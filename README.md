@@ -14,16 +14,76 @@ A simple and elegant Python package for AI-powered text processing using OpenAI 
 
 ## Installation
 
+### Recommended: Using Virtual Environment
+
+We strongly recommend using a virtual environment to avoid conflicts with other packages:
+
+```bash
+# Create a virtual environment
+python -m venv .venv
+
+# Activate it (Linux/Mac)
+source .venv/bin/activate
+
+# Activate it (Windows)
+.venv\Scripts\activate
+
+# Install aiwand
+pip install aiwand
+```
+
 ### From PyPI (when published)
 ```bash
 pip install aiwand
 ```
 
 ### Development Installation
+
+**Quick Setup (Recommended)**
+
+Use our setup scripts for automatic environment configuration:
+
+```bash
+# Linux/Mac
+chmod +x scripts/setup-dev.sh
+./scripts/setup-dev.sh
+
+# Windows
+scripts\setup-dev.bat
+```
+
+**Manual Setup**
+
+**Step 1: Clone and setup virtual environment**
 ```bash
 git clone <your-repo-url>
 cd aiwand
-pip install -e .
+
+# Create virtual environment
+python -m venv .venv
+
+# Activate virtual environment
+# Linux/Mac:
+source .venv/bin/activate
+# Windows:
+.venv\Scripts\activate
+
+# Upgrade pip
+pip install --upgrade pip
+```
+
+**Step 2: Install in development mode**
+```bash
+# Install package in editable mode with dev dependencies
+pip install -e ".[dev]"
+
+# Or install requirements directly
+pip install -r requirements.txt
+```
+
+**Step 3: Verify installation**
+```bash
+python test_install.py
 ```
 
 ## Quick Start
