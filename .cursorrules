@@ -1,0 +1,246 @@
+# AIWand Cursor Rules
+
+You are an AI assistant working on AIWand, a Python package that provides AI-powered text processing capabilities using OpenAI and Google Gemini APIs.
+
+## Project Overview
+
+AIWand is a professional Python package that offers:
+- Text summarization with multiple styles
+- AI chat functionality with conversation history
+- Text generation with customizable parameters
+- CLI interface with intelligent provider selection
+- Support for both OpenAI and Gemini APIs with smart fallback
+
+## Project Structure
+
+```
+aiwand/
+├── src/aiwand/           # Main package source (src layout)
+│   ├── __init__.py       # Package exports & VERSION (single source of truth)
+│   ├── config.py         # API configuration & smart provider selection
+│   ├── core.py           # Core AI functionality
+│   └── cli.py            # Command line interface
+├── docs/                 # Comprehensive documentation
+│   ├── api-reference.md  # Detailed API documentation
+│   ├── cli.md            # CLI reference
+│   ├── development.md    # Development workflow guide
+│   ├── installation.md   # Installation instructions
+│   └── venv-guide.md     # Virtual environment guide
+├── scripts/              # Automation scripts
+│   ├── bump-version.py   # Automated version management
+│   ├── publish.py        # Automated publishing workflow
+│   ├── setup-dev.sh      # Linux/Mac dev setup
+│   └── setup-dev.bat     # Windows dev setup
+├── examples/             # Usage examples
+└── setup.py              # Package configuration (reads version from __init__.py)
+```
+
+## Key Technical Decisions
+
+### Version Management
+- **Single source of truth**: Version is defined ONLY in `src/aiwand/__init__.py`
+- **Automated reading**: `setup.py` dynamically reads version from `__init__.py`
+- **Never hardcode versions** in multiple places
+- Use `scripts/bump-version.py` for version updates
+
+### API Provider Strategy
+- **Smart provider selection**: Automatically detects available API keys
+- **Fallback logic**: OpenAI → Gemini → Error if neither available
+- **Environment-based**: Uses `AI_DEFAULT_PROVIDER` when both keys present
+- **Model mapping**: gpt-3.5-turbo (OpenAI) / gemini-2.0-flash (Gemini)
+
+### Package Architecture
+- **src/ layout**: Modern Python packaging structure
+- **Modular design**: Separate concerns (config, core, cli)
+- **Type hints**: Required for all public APIs
+- **Error handling**: Comprehensive with user-friendly messages
+
+## Coding Standards
+
+### Python Style
+- **PEP 8 compliant**: Use consistent formatting
+- **Type hints**: Required for all function parameters and return values
+- **Docstrings**: Google-style docstrings for all public functions
+- **Error handling**: Use specific exceptions with helpful messages
+- **Variable names**: Descriptive and consistent (snake_case)
+
+### Example Function Template
+```python
+def function_name(param1: str, param2: Optional[int] = None) -> Dict[str, Any]:
+    """Brief description of what the function does.
+    
+    Args:
+        param1: Description of first parameter
+        param2: Description of optional parameter
+        
+    Returns:
+        Dictionary containing the result data
+        
+    Raises:
+        ValueError: When param1 is invalid
+        APIError: When external API call fails
+    """
+    # Implementation here
+    pass
+```
+
+## Development Workflow
+
+### Version Management
+```bash
+# Bump version automatically
+python scripts/bump-version.py patch   # 0.1.0 -> 0.1.1
+python scripts/bump-version.py minor   # 0.1.0 -> 0.2.0
+python scripts/bump-version.py major   # 0.1.0 -> 1.0.0
+```
+
+### Publishing Process
+```bash
+# Automated publishing (recommended)
+python scripts/publish.py
+
+# Manual process
+python -m build
+python -m twine upload dist/*
+```
+
+### Testing Requirements
+- **Installation test**: `python test_install.py`
+- **Functionality test**: `python examples/basic_usage.py`
+- **CLI testing**: Test all CLI commands
+- **API integration**: Test both OpenAI and Gemini providers
+
+## Environment Configuration
+
+### Required Environment Variables
+```bash
+OPENAI_API_KEY=your_openai_key      # Optional
+GEMINI_API_KEY=your_gemini_key      # Optional  
+AI_DEFAULT_PROVIDER=gemini          # Optional (gemini|openai)
+```
+
+### Development Setup
+```bash
+# Use automated setup
+./scripts/setup-dev.sh              # Linux/Mac
+scripts\setup-dev.bat               # Windows
+
+# Manual setup
+python -m venv .venv
+source .venv/bin/activate           # Linux/Mac
+pip install -e .
+```
+
+## Documentation Standards
+
+### File Organization
+- **README.md**: Concise overview with badges and quick start
+- **docs/**: Detailed documentation in separate files
+- **CHANGELOG.md**: Follow Keep a Changelog format
+- **API docs**: Complete function/class documentation
+
+### Documentation Requirements
+- Update relevant docs when making API changes
+- Include code examples in documentation
+- Maintain consistency between CLI help and docs
+- Update changelog for all releases
+
+## AI Assistant Guidelines
+
+### When Making Code Changes
+1. **Maintain type hints** for all function signatures
+2. **Update docstrings** if function behavior changes
+3. **Follow existing patterns** in the codebase
+4. **Test changes** using provided test scripts
+5. **Update documentation** if public API changes
+
+### When Adding New Features
+1. **Check provider compatibility** (OpenAI vs Gemini)
+2. **Add error handling** with user-friendly messages
+3. **Include CLI support** if applicable
+4. **Write examples** in `examples/` directory
+5. **Update API reference** documentation
+
+### When Fixing Bugs
+1. **Identify root cause** before implementing fix
+2. **Maintain backward compatibility** when possible
+3. **Add defensive programming** to prevent similar issues
+4. **Test fix** with both API providers
+5. **Update tests** if needed
+
+### Common Patterns to Follow
+
+#### API Client Initialization
+```python
+# Always use the smart provider selection from config
+client = get_ai_client()
+model = get_model_name()
+```
+
+#### Error Handling
+```python
+try:
+    response = client.completions.create(...)
+except Exception as e:
+    raise AIError(f"AI request failed: {str(e)}")
+```
+
+#### CLI Command Structure
+```python
+@click.command()
+@click.argument('text')
+@click.option('--style', default='concise', help='Summary style')
+def command_name(text: str, style: str) -> None:
+    """Command description."""
+    try:
+        result = core_function(text, style=style)
+        click.echo(result)
+    except Exception as e:
+        click.echo(f"Error: {e}", err=True)
+```
+
+## File Modification Guidelines
+
+### Never Modify
+- `.gitignore` (unless adding new patterns)
+- `LICENSE` (MIT license is final)
+- `requirements.txt` (managed via setup.py)
+
+### Always Update Together
+- When changing version: Update `CHANGELOG.md`
+- When adding CLI commands: Update `docs/cli.md`
+- When changing APIs: Update `docs/api-reference.md`
+- When adding dependencies: Update `setup.py`
+
+### Automation Scripts
+- **Use existing scripts** rather than manual processes
+- **Maintain script compatibility** across platforms
+- **Add error checking** to all automation scripts
+- **Document script usage** in development guide
+
+## Quality Checklist
+
+Before any significant change:
+- [ ] Code follows PEP 8 style guidelines
+- [ ] All functions have proper type hints and docstrings
+- [ ] Error handling is comprehensive and user-friendly
+- [ ] Changes work with both OpenAI and Gemini providers
+- [ ] CLI commands are tested and documented
+- [ ] Version management follows centralized approach
+- [ ] Documentation is updated for API changes
+- [ ] Changelog is updated for new versions
+- [ ] Installation test passes (`python test_install.py`)
+
+## Dependencies
+
+### Core Dependencies
+- `openai>=1.0.0` - OpenAI API client (also works with Gemini)
+- `python-dotenv>=0.19.0` - Environment variable management
+- `click>=8.0.0` - CLI framework
+
+### Development Dependencies
+- `build` - Package building
+- `twine` - PyPI publishing
+- `pytest` - Future testing framework
+
+Remember: AIWand prioritizes user experience, smart provider selection, and maintainable code architecture. Always consider the end user's perspective when making changes. 
