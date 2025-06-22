@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2024-06-23
+
+### Added
+- **Interactive Setup System**: New `aiwand setup` command for guided configuration
+- **User Preferences**: Persistent configuration storage in `~/.aiwand/config.json`
+- **Enhanced Model Support**: Added GPT-4o, GPT-4o-mini, Gemini 2.0 Flash Experimental models
+- **Configuration Status Command**: New `aiwand status` to display current settings
+- **Smart Provider Selection**: Hierarchical preference system (user config → env vars → auto-detection)
+- **Per-Provider Model Selection**: Configure different models for each AI provider
+- **AIError Exception Class**: Better error handling with specific error types
+
+### Changed
+- **Completely Rewritten Configuration System**: More robust and user-friendly
+- **Updated CLI Interface**: Removed old config command, added setup/status commands
+- **Enhanced Examples**: Updated to showcase new setup system and preferences
+- **Improved Test Suite**: Tests now cover new API functions and error handling
+- **Better Error Messages**: More helpful guidance for setup and configuration
+
+### Technical Improvements
+- Centralized configuration management with fallback logic
+- Support for multiple model options per provider
+- Persistent user preference storage
+- Enhanced type hints and error handling
+- Improved CLI argument parsing and help messages
+
 ## [0.1.0] - 2024-06-23
 
 ### Added
