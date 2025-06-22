@@ -6,7 +6,7 @@ import argparse
 import sys
 from typing import Optional
 from .core import summarize, chat, generate_text
-from .config import configure_api_key
+from .config import setup_user_preferences, show_current_config, AIError
 
 
 def main():
@@ -35,9 +35,11 @@ def main():
     generate_parser.add_argument('--temperature', type=float, default=0.7, help='Response creativity')
     generate_parser.add_argument('--model', help='AI model to use (auto-selected if not provided)')
     
-    # Config command
-    config_parser = subparsers.add_parser('config', help='Configure API key')
-    config_parser.add_argument('api_key', help='OpenAI API key')
+    # Setup command
+    setup_parser = subparsers.add_parser('setup', help='Interactive setup for preferences')
+    
+    # Status command
+    status_parser = subparsers.add_parser('status', help='Show current configuration')
     
     args = parser.parse_args()
     
@@ -72,10 +74,15 @@ def main():
             )
             print(result)
             
-        elif args.command == 'config':
-            configure_api_key(args.api_key)
-            print("API key configured successfully!")
+        elif args.command == 'setup':
+            setup_user_preferences()
             
+        elif args.command == 'status':
+            show_current_config()
+            
+    except AIError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)

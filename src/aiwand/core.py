@@ -3,31 +3,7 @@ Core AI functionality for AIWand
 """
 
 from typing import Optional, List, Dict, Any
-import openai
-from .config import get_api_key_and_provider
-
-
-def _get_client_and_provider():
-    """Get an AI client instance and provider info."""
-    api_key, provider = get_api_key_and_provider()
-    
-    if provider == "gemini":
-        client = openai.OpenAI(
-            api_key=api_key,
-            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
-        )
-        return client, provider
-    else:
-        client = openai.OpenAI(api_key=api_key)
-        return client, provider
-
-
-def _get_default_model(provider: str) -> str:
-    """Get default model based on provider."""
-    if provider == "gemini":
-        return "gemini-2.0-flash"
-    else:
-        return "gpt-3.5-turbo"
+from .config import get_ai_client, get_model_name, AIError
 
 
 def summarize(
@@ -68,11 +44,11 @@ def summarize(
         prompt += f" Keep the summary under {max_length} words."
     
     try:
-        client, provider = _get_client_and_provider()
+        client = get_ai_client()
         
-        # Use provided model or auto-select based on provider
+        # Use provided model or get from user preferences
         if model is None:
-            model = _get_default_model(provider)
+            model = get_model_name()
         
         response = client.chat.completions.create(
             model=model,
@@ -86,6 +62,8 @@ def summarize(
         
         return response.choices[0].message.content.strip()
     
+    except AIError as e:
+        raise AIError(str(e))
     except Exception as e:
         raise Exception(f"Failed to summarize text: {str(e)}")
 
@@ -116,11 +94,11 @@ def chat(
         raise ValueError("Message cannot be empty")
     
     try:
-        client, provider = _get_client_and_provider()
+        client = get_ai_client()
         
-        # Use provided model or auto-select based on provider
+        # Use provided model or get from user preferences
         if model is None:
-            model = _get_default_model(provider)
+            model = get_model_name()
         
         messages = conversation_history or []
         messages.append({"role": "user", "content": message})
@@ -134,6 +112,8 @@ def chat(
         
         return response.choices[0].message.content.strip()
     
+    except AIError as e:
+        raise AIError(str(e))
     except Exception as e:
         raise Exception(f"Failed to get chat response: {str(e)}")
 
@@ -164,11 +144,11 @@ def generate_text(
         raise ValueError("Prompt cannot be empty")
     
     try:
-        client, provider = _get_client_and_provider()
+        client = get_ai_client()
         
-        # Use provided model or auto-select based on provider
+        # Use provided model or get from user preferences
         if model is None:
-            model = _get_default_model(provider)
+            model = get_model_name()
         
         response = client.chat.completions.create(
             model=model,
@@ -179,5 +159,7 @@ def generate_text(
         
         return response.choices[0].message.content.strip()
     
+    except AIError as e:
+        raise AIError(str(e))
     except Exception as e:
         raise Exception(f"Failed to generate text: {str(e)}") 

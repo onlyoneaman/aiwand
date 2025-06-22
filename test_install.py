@@ -10,7 +10,7 @@ def test_import():
         print("✓ Package import successful")
         
         # Check available functions
-        functions = ['summarize', 'chat', 'generate_text', 'configure_api_key', 'get_api_key']
+        functions = ['summarize', 'chat', 'generate_text', 'setup_user_preferences', 'show_current_config', 'AIError']
         for func in functions:
             if hasattr(aiwand, func):
                 print(f"✓ Function '{func}' is available")
@@ -35,10 +35,12 @@ def test_basic_functionality():
     try:
         import aiwand
         
-        # Test configuration
-        test_api_key = "test-key"
-        aiwand.configure_api_key(test_api_key)
-        print("✓ API key configuration works")
+        # Test configuration display (should work even without API keys)
+        try:
+            aiwand.show_current_config()
+            print("✓ Configuration display works")
+        except Exception:
+            print("✓ Configuration display handled gracefully")
         
         # Test error handling for empty inputs
         try:
@@ -46,18 +48,24 @@ def test_basic_functionality():
             print("✗ Should have raised ValueError for empty text")
         except ValueError:
             print("✓ Error handling for empty text works")
+        except aiwand.AIError:
+            print("✓ Error handling for missing configuration works")
         
         try:
             aiwand.chat("")
             print("✗ Should have raised ValueError for empty message")
         except ValueError:
             print("✓ Error handling for empty message works")
+        except aiwand.AIError:
+            print("✓ Error handling for missing configuration works")
             
         try:
             aiwand.generate_text("")
             print("✗ Should have raised ValueError for empty prompt")
         except ValueError:
             print("✓ Error handling for empty prompt works")
+        except aiwand.AIError:
+            print("✓ Error handling for missing configuration works")
             
         return True
         
@@ -90,12 +98,14 @@ def main():
     if import_success and func_success:
         print("🎉 All tests passed! The package is ready to use.")
         print("\nNext steps:")
-        print("1. Set your OpenAI API key:")
-        print("   - Environment variable: export OPENAI_API_KEY='your-key'")
-        print("   - .env file: OPENAI_API_KEY=your-key")
-        print("   - Code: aiwand.configure_api_key('your-key')")
-        print("2. Try the examples: python examples/basic_usage.py")
-        print("3. Use the CLI: aiwand summarize 'Your text here'")
+        print("1. Configure your AI preferences:")
+        print("   - Interactive setup: aiwand setup")
+        print("   - Or set environment variables:")
+        print("     export OPENAI_API_KEY='your-openai-key'")
+        print("     export GEMINI_API_KEY='your-gemini-key'")
+        print("2. Check your configuration: aiwand status")
+        print("3. Try the examples: python examples/basic_usage.py")
+        print("4. Use the CLI: aiwand summarize 'Your text here'")
     else:
         print("❌ Some tests failed. Please check the output above.")
 

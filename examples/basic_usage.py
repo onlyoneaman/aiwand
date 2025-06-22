@@ -8,11 +8,19 @@ import aiwand
 def main():
     """Run basic examples."""
     
-    # Configure API key (you can also use environment variables)
-    # Option 1: OpenAI
-    # aiwand.configure_api_key("your-openai-api-key-here", "openai")
-    # Option 2: Gemini  
-    # aiwand.configure_api_key("your-gemini-api-key-here", "gemini")
+    print("🪄 AIWand Basic Usage Examples")
+    print("=" * 40)
+    
+    # Show current configuration
+    print("\n📋 Current Configuration:")
+    try:
+        aiwand.show_current_config()
+    except Exception as e:
+        print(f"Error showing config: {e}")
+        print("\n💡 Run 'aiwand setup' first to configure your preferences!")
+        print("   Or set environment variables: OPENAI_API_KEY, GEMINI_API_KEY")
+    
+    print("\n" + "=" * 40)
     
     # Example text to work with
     sample_text = """
@@ -29,9 +37,8 @@ def main():
     recommendation systems, and autonomous vehicles.
     """
     
-    print("=== AIWand Examples (Smart AI Provider Selection) ===")
-    print("AIWand will automatically use the best available AI provider.")
-    print("Set OPENAI_API_KEY and/or GEMINI_API_KEY environment variables.\n")
+    print("\n🚀 Running Examples with Smart AI Provider Selection")
+    print("AIWand will use your configured preferences or environment variables.\n")
     
     try:
         # Example 1: Basic summarization
@@ -81,12 +88,18 @@ def main():
         print(f"User: {msg2}")
         print(f"AI: {response2}")
         
+    except aiwand.AIError as e:
+        print(f"AIWand Error: {e}")
+        print("\n💡 To fix this:")
+        print("1. Run 'aiwand setup' to configure your preferences")
+        print("2. Or set environment variables: OPENAI_API_KEY, GEMINI_API_KEY")
+        print("3. Make sure you have an active internet connection")
     except ValueError as e:
         print(f"Input Error: {e}")
     except Exception as e:
-        print(f"API Error: {e}")
+        print(f"Unexpected Error: {e}")
         print("\nMake sure you have:")
-        print("1. Set your API key (OPENAI_API_KEY or GEMINI_API_KEY)")
+        print("1. Configured AIWand with 'aiwand setup'")
         print("2. Installed the required dependencies")
         print("3. Have an active internet connection")
 

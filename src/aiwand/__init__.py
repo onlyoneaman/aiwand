@@ -1,17 +1,18 @@
 """
-AIWand - A simple AI toolkit for text processing using OpenAI
+AIWand - A simple AI toolkit for text processing using OpenAI and Gemini
 """
 
 __version__ = "0.1.0"
 __author__ = "Aman Kumar"
 
 from .core import summarize, chat, generate_text
-from .config import configure_api_key, get_api_key
+from .config import setup_user_preferences, show_current_config, AIError
 
 __all__ = [
     "summarize",
     "chat", 
     "generate_text",
-    "configure_api_key",
-    "get_api_key",
+    "setup_user_preferences",
+    "show_current_config",
+    "AIError",
 ] 
