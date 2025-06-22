@@ -7,7 +7,7 @@ setup(
     name="aiwand",
     version="0.0.1",
     author="Aman Kumar",
-    author_email="onlyoneaman@gmail.com",
+    author_email="2000.aman.sinha@gmail.com",
     description="A simple AI toolkit for text processing using OpenAI and Gemini APIs",
     long_description=long_description,
     long_description_content_type="text/markdown",
