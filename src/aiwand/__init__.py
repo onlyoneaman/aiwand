@@ -2,7 +2,7 @@
 AIWand - A simple AI toolkit for text processing using OpenAI
 """
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 __author__ = "Aman Kumar"
 
 from .core import summarize, chat, generate_text

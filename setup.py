@@ -1,11 +1,21 @@
 from setuptools import setup, find_packages
+import os
+
+# Read version from package __init__.py
+def get_version():
+    init_path = os.path.join(os.path.dirname(__file__), "src", "aiwand", "__init__.py")
+    with open(init_path, "r", encoding="utf-8") as f:
+        for line in f:
+            if line.startswith("__version__"):
+                return line.split("=")[1].strip().strip('"').strip("'")
+    raise RuntimeError("Version not found")
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name="aiwand",
-    version="0.0.1",
+    version=get_version(),
     author="Aman Kumar",
     author_email="2000.aman.sinha@gmail.com",
     description="A simple AI toolkit for text processing using OpenAI and Gemini APIs",
