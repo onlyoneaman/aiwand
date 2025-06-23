@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0] - 2024-06-23
+## [0.2.0] - 2025-06-23
 
 ### Added
 - **Interactive Setup System**: New `aiwand setup` command for guided configuration
@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced type hints and error handling
 - Improved CLI argument parsing and help messages
 
-## [0.1.0] - 2024-06-23
+## [0.1.0] - 2025-06-23
 
 ### Added
 - Centralized version management (single source of truth in `__init__.py`)
@@ -52,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved error handling and validation
 - Enhanced setup scripts for development environment
 
-## [0.0.1] - 2024-06-23
+## [0.0.1] - 2025-06-23
 
 ### Added
 - Initial release of AIWand
