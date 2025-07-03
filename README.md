@@ -50,14 +50,15 @@ story = aiwand.generate_text("Write a poem about coding")
 ### CLI Usage
 
 ```bash
-# Summarize text
+# Direct prompts (easiest way!)
+aiwand "Ten fun names for a pet pelican"
+aiwand "Explain quantum computing in simple terms" 
+aiwand "Write a haiku about programming"
+
+# Or use specific commands
 aiwand summarize "Your text here" --style bullet-points
-
-# Chat with AI
-aiwand chat "Explain quantum computing"
-
-# Generate content
-aiwand generate "Write a haiku about programming"
+aiwand chat "What is machine learning?"
+aiwand generate "Write a story about AI"
 ```
 
 ## 🔧 Configuration

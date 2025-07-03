@@ -5,10 +5,51 @@ Command line interface for AIWand.
 ## Basic Usage
 
 ```bash
+# Direct prompt (quick chat)
+aiwand "Your prompt or question here"
+
+# Or use specific commands
 aiwand [command] [options] [arguments]
 ```
 
+## Quick Start
+
+The easiest way to use AIWand is with direct prompts:
+
+```bash
+# Ask a question
+aiwand "What is machine learning?"
+
+# Get creative content
+aiwand "Ten fun names for a pet pelican"
+
+# Get help with code
+aiwand "Explain how recursion works in Python"
+
+# Generate content
+aiwand "Write a haiku about artificial intelligence"
+```
+
+**Note**: Direct prompts use the chat functionality with smart AI provider selection.
+
 ## Commands
+
+### Direct Prompt (Default)
+
+Simply provide your text without any command:
+
+```bash
+aiwand "Your prompt here"
+```
+
+This is equivalent to `aiwand chat "Your prompt here"` but much faster to type.
+
+**Examples:**
+```bash
+aiwand "Explain quantum computing in simple terms"
+aiwand "What are the best practices for Python coding?"
+aiwand "Write a short story about a robot"
+```
 
 ### `summarize`
 

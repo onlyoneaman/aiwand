@@ -11,7 +11,29 @@ from .config import setup_user_preferences, show_current_config, AIError
 
 def main():
     """Main CLI entry point."""
-    parser = argparse.ArgumentParser(description="AIWand - AI toolkit for text processing")
+    # Check if the first argument is a direct prompt (not a subcommand)
+    known_commands = {'summarize', 'chat', 'generate', 'setup', 'status'}
+    
+    # If we have arguments and the first one isn't a known command, treat it as a direct prompt
+    if len(sys.argv) > 1 and sys.argv[1] not in known_commands and not sys.argv[1].startswith('-'):
+        # Handle direct prompt
+        try:
+            prompt = ' '.join(sys.argv[1:])  # Join all arguments as the prompt
+            result = chat(message=prompt)
+            print(result)
+            return
+        except AIError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+        except Exception as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+    
+    # Original subcommand-based CLI logic
+    parser = argparse.ArgumentParser(
+        description="AIWand - AI toolkit for text processing\n\nQuick usage: aiwand \"Your prompt here\" for direct chat",
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
     
     # Summarize command
