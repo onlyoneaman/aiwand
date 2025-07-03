@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-06-23
+
+### Added
+- **Direct Prompt Support**: New simplified CLI usage - `aiwand "Your prompt here"` for instant AI chat
+- **Enhanced CLI Experience**: Direct prompts bypass subcommands for faster interaction
+- **Updated Documentation**: Added quick start examples and direct prompt usage guide
+- **Backward Compatibility**: All existing subcommands (chat, summarize, generate) continue to work
+
+### Changed
+- **CLI Help Text**: Updated to showcase direct prompt feature as primary usage method
+- **README Examples**: Prioritized direct prompt usage in documentation
+- **CLI Reference**: Added comprehensive direct prompt examples and use cases
+
+### Technical Improvements
+- Smart command detection that differentiates between subcommands and direct prompts
+- Maintained full backward compatibility with existing CLI structure
+- Enhanced argument parsing with better help formatting
+
 ## [0.2.0] - 2025-06-23
 
 ### Added
