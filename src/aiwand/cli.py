@@ -7,12 +7,13 @@ import sys
 from typing import Optional
 from .core import summarize, chat, generate_text
 from .config import setup_user_preferences, show_current_config, AIError
+from .helper import find_chrome_binary, get_chrome_version
 
 
 def main():
     """Main CLI entry point."""
     # Check if the first argument is a direct prompt (not a subcommand)
-    known_commands = {'summarize', 'chat', 'generate', 'setup', 'status'}
+    known_commands = {'summarize', 'chat', 'generate', 'setup', 'status', 'helper'}
     
     # If we have arguments and the first one isn't a known command, treat it as a direct prompt
     if len(sys.argv) > 1 and sys.argv[1] not in known_commands and not sys.argv[1].startswith('-'):
@@ -63,6 +64,15 @@ def main():
     # Status command
     status_parser = subparsers.add_parser('status', help='Show current configuration')
     
+    # Helper command
+    helper_parser = subparsers.add_parser('helper', help='System helper utilities')
+    helper_subparsers = helper_parser.add_subparsers(dest='helper_command', help='Helper utilities')
+    
+    # Chrome binary finder
+    chrome_parser = helper_subparsers.add_parser('chrome', help='Find Chrome browser executable')
+    chrome_parser.add_argument('--version', action='store_true', help='Also show Chrome version')
+    chrome_parser.add_argument('--path-only', action='store_true', help='Output only the path (no quotes, for scripting)')
+    
     args = parser.parse_args()
     
     if not args.command:
@@ -101,6 +111,33 @@ def main():
             
         elif args.command == 'status':
             show_current_config()
+            
+        elif args.command == 'helper':
+            if not args.helper_command:
+                print("Error: Please specify a helper command. Use 'aiwand helper --help' for options.", file=sys.stderr)
+                sys.exit(1)
+                
+            if args.helper_command == 'chrome':
+                try:
+                    chrome_path = find_chrome_binary()
+                    
+                    if args.path_only:
+                        # Just output the raw path for scripting
+                        print(chrome_path)
+                    else:
+                        # Output quoted path for easy copying
+                        print(f'"{chrome_path}"')
+                    
+                    if args.version:
+                        version = get_chrome_version(chrome_path)
+                        if version:
+                            print(f"Version: {version}")
+                        else:
+                            print("Version: Unable to determine")
+                            
+                except FileNotFoundError as e:
+                    print(f"Error: {e}", file=sys.stderr)
+                    sys.exit(1)
             
     except AIError as e:
         print(f"Error: {e}", file=sys.stderr)

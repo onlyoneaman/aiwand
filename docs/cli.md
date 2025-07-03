@@ -125,6 +125,43 @@ aiwand generate "Write a story about AI" --max-tokens 800 --temperature 0.8
 aiwand generate "Explain neural networks" --model gpt-4 --temperature 0.3
 ```
 
+### `helper`
+
+Access system helper utilities.
+
+```bash
+aiwand helper [subcommand] [options]
+```
+
+**Subcommands:**
+
+#### `chrome`
+
+Find Chrome browser executable on the system.
+
+```bash
+aiwand helper chrome [options]
+```
+
+**Options:**
+- `--version` - Also display Chrome version information
+- `--path-only` - Output only the raw path (no quotes, useful for scripting)
+
+**Examples:**
+```bash
+# Find Chrome executable (quoted for easy copying)
+aiwand helper chrome
+
+# Find Chrome and show version
+aiwand helper chrome --version
+
+# Get raw path for scripting
+aiwand helper chrome --path-only
+
+# Use in shell scripts
+CHROME_PATH=$(aiwand helper chrome --path-only)
+```
+
 ## Global Options
 
 These work with all commands:
@@ -146,6 +183,11 @@ aiwand --version
 aiwand summarize "AI is transforming industries..." --style detailed
 aiwand chat "What are the implications of this?"
 aiwand generate "Write recommendations based on this discussion"
+
+# System helpers
+aiwand helper chrome                    # Quoted path for copying
+aiwand helper chrome --version          # With version info
+aiwand helper chrome --path-only        # Raw path for scripting
 ```
 
 ## Environment Variables
