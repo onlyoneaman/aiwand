@@ -30,6 +30,12 @@ aiwand "Explain how recursion works in Python"
 aiwand "Write a haiku about artificial intelligence"
 ```
 
+**Important**: 
+- **Direct prompts only work for multi-word quoted text**: `aiwand "tell me about chrome"`
+- **Single words (quoted or unquoted) are rejected**: `aiwand "chrome"` or `aiwand chrome` will show errors
+- **For single-word prompts, use explicit chat command**: `aiwand chat "chrome"`
+- **This prevents confusion between prompts and commands**
+
 **Note**: Direct prompts use the chat functionality with smart AI provider selection.
 
 ## Commands

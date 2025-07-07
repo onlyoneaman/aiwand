@@ -12,27 +12,49 @@ from .helper import find_chrome_binary, get_chrome_version
 
 def main():
     """Main CLI entry point."""
-    # Check if the first argument is a direct prompt (not a subcommand)
+    # Check if this is a direct prompt (only works with quoted text containing spaces/punctuation)
     known_commands = {'summarize', 'chat', 'generate', 'setup', 'status', 'helper'}
     
-    # If we have arguments and the first one isn't a known command, treat it as a direct prompt
+    # Handle non-command arguments
     if len(sys.argv) > 1 and sys.argv[1] not in known_commands and not sys.argv[1].startswith('-'):
-        # Handle direct prompt
-        try:
-            prompt = ' '.join(sys.argv[1:])  # Join all arguments as the prompt
-            result = chat(message=prompt)
-            print(result)
-            return
-        except AIError as e:
-            print(f"Error: {e}", file=sys.stderr)
-            sys.exit(1)
-        except Exception as e:
-            print(f"Error: {e}", file=sys.stderr)
+        
+        if len(sys.argv) == 2:
+            # Single argument case: aiwand "something" or aiwand something
+            single_arg = sys.argv[1]
+            
+            # Only treat as direct prompt if it contains spaces (indicating it was quoted)
+            # Single words without spaces are rejected to avoid command confusion
+            if ' ' in single_arg:
+                # Multi-word content - must have been quoted
+                try:
+                    result = chat(message=single_arg)
+                    print(result)
+                    return
+                except AIError as e:
+                    print(f"Error: {e}", file=sys.stderr)
+                    sys.exit(1)
+                except Exception as e:
+                    print(f"Error: {e}", file=sys.stderr)
+                    sys.exit(1)
+            else:
+                # Single word - show error
+                print(f"Error: '{single_arg}' is not a recognized command.", file=sys.stderr)
+                print("For single-word prompts, use the chat command:", file=sys.stderr)
+                print(f"  aiwand chat \"{single_arg}\"", file=sys.stderr)
+                print("For available commands, use: aiwand --help", file=sys.stderr)
+                sys.exit(1)
+                
+        else:
+            # Multiple unquoted words - show error
+            attempted_prompt = ' '.join(sys.argv[1:])
+            print(f"Error: Unquoted multi-word input detected.", file=sys.stderr)
+            print(f"Did you mean: aiwand \"{attempted_prompt}\"", file=sys.stderr)
+            print("Direct prompts must be quoted to avoid confusion with commands.", file=sys.stderr)
             sys.exit(1)
     
     # Original subcommand-based CLI logic
     parser = argparse.ArgumentParser(
-        description="AIWand - AI toolkit for text processing\n\nQuick usage: aiwand \"Your prompt here\" for direct chat",
+        description="AIWand - AI toolkit for text processing\n\nQuick usage: aiwand \"Your multi-word prompt here\" for direct chat\n(Single words require: aiwand chat \"word\")",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
