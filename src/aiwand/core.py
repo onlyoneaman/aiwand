@@ -3,7 +3,7 @@ Core AI functionality for AIWand
 """
 
 from typing import Optional, List, Dict, Any
-from .config import get_ai_client, get_model_name, AIError
+from .config import make_ai_request, AIError
 
 
 def summarize(
@@ -26,7 +26,7 @@ def summarize(
         
     Raises:
         ValueError: If the text is empty
-        Exception: If the API call fails
+        AIError: If the API call fails
     """
     if not text.strip():
         raise ValueError("Text cannot be empty")
@@ -43,29 +43,17 @@ def summarize(
     if max_length:
         prompt += f" Keep the summary under {max_length} words."
     
-    try:
-        client = get_ai_client()
-        
-        # Use provided model or get from user preferences
-        if model is None:
-            model = get_model_name()
-        
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": text}
-            ],
-            max_tokens=2000,
-            temperature=0.3
-        )
-        
-        return response.choices[0].message.content.strip()
+    messages = [
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": text}
+    ]
     
-    except AIError as e:
-        raise AIError(str(e))
-    except Exception as e:
-        raise Exception(f"Failed to summarize text: {str(e)}")
+    return make_ai_request(
+        messages=messages,
+        max_tokens=2000,
+        temperature=0.3,
+        model=model
+    )
 
 
 def chat(
@@ -88,34 +76,20 @@ def chat(
         
     Raises:
         ValueError: If the message is empty
-        Exception: If the API call fails
+        AIError: If the API call fails
     """
     if not message.strip():
         raise ValueError("Message cannot be empty")
     
-    try:
-        client = get_ai_client()
-        
-        # Use provided model or get from user preferences
-        if model is None:
-            model = get_model_name()
-        
-        messages = conversation_history or []
-        messages.append({"role": "user", "content": message})
-        
-        response = client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=1000
-        )
-        
-        return response.choices[0].message.content.strip()
+    messages = conversation_history or []
+    messages.append({"role": "user", "content": message})
     
-    except AIError as e:
-        raise AIError(str(e))
-    except Exception as e:
-        raise Exception(f"Failed to get chat response: {str(e)}")
+    return make_ai_request(
+        messages=messages,
+        max_tokens=1000,
+        temperature=temperature,
+        model=model
+    )
 
 
 def generate_text(
@@ -138,28 +112,16 @@ def generate_text(
         
     Raises:
         ValueError: If the prompt is empty
-        Exception: If the API call fails
+        AIError: If the API call fails
     """
     if not prompt.strip():
         raise ValueError("Prompt cannot be empty")
     
-    try:
-        client = get_ai_client()
-        
-        # Use provided model or get from user preferences
-        if model is None:
-            model = get_model_name()
-        
-        response = client.chat.completions.create(
-            model=model,
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=max_tokens,
-            temperature=temperature
-        )
-        
-        return response.choices[0].message.content.strip()
+    messages = [{"role": "user", "content": prompt}]
     
-    except AIError as e:
-        raise AIError(str(e))
-    except Exception as e:
-        raise Exception(f"Failed to generate text: {str(e)}") 
+    return make_ai_request(
+        messages=messages,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        model=model
+    ) 

@@ -7,7 +7,7 @@ This module handles API client setup, provider selection, and user preferences.
 import os
 import json
 from pathlib import Path
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, List
 from openai import OpenAI
 
 
@@ -346,3 +346,72 @@ def show_current_config() -> None:
     
     print(f"\n📁 Config file: {get_config_file()}")
     print(f"💡 Run 'aiwand setup' to change preferences") 
+
+
+def get_current_provider() -> Optional[str]:
+    """Get the currently active provider."""
+    provider, _ = get_preferred_provider_and_model()
+    return provider
+
+
+def make_ai_request(
+    messages: List[Dict[str, str]],
+    max_tokens: Optional[int] = None,
+    temperature: float = 0.7,
+    top_p: float = 1.0,
+    model: Optional[str] = None,
+    response_format: Optional[Dict[str, Any]] = None
+) -> str:
+    """
+    Unified wrapper for AI API calls that handles provider differences.
+    
+    Args:
+        messages: List of message dictionaries with 'role' and 'content'
+        max_tokens: Maximum tokens to generate
+        temperature: Response creativity (0.0 to 1.0)
+        top_p: Nucleus sampling parameter
+        model: Specific model to use (auto-selected if not provided)
+        response_format: Response format specification
+        
+    Returns:
+        str: The AI response content
+        
+    Raises:
+        AIError: When the API call fails
+    """
+    try:
+        client = get_ai_client()
+        current_provider = get_current_provider()
+        
+        # Use provided model or get from user preferences
+        if model is None:
+            model = get_model_name()
+        
+        # Prepare common parameters
+        params = {
+            "model": model,
+            "messages": messages,
+            "temperature": temperature,
+            "top_p": top_p
+        }
+        
+        if max_tokens:
+            params["max_tokens"] = max_tokens
+        
+        if response_format:
+            params["response_format"] = response_format
+        
+        # Choose API call method based on provider and features
+        if current_provider == "gemini" and response_format:
+            # For Gemini with structured output, use beta endpoint
+            response = client.beta.chat.completions.parse(**params)
+        else:
+            # Standard chat completions for all other cases
+            response = client.chat.completions.create(**params)
+        
+        return response.choices[0].message.content.strip()
+    
+    except AIError as e:
+        raise AIError(str(e))
+    except Exception as e:
+        raise AIError(f"AI request failed: {str(e)}") 
