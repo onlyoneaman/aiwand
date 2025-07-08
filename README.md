@@ -12,30 +12,45 @@
 - **Text Summarization** - Create concise, detailed, or bullet-point summaries  
 - **AI Chat** - Have conversations with context history
 - **Text Generation** - Generate content from prompts
-- **CLI Interface** - Use from command line
-- **Virtual Environment Ready** - Easy setup with automated scripts
+- **Zero Configuration** - Works with just environment variables
+- **CLI Interface** - Optional command line usage
 
 ## 🚀 Quick Start
 
 ### Installation
 
 ```bash
-# Using pip
 pip install aiwand
+```
 
-# With virtual environment (recommended)
-python -m venv .venv
-source .venv/bin/activate  # Linux/Mac
-pip install aiwand
+### Configuration
+
+Set your API keys as environment variables:
+
+```bash
+# Option 1: OpenAI only
+export OPENAI_API_KEY="your-openai-key"
+
+# Option 2: Gemini only  
+export GEMINI_API_KEY="your-gemini-key"
+
+# Option 3: Both (set preference)
+export OPENAI_API_KEY="your-openai-key"
+export GEMINI_API_KEY="your-gemini-key"
+export AI_DEFAULT_PROVIDER="openai"  # or "gemini"
+```
+
+Or create a `.env` file in your project:
+```env
+OPENAI_API_KEY=your-openai-key
+GEMINI_API_KEY=your-gemini-key
+AI_DEFAULT_PROVIDER=openai
 ```
 
 ### Basic Usage
 
 ```python
 import aiwand
-
-# Set your API key
-aiwand.configure_api_key("your-api-key", "openai")  # or "gemini"
 
 # Summarize text
 summary = aiwand.summarize("Your long text here...")
@@ -47,49 +62,82 @@ response = aiwand.chat("What is machine learning?")
 story = aiwand.generate_text("Write a poem about coding")
 ```
 
-### CLI Usage
+### Advanced Usage
+
+```python
+import aiwand
+
+# Customized summarization
+summary = aiwand.summarize(
+    text="Your long text...",
+    style="bullet-points",  # "concise", "detailed", "bullet-points"
+    max_length=50,
+    model="gpt-4"  # Optional: specify model
+)
+
+# Chat with conversation history
+conversation = []
+response1 = aiwand.chat("Hello!", conversation_history=conversation)
+conversation.append({"role": "user", "content": "Hello!"})
+conversation.append({"role": "assistant", "content": response1})
+
+response2 = aiwand.chat("What did I just say?", conversation_history=conversation)
+
+# Generate text with custom parameters
+text = aiwand.generate_text(
+    prompt="Write a technical explanation",
+    max_tokens=300,
+    temperature=0.3  # Lower = more focused, Higher = more creative
+)
+```
+
+### Configuration Management
+
+```python
+import aiwand
+
+# Show current configuration
+aiwand.show_current_config()
+
+# Interactive setup (optional)
+aiwand.setup_user_preferences()
+```
+
+### Error Handling
+
+```python
+import aiwand
+
+try:
+    summary = aiwand.summarize("Some text")
+except aiwand.AIError as e:
+    print(f"AI service error: {e}")
+except ValueError as e:
+    print(f"Input error: {e}")
+```
+
+## 🔧 CLI Usage (Optional)
 
 ```bash
 # Direct prompts (easiest way!)
 aiwand "Ten fun names for a pet pelican"
 aiwand "Explain quantum computing in simple terms" 
-aiwand "Write a haiku about programming"
 
-# Or use specific commands
+# Specific commands
 aiwand summarize "Your text here" --style bullet-points
 aiwand chat "What is machine learning?"
 aiwand generate "Write a story about AI"
-```
 
-## 🔧 Configuration
-
-Set your API keys via environment variables:
-
-```bash
-# Option 1: OpenAI
-export OPENAI_API_KEY="your-openai-key"
-
-# Option 2: Gemini  
-export GEMINI_API_KEY="your-gemini-key"
-
-# Option 3: Both (set preference)
-export OPENAI_API_KEY="your-openai-key"
-export GEMINI_API_KEY="your-gemini-key"
-export AI_DEFAULT_PROVIDER="gemini"  # or "openai"
-```
-
-Or use a `.env` file:
-```
-OPENAI_API_KEY=your-openai-key
-GEMINI_API_KEY=your-gemini-key
-AI_DEFAULT_PROVIDER=openai
+# Setup preferences
+aiwand setup
+aiwand config
 ```
 
 ## 📚 Documentation
 
-- **[Installation Guide](docs/installation.md)** - Detailed setup instructions
 - **[API Reference](docs/api-reference.md)** - Complete function documentation  
 - **[CLI Reference](docs/cli.md)** - Command line usage
+- **[Installation Guide](docs/installation.md)** - Detailed setup instructions
 - **[Virtual Environment Guide](docs/venv-guide.md)** - Best practices for Python environments
 
 ## 🤝 Connect

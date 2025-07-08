@@ -7,7 +7,6 @@ __author__ = "Aman Kumar"
 
 from .core import summarize, chat, generate_text
 from .config import setup_user_preferences, show_current_config, AIError
-from .helper import find_chrome_binary, get_chrome_version
 
 __all__ = [
     "summarize",
@@ -16,6 +15,4 @@ __all__ = [
     "setup_user_preferences",
     "show_current_config",
     "AIError",
-    "find_chrome_binary",
-    "get_chrome_version",
 ] 

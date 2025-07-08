@@ -16,6 +16,10 @@ Summarize text with customizable options.
 
 **Returns:** Summarized text (str)
 
+**Raises:**
+- `ValueError`: If text is empty
+- `AIError`: If API call fails or no provider available
+
 **Example:**
 ```python
 import aiwand
@@ -28,7 +32,7 @@ summary = aiwand.summarize(
     text="Your text...",
     style="bullet-points",
     max_length=50,
-    model="gemini-2.0-flash"
+    model="gpt-4"
 )
 ```
 
@@ -43,6 +47,10 @@ Have a conversation with AI.
 - `temperature` (float): Response creativity (0.0-1.0)
 
 **Returns:** AI response (str)
+
+**Raises:**
+- `ValueError`: If message is empty
+- `AIError`: If API call fails or no provider available
 
 **Example:**
 ```python
@@ -72,6 +80,10 @@ Generate text from a prompt.
 
 **Returns:** Generated text (str)
 
+**Raises:**
+- `ValueError`: If prompt is empty
+- `AIError`: If API call fails or no provider available
+
 **Example:**
 ```python
 import aiwand
@@ -90,23 +102,49 @@ text = aiwand.generate_text(
 
 ## Configuration Functions
 
-### `configure_api_key(api_key, provider="openai")`
+### `setup_user_preferences()`
 
-Set API key programmatically.
+Interactive setup for user preferences (provider and model selection).
 
-**Parameters:**
-- `api_key` (str): Your API key
-- `provider` (str): Provider type ("openai" or "gemini")
+**Parameters:** None
+
+**Returns:** None
 
 **Example:**
 ```python
 import aiwand
 
-# Configure OpenAI
-aiwand.configure_api_key("your-openai-key", "openai")
+# Run interactive setup
+aiwand.setup_user_preferences()
+```
 
-# Configure Gemini
-aiwand.configure_api_key("your-gemini-key", "gemini")
+### `show_current_config()`
+
+Display current configuration and available providers.
+
+**Parameters:** None
+
+**Returns:** None
+
+**Example:**
+```python
+import aiwand
+
+# Show current configuration
+aiwand.show_current_config()
+```
+
+## Configuration
+
+AIWand uses environment variables for configuration:
+
+```bash
+# Required: At least one API key
+export OPENAI_API_KEY="your-openai-key"
+export GEMINI_API_KEY="your-gemini-key"
+
+# Optional: Default provider when both keys available
+export AI_DEFAULT_PROVIDER="openai"  # or "gemini"
 ```
 
 ## Smart Model Selection
@@ -117,38 +155,95 @@ AIWand automatically selects the best available model:
 |----------------|---------------|----------|
 | OpenAI only | `gpt-3.5-turbo` | OpenAI |
 | Gemini only | `gemini-2.0-flash` | Gemini |
-| Both available | Based on `AI_DEFAULT_PROVIDER` | Configurable |
+| Both available | Based on `AI_DEFAULT_PROVIDER` or preferences | Configurable |
 
 ### Supported Models
 
 **OpenAI Models:**
-- `gpt-3.5-turbo` (default)
-- `gpt-4`
-- `gpt-4-turbo`
 - `gpt-4o`
+- `gpt-4o-mini`
+- `gpt-4-turbo`
+- `gpt-4`
+- `gpt-3.5-turbo` (default)
 
 **Gemini Models:**
+- `gemini-2.0-flash-exp`
 - `gemini-2.0-flash` (default)
-- `gemini-2.5-flash`
-- `gemini-2.5-pro`
+- `gemini-1.5-flash`
+- `gemini-1.5-pro`
 
 ## Error Handling
 
-All functions raise appropriate exceptions:
+### AIError
 
+Custom exception for AI-related errors.
+
+**Common scenarios:**
+- No API keys configured
+- API call failures
+- Network issues
+- Provider-specific errors
+
+**Example:**
 ```python
 import aiwand
 
 try:
     summary = aiwand.summarize("Some text")
+except aiwand.AIError as e:
+    print(f"AI service error: {e}")
+    # Handle API issues, missing keys, etc.
 except ValueError as e:
     print(f"Input error: {e}")
-except Exception as e:
-    print(f"API error: {e}")
+    # Handle empty text, invalid parameters, etc.
 ```
 
-## Environment Variables
+## Best Practices
 
-- `OPENAI_API_KEY`: Your OpenAI API key
-- `GEMINI_API_KEY`: Your Gemini API key  
-- `AI_DEFAULT_PROVIDER`: Default provider when both keys available ("openai" or "gemini") 
+### Environment Setup
+```python
+# Use environment variables or .env file
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Load from .env file
+
+# AIWand will automatically pick up the keys
+import aiwand
+```
+
+### Error Handling
+```python
+import aiwand
+
+def safe_summarize(text):
+    try:
+        return aiwand.summarize(text)
+    except aiwand.AIError as e:
+        print(f"AI service unavailable: {e}")
+        return None
+    except ValueError as e:
+        print(f"Invalid input: {e}")
+        return None
+```
+
+### Model Selection
+```python
+import aiwand
+
+# Let AIWand choose the best model
+response = aiwand.chat("Hello")
+
+# Or specify a model for specific needs
+creative_response = aiwand.generate_text(
+    "Write a creative story",
+    model="gpt-4",
+    temperature=0.9
+)
+
+factual_response = aiwand.generate_text(
+    "Explain quantum physics",
+    model="gpt-4",
+    temperature=0.2
+)
+``` 

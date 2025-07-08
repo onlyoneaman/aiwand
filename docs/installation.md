@@ -97,15 +97,15 @@ GEMINI_API_KEY=your-gemini-key-here
 AI_DEFAULT_PROVIDER=openai
 ```
 
-### Programmatically
+### Interactive Setup
 ```python
 import aiwand
 
-# For OpenAI
-aiwand.configure_api_key("your-api-key-here", "openai")
+# Interactive setup for preferences
+aiwand.setup_user_preferences()
 
-# For Gemini
-aiwand.configure_api_key("your-api-key-here", "gemini")
+# Check current configuration
+aiwand.show_current_config()
 ```
 
 ## Verification
@@ -118,10 +118,16 @@ import aiwand
 # Check version
 print(aiwand.__version__)
 
+# Show current configuration
+aiwand.show_current_config()
+
 # Test basic functionality (requires API key)
 try:
     response = aiwand.chat("Hello!")
     print("✅ Installation successful!")
+except aiwand.AIError as e:
+    print(f"❌ AI Error: {e}")
+    print("💡 Run 'aiwand setup' or set environment variables")
 except Exception as e:
     print(f"❌ Error: {e}")
 ```
@@ -175,6 +181,9 @@ pip install aiwand
 echo $OPENAI_API_KEY
 echo $GEMINI_API_KEY
 
-# Test API key programmatically
-python -c "import aiwand; aiwand.configure_api_key('your-key', 'openai'); print('Key configured')"
+# Test configuration
+python -c "import aiwand; aiwand.show_current_config()"
+
+# Interactive setup
+python -c "import aiwand; aiwand.setup_user_preferences()"
 ``` 
