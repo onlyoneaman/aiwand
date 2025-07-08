@@ -155,6 +155,15 @@ aiwand config
 - **[Installation Guide](docs/installation.md)** - Detailed setup instructions
 - **[Virtual Environment Guide](docs/venv-guide.md)** - Best practices for Python environments
 
+## 🛠️ Contributing
+
+We welcome contributions from both AI assistants and human developers! Please see our comprehensive contributing guide:
+
+- **[Contributing Guide](CONTRIBUTING.md)** - Standards, workflows, and best practices
+- **[Development Guide](docs/development.md)** - Technical details and advanced topics
+
+Whether you're an AI assistant helping users or a human developer, these guides ensure consistency and quality across all contributions.
+
 ## 🤝 Connect
 
 - **GitHub**: [github.com/onlyoneaman/aiwand](https://github.com/onlyoneaman/aiwand)
