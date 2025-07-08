@@ -3,9 +3,10 @@
 Version management script for AIWand
 
 Usage:
-    python scripts/bump-version.py patch  # 0.1.0 -> 0.1.1
-    python scripts/bump-version.py minor  # 0.1.0 -> 0.2.0  
-    python scripts/bump-version.py major  # 0.1.0 -> 1.0.0
+    python scripts/bump-version.py         # 0.1.0 -> 0.1.1 (default: patch)
+    python scripts/bump-version.py patch   # 0.1.0 -> 0.1.1
+    python scripts/bump-version.py minor   # 0.1.0 -> 0.2.0  
+    python scripts/bump-version.py major   # 0.1.0 -> 1.0.0
 """
 
 import sys
@@ -52,20 +53,26 @@ def update_version_in_file(file_path, old_version, new_version):
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python scripts/bump-version.py {patch|minor|major}")
+    # Default to patch if no argument provided
+    if len(sys.argv) == 1:
+        bump_type = 'patch'
+    elif len(sys.argv) == 2:
+        bump_type = sys.argv[1].lower()
+    else:
+        print("Usage: python scripts/bump-version.py [patch|minor|major]")
+        print("Defaults to 'patch' if no argument provided")
         sys.exit(1)
     
-    bump_type = sys.argv[1].lower()
     if bump_type not in ['patch', 'minor', 'major']:
         print("Error: bump_type must be 'patch', 'minor', or 'major'")
+        print("Defaults to 'patch' if no argument provided")
         sys.exit(1)
     
     try:
         current_version = get_current_version()
         new_version = bump_version(current_version, bump_type)
         
-        print(f"Bumping version: {current_version} -> {new_version}")
+        print(f"Bumping version ({bump_type}): {current_version} -> {new_version}")
         
         # Update version in __init__.py
         update_version_in_file("src/aiwand/__init__.py", current_version, new_version)

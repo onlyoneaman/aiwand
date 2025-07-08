@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-01-27
+
+### Fixed
+- **Documentation Accuracy**: Removed non-existent `configure_api_key()` function from all documentation
+- **API Reference**: Corrected configuration approach to use environment variables and `setup_user_preferences()`
+- **Model Names**: Updated supported model lists to match actual implementation
+- **Installation Guide**: Fixed programmatic setup examples to show correct methods
+- **Package Focus**: Prioritized Python package usage over CLI in documentation
+
+### Changed
+- **API Exports**: Removed unrelated Chrome helper functions (`find_chrome_binary`, `get_chrome_version`) from public API
+- **Documentation Structure**: Reorganized README to emphasize package-first usage
+- **Error Handling**: Enhanced documentation with proper `AIError` exception examples
+
+### Technical Improvements
+- Cleaned up package exports to focus on core AI functionality
+- Improved documentation consistency across all files
+- Better error handling examples and best practices
+
 ## [0.3.0] - 2025-06-23
 
 ### Added
