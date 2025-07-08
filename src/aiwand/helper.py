@@ -4,8 +4,74 @@ Helper utilities for AIWand
 
 import sys
 import os
+import random
+import uuid
 from pathlib import Path
 from typing import Optional
+
+
+def generate_random_number(length: int = 6) -> str:
+    """Generate a random number with specified number of digits.
+    
+    Args:
+        length: Number of digits for the random number (default: 6)
+        
+    Returns:
+        str: Random number as string (preserves leading zeros)
+        
+    Raises:
+        ValueError: If length is less than 1
+        
+    Examples:
+        >>> num = generate_random_number()
+        >>> print(f"6-digit number: {num}")
+        
+        >>> num = generate_random_number(10)
+        >>> print(f"10-digit number: {num}")
+    """
+    if length < 1:
+        raise ValueError("Length must be at least 1")
+    
+    # Generate random number with specified length
+    # For first digit, ensure it's not 0 to maintain exact length
+    if length == 1:
+        return str(random.randint(0, 9))
+    
+    first_digit = random.randint(1, 9)
+    remaining_digits = ''.join([str(random.randint(0, 9)) for _ in range(length - 1)])
+    
+    return str(first_digit) + remaining_digits
+
+
+def generate_uuid(version: int = 4, uppercase: bool = False) -> str:
+    """Generate a UUID (Universally Unique Identifier).
+    
+    Args:
+        version: UUID version to generate (1 or 4, default: 4)
+        uppercase: Whether to return uppercase UUID (default: False)
+        
+    Returns:
+        str: Generated UUID string
+        
+    Raises:
+        ValueError: If version is not 1 or 4
+        
+    Examples:
+        >>> uid = generate_uuid()
+        >>> print(f"UUID4: {uid}")
+        
+        >>> uid = generate_uuid(version=1, uppercase=True)
+        >>> print(f"UUID1: {uid}")
+    """
+    if version == 4:
+        generated_uuid = uuid.uuid4()
+    elif version == 1:
+        generated_uuid = uuid.uuid1()
+    else:
+        raise ValueError("Version must be 1 or 4")
+    
+    uuid_str = str(generated_uuid)
+    return uuid_str.upper() if uppercase else uuid_str
 
 
 def find_chrome_binary() -> str:

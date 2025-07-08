@@ -12,6 +12,7 @@
 - **Text Summarization** - Create concise, detailed, or bullet-point summaries  
 - **AI Chat** - Have conversations with context history
 - **Text Generation** - Generate content from prompts
+- **Helper Utilities** - Random number and UUID generation
 - **Zero Configuration** - Works with just environment variables
 - **CLI Interface** - Optional command line usage
 
@@ -60,6 +61,10 @@ response = aiwand.chat("What is machine learning?")
 
 # Generate text
 story = aiwand.generate_text("Write a poem about coding")
+
+# Generate random number and UUID
+random_num = aiwand.generate_random_number(8)  # 8-digit number
+unique_id = aiwand.generate_uuid()  # UUID4
 ```
 
 ### Advanced Usage
@@ -89,6 +94,12 @@ text = aiwand.generate_text(
     max_tokens=300,
     temperature=0.3  # Lower = more focused, Higher = more creative
 )
+
+# Helper utilities for testing and development
+test_id = aiwand.generate_random_number(6)  # 6-digit number
+session_id = aiwand.generate_uuid()  # UUID4
+user_code = aiwand.generate_random_number(4)  # 4-digit code
+transaction_uuid = aiwand.generate_uuid(uppercase=True)  # Uppercase UUID
 ```
 
 ### Configuration Management

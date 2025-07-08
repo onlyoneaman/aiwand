@@ -2,11 +2,12 @@
 AIWand - A simple AI toolkit for text processing using OpenAI and Gemini
 """
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 __author__ = "Aman Kumar"
 
 from .core import summarize, chat, generate_text
 from .config import setup_user_preferences, show_current_config, AIError
+from .helper import generate_random_number, generate_uuid
 
 __all__ = [
     "summarize",
@@ -15,4 +16,6 @@ __all__ = [
     "setup_user_preferences",
     "show_current_config",
     "AIError",
+    "generate_random_number",
+    "generate_uuid",
 ] 

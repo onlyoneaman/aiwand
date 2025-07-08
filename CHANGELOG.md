@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2025-01-27
+
+### Added
+- **Helper Functions**: New utility functions for development and testing
+  - `generate_random_number(length=6)` - Generate random numbers with configurable digit length
+  - `generate_uuid(version=4, uppercase=False)` - Generate UUIDs (version 1 or 4) with formatting options
+- **Enhanced Examples**: Updated `examples/helper_usage.py` with comprehensive helper function demonstrations
+- **API Documentation**: Complete documentation for new helper functions in API reference
+
+### Changed
+- **Package Exports**: Added helper functions to public API (`aiwand.generate_random_number`, `aiwand.generate_uuid`)
+- **README**: Updated features list and usage examples to showcase helper utilities
+- **Documentation**: Enhanced API reference with helper function section and usage patterns
+
+### Technical Improvements
+- Type-safe random number generation with exact digit length control
+- Support for both UUID1 (timestamp-based) and UUID4 (random) generation
+- Comprehensive error handling and validation for helper functions
+- Added helper utilities to package's `__all__` exports
+
 ## [0.3.1] - 2025-01-27
 
 ### Fixed

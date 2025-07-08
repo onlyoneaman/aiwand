@@ -100,6 +100,67 @@ text = aiwand.generate_text(
 )
 ```
 
+## Helper Functions
+
+### `generate_random_number(length=6)`
+
+Generate a random number with specified number of digits.
+
+**Parameters:**
+- `length` (int): Number of digits for the random number (default: 6)
+
+**Returns:** Random number as string (preserves leading zeros)
+
+**Raises:**
+- `ValueError`: If length is less than 1
+
+**Example:**
+```python
+import aiwand
+
+# Default 6-digit number
+number = aiwand.generate_random_number()
+print(f"6-digit: {number}")  # e.g., "432875"
+
+# Custom length
+number = aiwand.generate_random_number(10)
+print(f"10-digit: {number}")  # e.g., "9847382659"
+
+# Single digit
+number = aiwand.generate_random_number(1)
+print(f"1-digit: {number}")  # e.g., "7"
+```
+
+### `generate_uuid(version=4, uppercase=False)`
+
+Generate a UUID (Universally Unique Identifier).
+
+**Parameters:**
+- `version` (int): UUID version to generate (1 or 4, default: 4)
+- `uppercase` (bool): Whether to return uppercase UUID (default: False)
+
+**Returns:** Generated UUID string
+
+**Raises:**
+- `ValueError`: If version is not 1 or 4
+
+**Example:**
+```python
+import aiwand
+
+# Default UUID4
+uuid = aiwand.generate_uuid()
+print(f"UUID4: {uuid}")  # e.g., "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+
+# UUID4 uppercase
+uuid = aiwand.generate_uuid(uppercase=True)
+print(f"UUID4: {uuid}")  # e.g., "F47AC10B-58CC-4372-A567-0E02B2C3D479"
+
+# UUID1 (includes timestamp and MAC address)
+uuid = aiwand.generate_uuid(version=1)
+print(f"UUID1: {uuid}")  # e.g., "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+```
+
 ## Configuration Functions
 
 ### `setup_user_preferences()`
@@ -246,4 +307,22 @@ factual_response = aiwand.generate_text(
     model="gpt-4",
     temperature=0.2
 )
+```
+
+### Using Helper Functions
+```python
+import aiwand
+
+# Generate random data for testing
+test_id = aiwand.generate_random_number(8)
+session_id = aiwand.generate_uuid()
+
+# Create unique identifiers
+user_id = f"user_{aiwand.generate_random_number(6)}"
+transaction_id = aiwand.generate_uuid(uppercase=True)
+
+print(f"Test ID: {test_id}")
+print(f"Session: {session_id}")
+print(f"User: {user_id}")
+print(f"Transaction: {transaction_id}")
 ``` 
