@@ -139,6 +139,10 @@ aiwand summarize "Your text here" --style bullet-points
 aiwand chat "What is machine learning?"
 aiwand generate "Write a story about AI"
 
+# Helper utilities
+aiwand helper random --length 8        # Generate 8-digit random number
+aiwand helper uuid --uppercase         # Generate uppercase UUID
+
 # Setup preferences
 aiwand setup
 aiwand config

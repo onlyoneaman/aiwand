@@ -7,7 +7,7 @@ import sys
 from typing import Optional
 from .core import summarize, chat, generate_text
 from .config import setup_user_preferences, show_current_config, AIError
-from .helper import find_chrome_binary, get_chrome_version
+from .helper import find_chrome_binary, get_chrome_version, generate_random_number, generate_uuid
 
 
 def main():
@@ -87,8 +87,19 @@ def main():
     status_parser = subparsers.add_parser('status', help='Show current configuration')
     
     # Helper command
-    helper_parser = subparsers.add_parser('helper', help='System helper utilities')
+    helper_parser = subparsers.add_parser('helper', help='Utility functions for development and testing')
     helper_subparsers = helper_parser.add_subparsers(dest='helper_command', help='Helper utilities')
+    
+    # Random number generator
+    random_parser = helper_subparsers.add_parser('random', help='Generate random numbers')
+    random_parser.add_argument('--length', type=int, default=6, help='Number of digits (default: 6)')
+    random_parser.add_argument('--count', type=int, default=1, help='Number of random numbers to generate (default: 1)')
+    
+    # UUID generator
+    uuid_parser = helper_subparsers.add_parser('uuid', help='Generate UUIDs')
+    uuid_parser.add_argument('--version', type=int, choices=[1, 4], default=4, help='UUID version (1 or 4, default: 4)')
+    uuid_parser.add_argument('--uppercase', action='store_true', help='Generate uppercase UUID')
+    uuid_parser.add_argument('--count', type=int, default=1, help='Number of UUIDs to generate (default: 1)')
     
     # Chrome binary finder
     chrome_parser = helper_subparsers.add_parser('chrome', help='Find Chrome browser executable')
@@ -139,7 +150,25 @@ def main():
                 print("Error: Please specify a helper command. Use 'aiwand helper --help' for options.", file=sys.stderr)
                 sys.exit(1)
                 
-            if args.helper_command == 'chrome':
+            if args.helper_command == 'random':
+                try:
+                    for i in range(args.count):
+                        number = generate_random_number(args.length)
+                        print(number)
+                except ValueError as e:
+                    print(f"Error: {e}", file=sys.stderr)
+                    sys.exit(1)
+                    
+            elif args.helper_command == 'uuid':
+                try:
+                    for i in range(args.count):
+                        uuid_str = generate_uuid(version=args.version, uppercase=args.uppercase)
+                        print(uuid_str)
+                except ValueError as e:
+                    print(f"Error: {e}", file=sys.stderr)
+                    sys.exit(1)
+                    
+            elif args.helper_command == 'chrome':
                 try:
                     chrome_path = find_chrome_binary()
                     

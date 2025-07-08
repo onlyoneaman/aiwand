@@ -131,15 +131,93 @@ aiwand generate "Write a story about AI" --max-tokens 800 --temperature 0.8
 aiwand generate "Explain neural networks" --model gpt-4 --temperature 0.3
 ```
 
+### `setup`
+
+Interactive setup for user preferences.
+
+```bash
+aiwand setup
+```
+
+Guides you through configuring your default AI provider and model preferences.
+
+### `status`
+
+Show current configuration and available providers.
+
+```bash
+aiwand status
+```
+
+Displays which API keys are configured and what models are currently being used.
+
 ### `helper`
 
-Access system helper utilities.
+Utility functions for development and testing.
 
 ```bash
 aiwand helper [subcommand] [options]
 ```
 
 **Subcommands:**
+
+#### `random`
+
+Generate random numbers with configurable length.
+
+```bash
+aiwand helper random [options]
+```
+
+**Options:**
+- `--length LENGTH` - Number of digits (default: 6)
+- `--count COUNT` - Number of random numbers to generate (default: 1)
+
+**Examples:**
+```bash
+# Generate 6-digit number (default)
+aiwand helper random
+
+# Generate 4-digit number
+aiwand helper random --length 4
+
+# Generate 3 random 8-digit numbers
+aiwand helper random --length 8 --count 3
+
+# Perfect for test data
+TEST_ID=$(aiwand helper random --length 6)
+```
+
+#### `uuid`
+
+Generate UUIDs (Universally Unique Identifiers).
+
+```bash
+aiwand helper uuid [options]
+```
+
+**Options:**
+- `--version {1,4}` - UUID version (1 or 4, default: 4)
+- `--uppercase` - Generate uppercase UUID
+- `--count COUNT` - Number of UUIDs to generate (default: 1)
+
+**Examples:**
+```bash
+# Generate UUID4 (default)
+aiwand helper uuid
+
+# Generate uppercase UUID4
+aiwand helper uuid --uppercase
+
+# Generate UUID1 (timestamp-based)
+aiwand helper uuid --version 1
+
+# Generate 3 uppercase UUID1s
+aiwand helper uuid --version 1 --uppercase --count 3
+
+# Perfect for unique identifiers
+SESSION_ID=$(aiwand helper uuid)
+```
 
 #### `chrome`
 
@@ -181,19 +259,30 @@ These work with all commands:
 # Get help
 aiwand --help
 aiwand summarize --help
+aiwand helper --help
 
 # Check version
 aiwand --version
 
-# Multiple operations
+# AI operations
 aiwand summarize "AI is transforming industries..." --style detailed
 aiwand chat "What are the implications of this?"
 aiwand generate "Write recommendations based on this discussion"
 
-# System helpers
-aiwand helper chrome                    # Quoted path for copying
-aiwand helper chrome --version          # With version info
-aiwand helper chrome --path-only        # Raw path for scripting
+# Utility helpers
+aiwand helper random --length 8          # 8-digit random number
+aiwand helper uuid --uppercase           # Uppercase UUID
+aiwand helper chrome --version           # Chrome path + version
+
+# Development workflows
+USER_ID=$(aiwand helper random --length 6)
+SESSION_ID=$(aiwand helper uuid)
+echo "User: $USER_ID, Session: $SESSION_ID"
+
+# Testing data generation
+for i in {1..5}; do
+  echo "Test case $i: $(aiwand helper random --length 4)"
+done
 ```
 
 ## Environment Variables
