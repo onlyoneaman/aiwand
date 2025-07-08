@@ -11,19 +11,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Helper Functions**: New utility functions for development and testing
   - `generate_random_number(length=6)` - Generate random numbers with configurable digit length
   - `generate_uuid(version=4, uppercase=False)` - Generate UUIDs (version 1 or 4) with formatting options
+- **CLI Helper Commands**: New command-line interface for helper functions
+  - `aiwand helper random` - Generate random numbers with `--length` and `--count` options
+  - `aiwand helper uuid` - Generate UUIDs with `--version`, `--uppercase`, and `--count` options
 - **Enhanced Examples**: Updated `examples/helper_usage.py` with comprehensive helper function demonstrations
 - **API Documentation**: Complete documentation for new helper functions in API reference
+- **CLI Documentation**: Enhanced CLI reference with helper command examples and usage patterns
 
 ### Changed
 - **Package Exports**: Added helper functions to public API (`aiwand.generate_random_number`, `aiwand.generate_uuid`)
-- **README**: Updated features list and usage examples to showcase helper utilities
-- **Documentation**: Enhanced API reference with helper function section and usage patterns
+- **README**: Updated features list and usage examples to showcase helper utilities and CLI commands
+- **Documentation**: Enhanced API reference with helper function section and CLI usage patterns
+- **CLI Description**: Updated helper command description to emphasize development and testing utilities
 
 ### Technical Improvements
 - Type-safe random number generation with exact digit length control
 - Support for both UUID1 (timestamp-based) and UUID4 (random) generation
 - Comprehensive error handling and validation for helper functions
 - Added helper utilities to package's `__all__` exports
+- CLI integration with batch generation support (multiple numbers/UUIDs)
+- Perfect for shell scripting and automation workflows
 
 ## [0.3.1] - 2025-01-27
 
