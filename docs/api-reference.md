@@ -214,22 +214,32 @@ AIWand automatically selects the best available model:
 
 | Available APIs | Default Model | Provider |
 |----------------|---------------|----------|
-| OpenAI only | `gpt-3.5-turbo` | OpenAI |
+| OpenAI only | `gpt-4o` | OpenAI |
 | Gemini only | `gemini-2.0-flash` | Gemini |
 | Both available | Based on `AI_DEFAULT_PROVIDER` or preferences | Configurable |
 
 ### Supported Models
 
 **OpenAI Models:**
-- `gpt-4o`
-- `gpt-4o-mini`
+- `o3` (newest reasoning model, best performance)
+- `o3-mini` (efficient reasoning model)
+- `o1` (advanced reasoning model)
+- `o1-mini` (compact reasoning model)
+- `gpt-4.1` (1M context window, best for coding)
+- `gpt-4.1-mini` (efficient large context model)
+- `gpt-4o` (default - multimodal flagship)
+- `gpt-4o-mini` (fast, capable, cost-effective)
 - `gpt-4-turbo`
 - `gpt-4`
-- `gpt-3.5-turbo` (default)
+- `gpt-3.5-turbo`
 
 **Gemini Models:**
-- `gemini-2.0-flash-exp`
-- `gemini-2.0-flash` (default)
+- `gemini-2.5-pro` (newest flagship model)
+- `gemini-2.5-flash` (latest experimental model)
+- `gemini-2.5-flash-lite` (efficient variant)
+- `gemini-2.0-flash-exp` (experimental features)
+- `gemini-2.0-flash` (default - stable, fast, capable)
+- `gemini-2.0-pro`
 - `gemini-1.5-flash`
 - `gemini-1.5-pro`
 

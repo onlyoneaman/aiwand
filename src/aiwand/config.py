@@ -63,15 +63,32 @@ def get_supported_models() -> Dict[str, list]:
     """Get supported models for each provider."""
     return {
         "openai": [
+            # Latest reasoning models (best performance)
+            "o3-mini",
+            "o3",
+            "o1",
+            "o1-mini",
+            # Latest GPT-4.1 series (huge context, best for coding)
+            "gpt-4.1",
+            "gpt-4.1-mini",
+            # Latest GPT-4o series (multimodal, fast)
             "gpt-4o",
-            "gpt-4o-mini", 
+            "gpt-4o-mini",
+            # Legacy but still capable
             "gpt-4-turbo",
             "gpt-4",
             "gpt-3.5-turbo"
         ],
         "gemini": [
+            # Latest Gemini 2.5 series (best performance)
+            "gemini-2.5-pro",
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite",
+            # Gemini 2.0 series (current stable)
             "gemini-2.0-flash-exp",
             "gemini-2.0-flash",
+            "gemini-2.0-pro",
+            # Legacy but still capable
             "gemini-1.5-flash",
             "gemini-1.5-pro"
         ]
@@ -81,8 +98,8 @@ def get_supported_models() -> Dict[str, list]:
 def get_default_models() -> Dict[str, str]:
     """Get default models for each provider."""
     return {
-        "openai": "gpt-3.5-turbo",
-        "gemini": "gemini-2.0-flash"
+        "openai": "gpt-4o",  # Flagship multimodal model, excellent performance
+        "gemini": "gemini-2.0-flash"  # Stable, fast, and capable model
     }
 
 

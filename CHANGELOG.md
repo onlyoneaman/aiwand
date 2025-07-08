@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-01-27
+
+### Added
+- **Latest AI Models**: Support for newest OpenAI and Gemini models
+  - OpenAI: `o3`, `o3-mini`, `o1`, `o1-mini`, `gpt-4.1`, `gpt-4.1-mini`
+  - Gemini: `gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemini-2.0-pro`
+
+### Changed
+- **Default Models**: Updated to `gpt-4o` (OpenAI) and `gemini-2.0-flash` (Gemini)
+- **Documentation**: Updated API reference and CLI docs with latest models
+
 ## [0.3.2] - 2025-01-27
 
 ### Added

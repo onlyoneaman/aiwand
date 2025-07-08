@@ -78,8 +78,8 @@ aiwand summarize "Machine learning is a powerful technology..."
 # Bullet-point summary with length limit
 aiwand summarize "Long text..." --style bullet-points --max-length 30
 
-# Use specific model
-aiwand summarize "Text..." --model gemini-2.0-flash
+# With model specification
+aiwand summarize "Text..." --model gemini-2.5-flash
 ```
 
 ### `chat`
@@ -297,6 +297,6 @@ The CLI uses the same environment variables as the Python package:
 
 The CLI automatically selects the best available model based on your API keys:
 
-- **OpenAI only**: Uses `gpt-3.5-turbo`
-- **Gemini only**: Uses `gemini-2.0-flash`
+- **OpenAI only**: Uses `gpt-4o` (multimodal flagship model)
+- **Gemini only**: Uses `gemini-2.0-flash` (stable and capable)
 - **Both available**: Uses `AI_DEFAULT_PROVIDER` preference 
