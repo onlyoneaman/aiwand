@@ -3,14 +3,14 @@ Core AI functionality for AIWand
 """
 
 from typing import Optional, List, Dict, Any
-from .config import make_ai_request, AIError
+from .config import make_ai_request, AIError, ModelType
 
 
 def summarize(
     text: str,
     max_length: Optional[int] = None,
     style: str = "concise",
-    model: Optional[str] = None
+    model: Optional[ModelType] = None
 ) -> str:
     """
     Summarize the given text using AI API (OpenAI or Gemini).
@@ -19,7 +19,7 @@ def summarize(
         text (str): The text to summarize
         max_length (Optional[int]): Maximum length of the summary in words
         style (str): Style of summary ('concise', 'detailed', 'bullet-points')
-        model (Optional[str]): Specific model to use (auto-selected if not provided)
+        model (Optional[ModelType]): Specific model to use (auto-selected if not provided)
         
     Returns:
         str: The summarized text
@@ -59,7 +59,7 @@ def summarize(
 def chat(
     message: str,
     conversation_history: Optional[List[Dict[str, str]]] = None,
-    model: Optional[str] = None,
+    model: Optional[ModelType] = None,
     temperature: float = 0.7
 ) -> str:
     """
@@ -68,7 +68,7 @@ def chat(
     Args:
         message (str): The user's message
         conversation_history (Optional[List[Dict[str, str]]]): Previous conversation messages
-        model (Optional[str]): Specific model to use (auto-selected if not provided)
+        model (Optional[ModelType]): Specific model to use (auto-selected if not provided)
         temperature (float): Response creativity (0.0 to 1.0)
         
     Returns:
@@ -96,7 +96,7 @@ def generate_text(
     prompt: str,
     max_tokens: int = 500,
     temperature: float = 0.7,
-    model: Optional[str] = None
+    model: Optional[ModelType] = None
 ) -> str:
     """
     Generate text based on a prompt using AI (OpenAI or Gemini).
@@ -105,7 +105,7 @@ def generate_text(
         prompt (str): The prompt to generate text from
         max_tokens (int): Maximum number of tokens to generate
         temperature (float): Response creativity (0.0 to 1.0)
-        model (Optional[str]): Specific model to use (auto-selected if not provided)
+        model (Optional[ModelType]): Specific model to use (auto-selected if not provided)
         
     Returns:
         str: The generated text

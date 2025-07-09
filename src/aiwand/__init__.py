@@ -6,7 +6,16 @@ __version__ = "0.4.0"
 __author__ = "Aman Kumar"
 
 from .core import summarize, chat, generate_text
-from .config import setup_user_preferences, show_current_config, AIError
+from .config import (
+    setup_user_preferences, 
+    show_current_config, 
+    AIError,
+    AIProvider,
+    OpenAIModel,
+    GeminiModel,
+    ModelType,
+    ProviderType
+)
 from .helper import generate_random_number, generate_uuid
 
 __all__ = [
@@ -16,6 +25,11 @@ __all__ = [
     "setup_user_preferences",
     "show_current_config",
     "AIError",
+    "AIProvider",
+    "OpenAIModel", 
+    "GeminiModel",
+    "ModelType",
+    "ProviderType",
     "generate_random_number",
     "generate_uuid",
 ] 
