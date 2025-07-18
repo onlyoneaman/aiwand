@@ -90,7 +90,8 @@ def make_ai_request(
     temperature: float = 0.7,
     top_p: float = 1.0,
     model: Optional[ModelType] = None,
-    response_format: Optional[Dict[str, Any]] = None
+    response_format: Optional[Dict[str, Any]] = None,
+    system_prompt: Optional[str] = None
 ) -> str:
     """
     Unified wrapper for AI API calls that handles provider differences.
@@ -102,6 +103,7 @@ def make_ai_request(
         top_p: Nucleus sampling parameter
         model: Specific model to use (auto-selected if not provided)
         response_format: Response format specification
+        system_prompt: Optional system prompt to add at the beginning
         
     Returns:
         str: The AI response content
@@ -119,10 +121,15 @@ def make_ai_request(
         else:
             model_name = str(model)  # Convert enum to string if needed
         
+        # Prepare messages with optional system prompt
+        final_messages = messages.copy()
+        if system_prompt:
+            final_messages.insert(0, {"role": "system", "content": system_prompt})
+        
         # Prepare common parameters
         params = {
             "model": model_name,
-            "messages": messages,
+            "messages": final_messages,
             "temperature": temperature,
             "top_p": top_p
         }
