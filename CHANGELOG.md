@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4] - 2025-01-27
+
+### ✨ Enhanced Provider Intelligence
+- **Smart Pattern-Based Inference**: Added fallback provider detection for unknown models
+  - Models containing "gemini" automatically use Gemini provider (e.g., `gemini-2.5-flash-preview-05-20`)
+  - Works with mixed case and custom model names
+  - Graceful handling of new models before they're added to registry
+- **Explicit Provider Parameter**: New `provider` parameter in `make_ai_request()`
+  - Accept AIProvider enum or string values (`'openai'`, `'gemini'`)
+  - Overrides automatic model-based inference when specified
+  - Useful for custom models or explicit provider control
+  - Example: `make_ai_request(model="custom-model", provider="gemini")`
+
+### 🔧 Improved Error Handling
+- **Better Unknown Model Support**: Enhanced fallback behavior for unrecognized models
+  - Unknown models now attempt smart provider inference via name patterns
+  - Clear error messages for invalid provider specifications
+  - Maintains backward compatibility with existing code
+
+### 📚 Enhanced API Flexibility
+- **Multiple Ways to Specify Provider**: Users can now control provider selection through:
+  1. Model-based automatic inference (existing)
+  2. Pattern-based inference for unknown models (new)
+  3. Explicit provider parameter (new)
+  4. User preference fallback (existing)
+
 ## [0.4.3] - 2025-01-27
 
 ### 🚀 Major Architecture Refactor
