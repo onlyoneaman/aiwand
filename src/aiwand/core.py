@@ -50,8 +50,6 @@ def summarize(
     
     return make_ai_request(
         messages=messages,
-        max_tokens=2000,
-        temperature=0.3,
         model=model
     )
 
@@ -86,7 +84,6 @@ def chat(
     
     return make_ai_request(
         messages=messages,
-        max_tokens=1000,
         temperature=temperature,
         model=model
     )
@@ -94,7 +91,7 @@ def chat(
 
 def generate_text(
     prompt: str,
-    max_tokens: int = 500,
+    max_tokens: int = None,
     temperature: float = 0.7,
     model: Optional[ModelType] = None
 ) -> str:
