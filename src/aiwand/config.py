@@ -12,8 +12,6 @@ from openai import OpenAI
 
 from .models import (
     AIProvider,
-    OpenAIModel,
-    GeminiModel,
     ModelType,
     ProviderRegistry,
 )
