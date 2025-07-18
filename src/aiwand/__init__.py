@@ -7,14 +7,16 @@ __author__ = "Aman Kumar"
 
 from .core import summarize, chat, generate_text
 from .config import (
-    setup_user_preferences, 
-    show_current_config, 
     AIError,
     make_ai_request,
     DEFAULT_SYSTEM_PROMPT,
     get_ai_client,
     get_current_provider,
     get_model_name
+)
+from .setup import (
+    setup_user_preferences, 
+    show_current_config, 
 )
 from .models import (
     AIProvider,
