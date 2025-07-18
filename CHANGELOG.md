@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.6] - 2025-01-27
+
+### 🎯 New Classifier Functionality
+- **Text Classification & Grading**: Complete classifier system inspired by autoevals
+  - `aiwand.classify_text()` - Main classification function with custom criteria
+  - `aiwand.create_classifier()` - Create reusable classifiers with predefined settings  
+  - `aiwand.create_binary_classifier()` - Simple correct/incorrect classification
+  - `aiwand.create_quality_classifier()` - A-F grading system
+  - `ClassifierResponse` - Structured response with score, choice, reasoning, and metadata
+- **Dramatic Simplification**: Replace complex KayLLMClassifier setup with one-line calls
+  - Before: Multi-step setup with custom classes and async calls
+  - After: `aiwand.classify_text(input_text, output_text, expected_text, choice_scores)`
+- **CLI Integration**: New `aiwand classify` command with full parameter support
+- **Provider Integration**: Uses existing OpenAI/Gemini provider system with structured output
+- **Comprehensive Documentation**: Added classifier section to DEV-README.md and CLI docs
+- **Examples**: Created `classifier_usage.py` and `classifier_test_basic.py` examples
+
 ## [0.4.5] - 2025-01-27
 
 ### 📚 Major Documentation Update
