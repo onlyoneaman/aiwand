@@ -131,6 +131,36 @@ aiwand generate "Write a story about AI" --max-tokens 800 --temperature 0.8
 aiwand generate "Explain neural networks" --model gpt-4 --temperature 0.3
 ```
 
+### `classify`
+
+Classify or grade text responses based on custom criteria.
+
+```bash
+aiwand classify "input_text" "output_text" [options]
+```
+
+**Options:**
+- `--expected TEXT` - Expected response for comparison
+- `--choices JSON` - Choice scores as JSON (e.g., '{"A":1.0,"B":0.5,"C":0.0}')
+- `--prompt TEMPLATE` - Custom prompt template
+- `--no-reasoning` - Skip step-by-step reasoning
+- `--model MODEL` - Specific AI model to use
+
+**Examples:**
+```bash
+# Simple binary classification
+aiwand classify "What is 2+2?" "4" --expected "4"
+
+# Custom grading scale
+aiwand classify "Write a haiku" "Roses are red..." --choices '{"A":1.0,"B":0.8,"C":0.6,"D":0.4,"F":0.0}'
+
+# With custom prompt
+aiwand classify "Math question" "Wrong answer" --prompt "Grade this: {input} -> {output}" --choices '{"CORRECT":1.0,"WRONG":0.0}'
+
+# Without reasoning
+aiwand classify "Question" "Answer" --no-reasoning
+```
+
 ### `setup`
 
 Interactive setup for user preferences.

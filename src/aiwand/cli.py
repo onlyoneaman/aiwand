@@ -3,17 +3,20 @@ Command Line Interface for AIWand
 """
 
 import argparse
+import json
 import sys
 from typing import Optional
 from .core import summarize, chat, generate_text
-from .config import setup_user_preferences, show_current_config, AIError
+from .config import AIError
+from .setup import setup_user_preferences, show_current_config
 from .helper import find_chrome_binary, get_chrome_version, generate_random_number, generate_uuid
+from .classifier import classify_text
 
 
 def main():
     """Main CLI entry point."""
     # Check if this is a direct prompt (only works with quoted text containing spaces/punctuation)
-    known_commands = {'summarize', 'chat', 'generate', 'setup', 'status', 'helper'}
+    known_commands = {'summarize', 'chat', 'generate', 'classify', 'setup', 'status', 'helper'}
     
     # Handle non-command arguments
     if len(sys.argv) > 1 and sys.argv[1] not in known_commands and not sys.argv[1].startswith('-'):
@@ -80,6 +83,16 @@ def main():
     generate_parser.add_argument('--temperature', type=float, default=0.7, help='Response creativity')
     generate_parser.add_argument('--model', help='AI model to use (auto-selected if not provided)')
     
+    # Classify command
+    classify_parser = subparsers.add_parser('classify', help='Classify or grade text responses')
+    classify_parser.add_argument('input_text', help='The question, prompt, or context')
+    classify_parser.add_argument('output_text', help='The response to evaluate')
+    classify_parser.add_argument('--expected', default='', help='Expected response for comparison')
+    classify_parser.add_argument('--choices', help='Choice scores as JSON (e.g., \'{"A":1.0,"B":0.5,"C":0.0}\')')
+    classify_parser.add_argument('--prompt', help='Custom prompt template')
+    classify_parser.add_argument('--no-reasoning', action='store_true', help='Skip step-by-step reasoning')
+    classify_parser.add_argument('--model', help='AI model to use (auto-selected if not provided)')
+    
     # Setup command
     setup_parser = subparsers.add_parser('setup', help='Interactive setup for preferences')
     
@@ -138,6 +151,31 @@ def main():
                 model=args.model
             )
             print(result)
+            
+        elif args.command == 'classify':
+            # Parse choice scores if provided
+            choice_scores = None
+            if args.choices:
+                try:
+                    choice_scores = json.loads(args.choices)
+                except json.JSONDecodeError:
+                    print("Error: Invalid JSON format for --choices", file=sys.stderr)
+                    sys.exit(1)
+            
+            result = classify_text(
+                input_text=args.input_text,
+                output_text=args.output_text,
+                expected_text=args.expected,
+                prompt_template=args.prompt or "",
+                choice_scores=choice_scores,
+                use_reasoning=not args.no_reasoning,
+                model=args.model
+            )
+            
+            print(f"Score: {result.score}")
+            print(f"Choice: {result.choice}")
+            if result.reasoning:
+                print(f"Reasoning: {result.reasoning}")
             
         elif args.command == 'setup':
             setup_user_preferences()

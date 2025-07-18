@@ -27,6 +27,13 @@ from .models import (
     ProviderRegistry,
 )
 from .helper import generate_random_number, generate_uuid
+from .classifier import (
+    ClassifierResponse,
+    classify_text,
+    create_classifier,
+    create_binary_classifier,
+    create_quality_classifier,
+)
 
 __all__ = [
     # Core AI functions
@@ -55,4 +62,11 @@ __all__ = [
     # Helper utilities
     "generate_random_number",
     "generate_uuid",
+    
+    # Classifier functionality
+    "ClassifierResponse",
+    "classify_text",
+    "create_classifier",
+    "create_binary_classifier",
+    "create_quality_classifier",
 ] 

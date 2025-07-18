@@ -173,6 +173,113 @@ aiwand.generate_uuid() -> str
 
 ---
 
+## 🎯 Classifier Functions
+
+### `aiwand.classify_text()`
+**Simple text classification and grading with custom criteria**
+
+```python
+aiwand.classify_text(
+    input_text: str,
+    output_text: str,
+    expected_text: str = "",
+    prompt_template: str = "",
+    choice_scores: Optional[Dict[str, float]] = None,
+    use_reasoning: bool = True,
+    model: Optional[ModelType] = None,
+    provider: Optional[Union[AIProvider, str]] = None
+) -> ClassifierResponse
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `input_text` | `str` | Required | The question, prompt, or context |
+| `output_text` | `str` | Required | The response to be evaluated |
+| `expected_text` | `str` | `""` | Expected/reference response (optional) |
+| `prompt_template` | `str` | `""` | Custom prompt with {input}, {output}, {expected} |
+| `choice_scores` | `Dict[str, float]` | `{"CORRECT": 1.0, "INCORRECT": 0.0}` | Choice-to-score mapping |
+| `use_reasoning` | `bool` | `True` | Include step-by-step reasoning |
+| `model` | `ModelType` | `None` | Specific model to use |
+| `provider` | `AIProvider/str` | `None` | Specific provider to use |
+
+**Returns:** `ClassifierResponse` with score, choice, reasoning, and metadata
+
+### `aiwand.create_classifier()`
+**Create reusable classifier with predefined settings**
+
+```python
+aiwand.create_classifier(
+    prompt_template: str,
+    choice_scores: Dict[str, float],
+    use_reasoning: bool = True,
+    model: Optional[ModelType] = None,
+    provider: Optional[Union[AIProvider, str]] = None
+) -> callable
+```
+
+**Returns:** Classifier function that can be called with (input_text, output_text, expected_text)
+
+### `aiwand.create_binary_classifier()`
+**Create simple correct/incorrect classifier**
+
+```python
+aiwand.create_binary_classifier(
+    criteria: str = "correctness",
+    model: Optional[ModelType] = None,
+    provider: Optional[Union[AIProvider, str]] = None
+) -> callable
+```
+
+### `aiwand.create_quality_classifier()`
+**Create A-F quality grading classifier**
+
+```python
+aiwand.create_quality_classifier(
+    model: Optional[ModelType] = None,
+    provider: Optional[Union[AIProvider, str]] = None
+) -> callable
+```
+
+### `ClassifierResponse`
+```python
+class ClassifierResponse(BaseModel):
+    score: float          # Numerical score
+    choice: str           # Selected choice/grade
+    reasoning: str        # Step-by-step reasoning
+    metadata: Dict        # Additional information
+```
+
+**Examples:**
+```python
+# Simple binary classification
+result = aiwand.classify_text(
+    input_text="What is 2+2?",
+    output_text="4",
+    expected_text="4",
+    choice_scores={"CORRECT": 1.0, "INCORRECT": 0.0}
+)
+
+# Custom grading scale
+result = aiwand.classify_text(
+    input_text="Write a haiku",
+    output_text="Roses are red...",
+    choice_scores={"A": 1.0, "B": 0.8, "C": 0.6, "D": 0.4, "F": 0.0}
+)
+
+# Reusable classifier
+math_grader = aiwand.create_classifier(
+    prompt_template="Grade this math answer: {input} -> {output}",
+    choice_scores={"CORRECT": 1.0, "PARTIAL": 0.5, "WRONG": 0.0}
+)
+result = math_grader("2+2", "4", "4")
+
+# Predefined classifiers
+checker = aiwand.create_binary_classifier(criteria="relevance")
+quality = aiwand.create_quality_classifier()
+```
+
+---
+
 ## 🎯 Provider & Model Enums
 
 ### `AIProvider`
