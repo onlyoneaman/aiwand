@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.3] - 2025-01-27
+
+### 🚀 Major Architecture Refactor
+- **Complete Module Reorganization**: Implemented clean separation of concerns across modules
+  - `config.py`: Focused on core AI functionality (`make_ai_request`, client management)
+  - `preferences.py`: Dedicated configuration and user preference management
+  - `setup.py`: Interactive setup and configuration display utilities
+  - `models.py`: Extensible provider and model registry system
+
+### ✨ Enhanced Provider System
+- **Registry-Based Architecture**: New `ProviderRegistry` class for extensible provider management
+  - Centralized provider configuration (API keys, base URLs, default models)
+  - Easy addition of new providers with minimal code changes
+  - Self-documenting system showing all capabilities at runtime
+- **Smart Provider Inference**: Enhanced `make_ai_request` with model-first provider detection
+  - Automatically detects provider from model name (e.g., `gemini-2.0-flash-lite` → Gemini)
+  - Falls back to user preferences when model is unspecified or unknown
+  - Works with all registered models across all providers
+
+### ⚡ Performance Improvements
+- **Client Caching**: Implemented efficient client caching to avoid recreation
+  - Same provider requests reuse cached OpenAI client instances
+  - Significant performance improvement for repeated requests
+  - Thread-safe client management
+- **DRY Principle Implementation**: Eliminated code duplication throughout codebase
+  - Removed redundant wrapper functions
+  - Extracted reusable utilities for provider/model resolution
+  - Cleaner, more maintainable code structure
+
+### 🔧 Developer Experience
+- **Better Code Organization**: Clear module responsibilities and cleaner imports
+  - Core AI operations isolated from configuration management
+  - Interactive setup separated from business logic
+  - Registry system makes adding providers trivial
+- **Enhanced Type Safety**: Improved type hints and error handling throughout
+- **Comprehensive Testing**: All functionality verified after refactoring
+
+### 🔄 Backward Compatibility
+- **API Preservation**: All existing functionality and imports preserved
+- **Seamless Migration**: No changes required for existing user code
+- **Enhanced Functionality**: New capabilities added without breaking changes
+
 ## [0.4.2] - 2025-01-27
 
 ### Enhanced
