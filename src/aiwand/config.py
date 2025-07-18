@@ -70,6 +70,9 @@ class GeminiModel(Enum):
 ModelType = Union[OpenAIModel, GeminiModel, str]
 ProviderType = Union[AIProvider, str]
 
+# Default system prompt
+DEFAULT_SYSTEM_PROMPT = "You are AIWand, a helpful AI assistant that provides clear, accurate, and concise responses. You excel at text processing, analysis, and generation tasks."
+
 
 class AIError(Exception):
     """Custom exception for AI-related errors."""
@@ -103,7 +106,7 @@ def make_ai_request(
         top_p: Nucleus sampling parameter
         model: Specific model to use (auto-selected if not provided)
         response_format: Response format specification
-        system_prompt: Optional system prompt to add at the beginning
+        system_prompt: Optional system prompt to add at the beginning (uses default if None)
         
     Returns:
         str: The AI response content
@@ -121,10 +124,10 @@ def make_ai_request(
         else:
             model_name = str(model)  # Convert enum to string if needed
         
-        # Prepare messages with optional system prompt
+        # Prepare messages with system prompt (use default if none provided)
         final_messages = messages.copy()
-        if system_prompt:
-            final_messages.insert(0, {"role": "system", "content": system_prompt})
+        prompt_to_use = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
+        final_messages.insert(0, {"role": "system", "content": prompt_to_use})
         
         # Prepare common parameters
         params = {
