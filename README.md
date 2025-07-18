@@ -1,20 +1,60 @@
 # AIWand 🪄
 
-> A simple and elegant Python package for AI-powered text processing using OpenAI and Google Gemini APIs.
+> **The simplest way to unify OpenAI and Gemini APIs** - Drop-in replacement for your existing AI code with automatic provider switching and structured output handling.
 
 [![PyPI version](https://img.shields.io/pypi/v/aiwand.svg)](https://pypi.org/project/aiwand/)
 [![Python versions](https://img.shields.io/pypi/pyversions/aiwand.svg)](https://pypi.org/project/aiwand/)
 [![License](https://img.shields.io/pypi/l/aiwand.svg)](https://github.com/onlyoneaman/aiwand/blob/main/LICENSE)
 
-## ✨ Features
+## 🎯 **Simple Migration - One Line Change**
 
-- **Smart Provider Selection** - Automatically uses OpenAI or Gemini based on available keys
-- **Text Summarization** - Create concise, detailed, or bullet-point summaries  
-- **AI Chat** - Have conversations with context history
-- **Text Generation** - Generate content from prompts
-- **Helper Utilities** - Random number and UUID generation
-- **Zero Configuration** - Works with just environment variables
-- **CLI Interface** - Optional command line usage
+**Before** - Direct API calls with provider-specific code:
+```python
+# OpenAI specific code
+content = openai_client.chat.completions.create(
+    model="gpt-4o",
+    messages=messages,
+    temperature=0.8,
+    top_p=0.9,
+    response_format={"type": "json_object"}
+)
+result = json.loads(content.choices[0].message.content)  # Manual parsing
+
+# OR Gemini specific code
+content = gemini_client.chat.completions.create(
+    model="gemini-2.0-flash",
+    messages=messages,
+    temperature=0.8,
+    top_p=0.9,
+    response_format=SomeSchema
+)
+result = content.parsed  # Different response handling
+```
+
+**After** - Unified AIWand code that works with both:
+```python
+import aiwand
+
+# Same code works with OpenAI, Gemini, and their structured outputs!
+content = aiwand.make_ai_request(
+    model="gpt-4o",          # or "gemini-2.0-flash" 
+    messages=messages,
+    temperature=0.8,
+    top_p=0.9,
+    response_format=CarouselContent  # Pydantic model - automatic parsing!
+)
+# 'content' is already your parsed Pydantic object - no post-processing needed! ✨
+```
+
+## ✨ **Why AIWand?**
+
+- 🔄 **Drop-in Replacement** - Minimal code changes, maximum benefits
+- 🧠 **Smart Provider Detection** - Automatically uses OpenAI or Gemini based on model name
+- 🏗️ **Structured Output Magic** - Handles Pydantic models automatically for both providers
+- ⚡ **No Post-Processing** - Get parsed objects directly, skip manual JSON handling
+- 🎯 **Unified API** - Same code works across different AI providers
+- 🔑 **Zero Configuration** - Works with just environment variables
+- 📱 **High-Level Functions** - Built-in summarization, chat, and text generation
 
 ## 🚀 Quick Start
 
@@ -48,36 +88,81 @@ GEMINI_API_KEY=your-gemini-key
 AI_DEFAULT_PROVIDER=openai
 ```
 
-### Basic Usage
+### Core AI Functionality
+
+The `make_ai_request()` function is the heart of AIWand - a unified interface for all AI providers:
 
 ```python
 import aiwand
+from pydantic import BaseModel
 
-# Summarize text
-summary = aiwand.summarize("Your long text here...")
+# Basic text generation
+response = aiwand.make_ai_request(
+    messages=[{"role": "user", "content": "Explain quantum computing"}],
+    model="gpt-4o"  # Automatically uses OpenAI
+)
 
-# Chat with AI  
-response = aiwand.chat("What is machine learning?")
+# Switch providers seamlessly
+response = aiwand.make_ai_request(
+    messages=[{"role": "user", "content": "Explain quantum computing"}],
+    model="gemini-2.0-flash"  # Automatically uses Gemini
+)
 
-# Generate text
-story = aiwand.generate_text("Write a poem about coding")
+# Structured output with Pydantic models
+class BlogPost(BaseModel):
+    title: str
+    content: str
+    tags: list[str]
 
-# Generate random number and UUID
-random_num = aiwand.generate_random_number(8)  # 8-digit number
-unique_id = aiwand.generate_uuid()  # UUID4
+blog_post = aiwand.make_ai_request(
+    messages=[{"role": "user", "content": "Write a blog post about AI"}],
+    model="gpt-4o",
+    response_format=BlogPost  # Returns parsed BlogPost object!
+)
+print(blog_post.title)  # Direct access to structured data
+
+# Custom/preview models with explicit provider
+response = aiwand.make_ai_request(
+    model="gemini-2.5-flash-preview-05-20",  # New model not in our registry
+    provider="gemini",  # Explicit provider specification
+    messages=[{"role": "user", "content": "Hello from the future!"}]
+)
+
+# Advanced parameters
+response = aiwand.make_ai_request(
+    messages=[
+        {"role": "system", "content": "You are a helpful coding assistant"},
+        {"role": "user", "content": "Write a Python function to sort a list"}
+    ],
+    model="gpt-4o",
+    temperature=0.3,  # More focused
+    max_tokens=500,
+    top_p=0.9
+)
 ```
 
-### Advanced Usage
+### High-Level Convenience Functions
+
+For common tasks, use these simplified functions:
 
 ```python
 import aiwand
+
+# Text summarization
+summary = aiwand.summarize("Your long text here...")
+
+# AI chat with conversation history
+response = aiwand.chat("What is machine learning?")
+
+# Text generation from prompts
+story = aiwand.generate_text("Write a poem about coding")
 
 # Customized summarization
 summary = aiwand.summarize(
     text="Your long text...",
     style="bullet-points",  # "concise", "detailed", "bullet-points"
     max_length=50,
-    model="gpt-4"  # Optional: specify model
+    model="gpt-4o"  # Optional: specify model
 )
 
 # Chat with conversation history
@@ -88,7 +173,7 @@ conversation.append({"role": "assistant", "content": response1})
 
 response2 = aiwand.chat("What did I just say?", conversation_history=conversation)
 
-# Generate text with custom parameters
+# Text generation with custom parameters
 text = aiwand.generate_text(
     prompt="Write a technical explanation",
     max_tokens=300,
@@ -96,10 +181,58 @@ text = aiwand.generate_text(
 )
 
 # Helper utilities for testing and development
-test_id = aiwand.generate_random_number(6)  # 6-digit number
-session_id = aiwand.generate_uuid()  # UUID4
-user_code = aiwand.generate_random_number(4)  # 4-digit code
-transaction_uuid = aiwand.generate_uuid(uppercase=True)  # Uppercase UUID
+random_num = aiwand.generate_random_number(8)  # 8-digit number
+unique_id = aiwand.generate_uuid()  # UUID4
+```
+
+## 🎯 **Smart Provider Features**
+
+### Automatic Model Detection
+```python
+# AIWand automatically detects the right provider:
+response = aiwand.make_ai_request(model="gpt-4o", ...)        # → OpenAI
+response = aiwand.make_ai_request(model="gemini-2.0-flash", ...)  # → Gemini
+response = aiwand.make_ai_request(model="o3-mini", ...)       # → OpenAI
+
+# Pattern-based detection for unknown models:
+response = aiwand.make_ai_request(model="gemini-experimental-123", ...)  # → Gemini
+```
+
+### Explicit Provider Control
+```python
+# Force a specific provider for custom models:
+response = aiwand.make_ai_request(
+    model="my-custom-model",
+    provider="gemini",  # or AIProvider.GEMINI
+    messages=[...]
+)
+
+# Works with both string and enum:
+from aiwand import AIProvider
+response = aiwand.make_ai_request(
+    model="any-model",
+    provider=AIProvider.OPENAI,
+    messages=[...]
+)
+```
+
+### Structured Output Support
+```python
+from pydantic import BaseModel
+
+class ProductReview(BaseModel):
+    rating: int
+    pros: list[str]
+    cons: list[str]
+    recommendation: bool
+
+# Works identically with both providers:
+review = aiwand.make_ai_request(
+    model="gpt-4o",  # or "gemini-2.0-flash"
+    messages=[{"role": "user", "content": "Review this product: ..."}],
+    response_format=ProductReview
+)
+# No manual JSON parsing needed - returns ProductReview object directly!
 ```
 
 ### Configuration Management
