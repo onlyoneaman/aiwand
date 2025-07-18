@@ -58,7 +58,8 @@ def main():
     try:
         response = aiwand.make_ai_request(
             system_prompt="Write a small joke about programming.",
-            temperature=0.7
+            temperature=0.7,
+            model="gemini-2.0-flash-lite"
         )
         print(f"✅ System prompt only response: {response}")
     except Exception as e:

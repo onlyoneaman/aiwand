@@ -10,16 +10,19 @@ from .config import (
     setup_user_preferences, 
     show_current_config, 
     AIError,
-    AIProvider,
-    OpenAIModel,
-    GeminiModel,
-    ModelType,
-    ProviderType,
     make_ai_request,
     DEFAULT_SYSTEM_PROMPT,
     get_ai_client,
     get_current_provider,
     get_model_name
+)
+from .models import (
+    AIProvider,
+    OpenAIModel,
+    GeminiModel,
+    ModelType,
+    ProviderType,
+    ProviderRegistry,
 )
 from .helper import generate_random_number, generate_uuid
 
@@ -45,6 +48,7 @@ __all__ = [
     "GeminiModel",
     "ModelType",
     "ProviderType",
+    "ProviderRegistry",
     
     # Helper utilities
     "generate_random_number",

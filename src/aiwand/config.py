@@ -6,72 +6,23 @@ This module handles API client setup, provider selection, and user preferences.
 
 import os
 import json
-from enum import Enum
 from pathlib import Path
 from typing import Dict, Any, Optional, Tuple, List, Union
 from openai import OpenAI
 
-
-class AIProvider(Enum):
-    """Supported AI providers."""
-    OPENAI = "openai"
-    GEMINI = "gemini"
-    
-    def __str__(self) -> str:
-        return self.value
-
-
-class OpenAIModel(Enum):
-    """Supported OpenAI models."""
-    # Latest reasoning models (best performance)
-    O3_MINI = "o3-mini"
-    O3 = "o3"
-    O1 = "o1"
-    O1_MINI = "o1-mini"
-    
-    # Latest GPT-4.1 series (huge context, best for coding)
-    GPT_4_1 = "gpt-4.1"
-    GPT_4_1_MINI = "gpt-4.1-mini"
-    
-    # Latest GPT-4o series (multimodal, fast)
-    GPT_4O = "gpt-4o"
-    GPT_4O_MINI = "gpt-4o-mini"
-    
-    # Legacy but still capable
-    GPT_4_TURBO = "gpt-4-turbo"
-    GPT_4 = "gpt-4"
-    GPT_3_5_TURBO = "gpt-3.5-turbo"
-    
-    def __str__(self) -> str:
-        return self.value
-
-
-class GeminiModel(Enum):
-    """Supported Gemini models."""
-    # Latest Gemini 2.5 series (best performance)
-    GEMINI_2_5_PRO = "gemini-2.5-pro"
-    GEMINI_2_5_FLASH = "gemini-2.5-flash"
-    GEMINI_2_5_FLASH_LITE = "gemini-2.5-flash-lite"
-    
-    # Gemini 2.0 series (current stable)
-    GEMINI_2_0_FLASH_EXP = "gemini-2.0-flash-exp"
-    GEMINI_2_0_FLASH = "gemini-2.0-flash"
-    GEMINI_2_0_PRO = "gemini-2.0-pro"
-    
-    # Legacy but still capable
-    GEMINI_1_5_FLASH = "gemini-1.5-flash"
-    GEMINI_1_5_PRO = "gemini-1.5-pro"
-    
-    def __str__(self) -> str:
-        return self.value
-
-
-# Type aliases for models
-ModelType = Union[OpenAIModel, GeminiModel, str]
-ProviderType = Union[AIProvider, str]
+from .models import (
+    AIProvider,
+    OpenAIModel,
+    GeminiModel,
+    ModelType,
+    ProviderRegistry,
+)
 
 # Default system prompt
 DEFAULT_SYSTEM_PROMPT = "You are AIWand, a helpful AI assistant that provides clear, accurate, and concise responses. You excel at text processing, analysis, and generation tasks."
+
+# Client cache to avoid recreating clients
+_client_cache: Dict[AIProvider, OpenAI] = {}
 
 
 class AIError(Exception):
@@ -82,9 +33,62 @@ class AIError(Exception):
 def get_current_provider() -> Optional[AIProvider]:
     """Get the currently active provider."""
     provider, _ = get_preferred_provider_and_model()
-    if provider:
-        return AIProvider(provider) if isinstance(provider, str) else provider
-    return None
+    return provider
+
+
+def _get_cached_client(provider: AIProvider) -> OpenAI:
+    """Get or create a cached client for the provider."""
+    if provider not in _client_cache:
+        # Get provider configuration from registry
+        env_var = ProviderRegistry.get_env_var(provider)
+        base_url = ProviderRegistry.get_base_url(provider)
+        
+        if not env_var:
+            raise AIError(f"Unsupported provider: {provider}")
+        
+        api_key = os.getenv(env_var)
+        if not api_key:
+            raise AIError(f"{provider.value.title()} API key not found. Please set {env_var} environment variable.")
+        
+        # Create client with provider-specific configuration
+        if base_url:
+            _client_cache[provider] = OpenAI(api_key=api_key, base_url=base_url)
+        else:
+            _client_cache[provider] = OpenAI(api_key=api_key)
+    
+    return _client_cache[provider]
+
+
+def _resolve_provider_model_client(model: Optional[ModelType] = None) -> Tuple[AIProvider, str, OpenAI]:
+    """
+    Resolve provider, model name, and client based on input model or preferences.
+    
+    Args:
+        model: Optional model to use for inference
+        
+    Returns:
+        Tuple of (provider, model_name, client)
+        
+    Raises:
+        AIError: When no provider is available
+    """
+    if model is not None:
+        # Try to infer provider from model
+        inferred_provider = ProviderRegistry.infer_provider_from_model(model)
+        if inferred_provider is not None:
+            return inferred_provider, str(model), _get_cached_client(inferred_provider)
+        else:
+            # Model provided but can't infer provider, use preferences with provided model
+            provider, _ = get_preferred_provider_and_model()
+            if not provider:
+                raise AIError("No AI provider available. Please set up your API keys.")
+            return provider, str(model), _get_cached_client(provider)
+    else:
+        # No model provided, use current preferences
+        provider, preferred_model = get_preferred_provider_and_model()
+        if not provider or not preferred_model:
+            raise AIError("No AI provider available. Please set up your API keys and run 'aiwand setup'.")
+        return provider, str(preferred_model), _get_cached_client(provider)
 
 
 def make_ai_request(
@@ -117,14 +121,8 @@ def make_ai_request(
         AIError: When the API call fails
     """
     try:
-        client = get_ai_client()
-        current_provider = get_current_provider()
-        
-        # Use provided model or get from user preferences
-        if model is None:
-            model_name = get_model_name()
-        else:
-            model_name = str(model)  # Convert enum to string if needed
+        # Resolve provider, model, and client
+        current_provider, model_name, client = _resolve_provider_model_client(model)
         
         # Handle case where messages is None or empty
         if messages is None:
@@ -174,8 +172,15 @@ def make_ai_request(
         else:
             # Standard chat completions for all other cases
             response = client.chat.completions.create(**params)
-        
-        return response.choices[0].message.content.strip()
+
+        content = response.choices[0].message.content.strip()
+        if response_format:
+            if isinstance(content, dict):
+                parsed = content
+            else:
+                parsed = json.loads(content)
+            return response_format(**parsed)
+        return content
     
     except AIError as e:
         raise AIError(str(e))
@@ -218,34 +223,10 @@ def save_user_preferences(preferences: Dict[str, Any]) -> None:
         raise AIError(f"Failed to save preferences: {e}")
 
 
-def get_available_providers() -> Dict[AIProvider, bool]:
-    """Check which AI providers are available based on environment variables."""
-    return {
-        AIProvider.OPENAI: bool(os.getenv("OPENAI_API_KEY")),
-        AIProvider.GEMINI: bool(os.getenv("GEMINI_API_KEY"))
-    }
-
-
-def get_supported_models() -> Dict[AIProvider, List[Union[OpenAIModel, GeminiModel]]]:
-    """Get supported models for each provider."""
-    return {
-        AIProvider.OPENAI: list(OpenAIModel),
-        AIProvider.GEMINI: list(GeminiModel)
-    }
-
-
-def get_default_models() -> Dict[AIProvider, Union[OpenAIModel, GeminiModel]]:
-    """Get default models for each provider."""
-    return {
-        AIProvider.OPENAI: OpenAIModel.GPT_4O,  # Flagship multimodal model
-        AIProvider.GEMINI: GeminiModel.GEMINI_2_0_FLASH  # Stable, fast model
-    }
-
-
 def get_preferred_provider_and_model() -> Tuple[Optional[AIProvider], Optional[Union[OpenAIModel, GeminiModel]]]:
     """Get user's preferred provider and model from preferences."""
     preferences = load_user_preferences()
-    available_providers = get_available_providers()
+    available_providers = ProviderRegistry.get_available_providers()
     
     # Get preferred provider
     preferred_provider_str = preferences.get("default_provider")
@@ -283,16 +264,13 @@ def get_preferred_provider_and_model() -> Tuple[Optional[AIProvider], Optional[U
     preferred_model = None
     
     if preferred_model_str:
-        try:
-            if preferred_provider == AIProvider.OPENAI:
-                preferred_model = OpenAIModel(preferred_model_str)
-            elif preferred_provider == AIProvider.GEMINI:
-                preferred_model = GeminiModel(preferred_model_str)
-        except ValueError:
+        # Use registry to get model enum
+        preferred_model = ProviderRegistry.get_model_enum(preferred_provider, preferred_model_str)
+        if preferred_model is None:
             # Fall back to default if model string is invalid
-            preferred_model = get_default_models().get(preferred_provider)
+            preferred_model = ProviderRegistry.get_default_model(preferred_provider)
     else:
-        preferred_model = get_default_models().get(preferred_provider)
+        preferred_model = ProviderRegistry.get_default_model(preferred_provider)
     
     return preferred_provider, preferred_model
 
@@ -310,30 +288,14 @@ def get_ai_client() -> OpenAI:
     provider, _ = get_preferred_provider_and_model()
     
     if not provider:
-        available = get_available_providers()
+        available = ProviderRegistry.get_available_providers()
         if not any(available.values()):
             raise AIError(
                 "No API keys found. Please set OPENAI_API_KEY or GEMINI_API_KEY environment variable, "
                 "or run 'aiwand setup' to configure your preferences."
             )
     
-    if provider == AIProvider.OPENAI:
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            raise AIError("OpenAI API key not found. Please set OPENAI_API_KEY environment variable.")
-        return OpenAI(api_key=api_key)
-    
-    elif provider == AIProvider.GEMINI:
-        api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
-            raise AIError("Gemini API key not found. Please set GEMINI_API_KEY environment variable.")
-        return OpenAI(
-            api_key=api_key,
-            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
-        )
-    
-    else:
-        raise AIError(f"Unsupported provider: {provider}")
+    return _get_cached_client(provider)
 
 
 def get_model_name() -> str:
@@ -362,7 +324,7 @@ def setup_user_preferences() -> None:
     print("🪄 AIWand Setup")
     print("=" * 40)
     
-    available_providers = get_available_providers()
+    available_providers = ProviderRegistry.get_available_providers()
     available_list = [p for p, available in available_providers.items() if available]
     
     if not available_list:
@@ -410,20 +372,16 @@ def setup_user_preferences() -> None:
             return
     
     # Choose model for the provider
-    supported_models = get_supported_models()[chosen_provider_enum]
+    supported_models = ProviderRegistry.get_models_for_provider(chosen_provider_enum)
     current_model_str = current_models.get(chosen_provider_enum.value)
-    default_model = get_default_models()[chosen_provider_enum]
+    default_model = ProviderRegistry.get_default_model(chosen_provider_enum)
     
     # Find current model enum or use default
     current_model_enum = default_model
     if current_model_str:
-        try:
-            if chosen_provider_enum == AIProvider.OPENAI:
-                current_model_enum = OpenAIModel(current_model_str)
-            elif chosen_provider_enum == AIProvider.GEMINI:
-                current_model_enum = GeminiModel(current_model_str)
-        except ValueError:
-            pass  # Keep default if current model is invalid
+        model_enum = ProviderRegistry.get_model_enum(chosen_provider_enum, current_model_str)
+        if model_enum is not None:
+            current_model_enum = model_enum
     
     print(f"\n🤖 Choose your default model for {chosen_provider_enum.value.title()}:")
     for i, model in enumerate(supported_models, 1):
@@ -473,7 +431,7 @@ def show_current_config() -> None:
     print("=" * 40)
     
     # Show available providers
-    available = get_available_providers()
+    available = ProviderRegistry.get_available_providers()
     print("📋 Available providers:")
     for provider, is_available in available.items():
         status = "✅" if is_available else "❌"
