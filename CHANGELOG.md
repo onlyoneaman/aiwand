@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2025-01-27
+
+### Enhanced
+- **Improved System Prompt Handling**: Enhanced `make_ai_request` function for better system prompt control
+  - Empty string system prompts (`""`) are now respected instead of using default
+  - Prevents duplicate system messages when messages already contain a system message
+  - Made `messages` parameter optional - can now use `system_prompt` alone for simple generation
+  - Added automatic user message when only system prompt is provided
+  - Better handling of edge cases in conversation building
+
+### Added
+- **New Test Examples**: Comprehensive test scripts for system prompt functionality
+  - `examples/test_system_prompt.py` - Full test suite with all scenarios
+  - `examples/simple_system_prompt_test.py` - Quick verification tests
+  - Real-world examples like Bhagavad Gita chat implementation
+
+### Documentation
+- **Updated API Reference**: Enhanced documentation for `make_ai_request` with new capabilities
+  - Added examples for system-prompt-only usage
+  - Documented new optional messages parameter behavior
+  - Added comprehensive usage patterns for different scenarios
+
 ## [0.4.1] - 2025-01-27
 
 ### Added

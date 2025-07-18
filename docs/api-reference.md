@@ -163,12 +163,12 @@ print(f"UUID1: {uuid}")  # e.g., "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
 
 ## Advanced Functions
 
-### `make_ai_request(messages, max_tokens=None, temperature=0.7, top_p=1.0, model=None, response_format=None, system_prompt=None)`
+### `make_ai_request(messages=None, max_tokens=None, temperature=0.7, top_p=1.0, model=None, response_format=None, system_prompt=None)`
 
 Low-level unified AI request function with automatic provider switching and advanced features.
 
 **Parameters:**
-- `messages` (list): List of message dictionaries with 'role' and 'content'
+- `messages` (list, optional): List of message dictionaries with 'role' and 'content'. If None or empty, a default user message will be added.
 - `max_tokens` (int, optional): Maximum tokens to generate
 - `temperature` (float): Response creativity (0.0-1.0, default: 0.7)
 - `top_p` (float): Nucleus sampling parameter (0.0-1.0, default: 1.0)
@@ -208,6 +208,56 @@ conversation = [
 response = aiwand.make_ai_request(
     messages=conversation,
     system_prompt="You are a patient programming tutor."
+)
+
+# Building conversation history with system message in messages array
+system_prompt = """
+You are Bhagavad Gita speaking timeless wisdom.
+Respond to queries with spiritual insight, calmness, clarity, and references to Gita teachings when relevant.
+Use a tone that is gentle, uplifting, and philosophical.
+Drive the conversation try to find more about the user, keep it like a conversation and guide user.
+Avoid being overly verbose or technical. Keep messages short.
+"""
+
+# Build history from previous conversation (e.g., from database)
+history = []
+# Simulate loading from database: messages = Message.get_by_thread_id(thread_id)
+previous_messages = [
+    {"sender": "user", "content": "I'm feeling lost in life"},
+    {"sender": "assistant", "content": "The soul is eternal, dear one. What troubles your heart?"},
+    {"sender": "user", "content": "I don't know my purpose"}
+]
+
+for msg in previous_messages:
+    history.append({
+        "role": "user" if msg["sender"] == "user" else "assistant", 
+        "content": msg["content"]
+    })
+
+# Always add the latest user message
+current_message = "How do I find inner peace?"
+history.append({"role": "user", "content": current_message})
+
+# Model expects system prompt first, then history
+model_messages = [{"role": "system", "content": system_prompt}] + history
+
+response = aiwand.make_ai_request(
+    model="gemini-2.0-flash",
+    messages=model_messages
+)
+
+# Simple generation using only system prompt (no messages needed)
+response = aiwand.make_ai_request(
+    system_prompt="You are a creative writer. Write a short story about a time traveler.",
+    temperature=0.8,
+    max_tokens=200
+)
+
+# Empty messages with system prompt
+response = aiwand.make_ai_request(
+    messages=[],
+    system_prompt="Generate 3 programming tips for beginners.",
+    temperature=0.5
 )
 ```
 

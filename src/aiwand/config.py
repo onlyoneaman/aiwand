@@ -88,7 +88,7 @@ def get_current_provider() -> Optional[AIProvider]:
 
 
 def make_ai_request(
-    messages: List[Dict[str, str]],
+    messages: Optional[List[Dict[str, str]]] = None,
     max_tokens: Optional[int] = None,
     temperature: float = 0.7,
     top_p: float = 1.0,
@@ -100,13 +100,15 @@ def make_ai_request(
     Unified wrapper for AI API calls that handles provider differences.
     
     Args:
-        messages: List of message dictionaries with 'role' and 'content'
+        messages: Optional list of message dictionaries with 'role' and 'content'.
+                 If None or empty, a default user message will be added.
         max_tokens: Maximum tokens to generate
         temperature: Response creativity (0.0 to 1.0)
         top_p: Nucleus sampling parameter
         model: Specific model to use (auto-selected if not provided)
         response_format: Response format specification
-        system_prompt: Optional system prompt to add at the beginning (uses default if None)
+        system_prompt: Optional system prompt to add at the beginning (uses default if None).
+                      Can be used alone without messages for simple generation.
         
     Returns:
         str: The AI response content
@@ -124,10 +126,32 @@ def make_ai_request(
         else:
             model_name = str(model)  # Convert enum to string if needed
         
-        # Prepare messages with system prompt (use default if none provided)
+        # Handle case where messages is None or empty
+        if messages is None:
+            messages = []
+        
+        # Prepare messages with system prompt
         final_messages = messages.copy()
-        prompt_to_use = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
-        final_messages.insert(0, {"role": "system", "content": prompt_to_use})
+        
+        # Check if messages already contain a system message
+        has_system_message = any(msg.get("role") == "system" for msg in final_messages)
+        
+        # Add system prompt only if:
+        # 1. No existing system message in messages
+        # 2. Either system_prompt was explicitly provided (including empty string) or we should use default
+        if not has_system_message:
+            if system_prompt is not None:
+                # Use provided system_prompt (even if empty string)
+                final_messages.insert(0, {"role": "system", "content": system_prompt})
+            else:
+                # Use default system prompt only when system_prompt is None
+                final_messages.insert(0, {"role": "system", "content": DEFAULT_SYSTEM_PROMPT})
+        
+        # If we only have a system message (no user messages), add a default user message
+        # This allows using system_prompt alone as a kind of generation prompt
+        has_user_message = any(msg.get("role") in ["user", "assistant"] for msg in final_messages)
+        if not has_user_message:
+            final_messages.append({"role": "user", "content": "Please respond based on your instructions."})
         
         # Prepare common parameters
         params = {
@@ -142,7 +166,7 @@ def make_ai_request(
         
         if response_format:
             params["response_format"] = response_format
-        
+
         # Choose API call method based on provider and features
         if current_provider == AIProvider.GEMINI and response_format:
             # For Gemini with structured output, use beta endpoint
