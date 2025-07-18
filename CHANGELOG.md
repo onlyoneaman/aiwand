@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2025-01-27
+
+### Added
+- **Advanced API Access**: Exposed `make_ai_request` function for direct AI requests
+  - Full access to unified AI request system with provider switching
+  - Built-in response format handling for structured output (JSON)
+  - Custom system prompt support with sensible defaults
+  - Complete conversation history management
+- **Enhanced System Prompts**: Function-specific system prompts for better AI behavior
+  - Specialized prompts for summarization, chat, and text generation
+  - Default system prompt for consistent AIWand identity
+  - Improved response quality and task-specific optimization
+- **New Utility Functions**: Additional configuration and inspection utilities
+  - `get_ai_client()` - Get configured AI client for current provider
+  - `get_current_provider()` - Check currently active provider
+  - `get_model_name()` - Get current model name from preferences
+  - `DEFAULT_SYSTEM_PROMPT` - Access to default system prompt constant
+- **Comprehensive Examples**: New example file `examples/direct_ai_request.py`
+  - Demonstrates advanced `make_ai_request` usage patterns
+  - Shows structured output, conversation handling, and model selection
+  - Includes best practices for different use cases
+
+### Changed
+- **Core Functions**: Updated to use specialized system prompts for better results
+- **API Documentation**: Enhanced with advanced functions and comprehensive examples
+- **Package Exports**: Organized exports with clear categories (core, config, types, helpers)
+
 ## [0.4.0] - 2025-01-27
 
 ### Added

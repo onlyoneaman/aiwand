@@ -161,6 +161,100 @@ uuid = aiwand.generate_uuid(version=1)
 print(f"UUID1: {uuid}")  # e.g., "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
 ```
 
+## Advanced Functions
+
+### `make_ai_request(messages, max_tokens=None, temperature=0.7, top_p=1.0, model=None, response_format=None, system_prompt=None)`
+
+Low-level unified AI request function with automatic provider switching and advanced features.
+
+**Parameters:**
+- `messages` (list): List of message dictionaries with 'role' and 'content'
+- `max_tokens` (int, optional): Maximum tokens to generate
+- `temperature` (float): Response creativity (0.0-1.0, default: 0.7)
+- `top_p` (float): Nucleus sampling parameter (0.0-1.0, default: 1.0)
+- `model` (str/enum, optional): Specific model to use (auto-selected if not provided)
+- `response_format` (dict, optional): Response format specification (e.g., {"type": "json_object"})
+- `system_prompt` (str, optional): Custom system prompt (uses default if None)
+
+**Returns:** AI response content (str)
+
+**Raises:**
+- `AIError`: If API call fails or no provider available
+
+**Example:**
+```python
+import aiwand
+
+# Basic request
+messages = [{"role": "user", "content": "Explain quantum computing"}]
+response = aiwand.make_ai_request(messages)
+
+# Advanced request with all options
+response = aiwand.make_ai_request(
+    messages=[{"role": "user", "content": "Analyze this data"}],
+    system_prompt="You are a data scientist. Provide structured analysis.",
+    response_format={"type": "json_object"},
+    temperature=0.3,
+    model=aiwand.OpenAIModel.GPT_4O,
+    max_tokens=500
+)
+
+# Conversation with history
+conversation = [
+    {"role": "user", "content": "Hi, I'm learning Python."},
+    {"role": "assistant", "content": "Great! Python is an excellent language..."},
+    {"role": "user", "content": "What should I learn first?"}
+]
+response = aiwand.make_ai_request(
+    messages=conversation,
+    system_prompt="You are a patient programming tutor."
+)
+```
+
+### `get_ai_client()`
+
+Get configured AI client for the current provider.
+
+**Returns:** OpenAI client configured for current provider
+
+**Raises:**
+- `AIError`: When no API provider is available
+
+### `get_current_provider()`
+
+Get the currently active AI provider.
+
+**Returns:** AIProvider enum (OPENAI or GEMINI) or None
+
+### `get_model_name()`
+
+Get the model name for the current provider based on user preferences.
+
+**Returns:** Model name string
+
+**Raises:**
+- `AIError`: When no provider is available
+
+### `DEFAULT_SYSTEM_PROMPT`
+
+Default system prompt used when none is specified.
+
+**Value:** `"You are AIWand, a helpful AI assistant that provides clear, accurate, and concise responses. You excel at text processing, analysis, and generation tasks."`
+
+**Example:**
+```python
+import aiwand
+
+# Check current default
+print(aiwand.DEFAULT_SYSTEM_PROMPT)
+
+# Use in custom request
+response = aiwand.make_ai_request(
+    messages=[{"role": "user", "content": "Hello"}],
+    system_prompt=aiwand.DEFAULT_SYSTEM_PROMPT
+)
+```
+
 ## Configuration Functions
 
 ### `setup_user_preferences()`
