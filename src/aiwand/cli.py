@@ -85,8 +85,8 @@ def main():
     
     # Classify command
     classify_parser = subparsers.add_parser('classify', help='Classify or grade text responses')
-    classify_parser.add_argument('input_text', help='The question, prompt, or context')
-    classify_parser.add_argument('output_text', help='The response to evaluate')
+    classify_parser.add_argument('question', help='The question, prompt, or context')
+    classify_parser.add_argument('answer', help='The response to evaluate')
     classify_parser.add_argument('--expected', default='', help='Expected response for comparison')
     classify_parser.add_argument('--choices', help='Choice scores as JSON (e.g., \'{"A":1.0,"B":0.5,"C":0.0}\')')
     classify_parser.add_argument('--prompt', help='Custom prompt template')
@@ -163,9 +163,9 @@ def main():
                     sys.exit(1)
             
             result = classify_text(
-                input_text=args.input_text,
-                output_text=args.output_text,
-                expected_text=args.expected,
+                question=args.question,
+                answer=args.answer,
+                expected=args.expected,
                 prompt_template=args.prompt or "",
                 choice_scores=choice_scores,
                 use_reasoning=not args.no_reasoning,

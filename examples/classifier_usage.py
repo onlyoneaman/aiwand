@@ -16,9 +16,9 @@ def main():
     print("=== Example 1: Binary Classification ===")
     
     result = aiwand.classify_text(
-        input_text="What is 2 + 2?",
-        output_text="4",
-        expected_text="4",
+        question="What is 2 + 2?",
+        answer="4",
+        expected="4",
         choice_scores={"CORRECT": 1.0, "INCORRECT": 0.0}
     )
     
@@ -31,8 +31,8 @@ def main():
     print("=== Example 2: Custom Grading Scale ===")
     
     result = aiwand.classify_text(
-        input_text="Write a haiku about spring",
-        output_text="Cherry blossoms bloom\nGentle breeze through ancient trees\nSpring awakens all",
+        question="Write a haiku about spring",
+        answer="Cherry blossoms bloom\nGentle breeze through ancient trees\nSpring awakens all",
         prompt_template="Evaluate this haiku based on structure (5-7-5 syllables) and imagery. Grade as: A (excellent), B (good), C (fair), D (poor)",
         choice_scores={"A": 1.0, "B": 0.75, "C": 0.5, "D": 0.25}
     )
@@ -47,7 +47,7 @@ def main():
     
     # Create a math grader
     math_grader = aiwand.create_classifier(
-        prompt_template="Grade this math answer. Input: {input}, Answer: {output}, Expected: {expected}",
+        prompt_template="Grade this math answer. Question: {question}, Answer: {answer}, Expected: {expected}",
         choice_scores={"CORRECT": 1.0, "PARTIAL": 0.5, "INCORRECT": 0.0},
         use_reasoning=True
     )
@@ -60,7 +60,7 @@ def main():
     ]
     
     for question, answer, expected in questions:
-        result = math_grader(question, answer, expected)
+        result = math_grader(question=question, answer=answer, expected=expected)
         print(f"Q: {question}")
         print(f"A: {answer} -> Score: {result.score} ({result.choice})")
         if result.reasoning:
@@ -73,9 +73,9 @@ def main():
     relevance_checker = aiwand.create_binary_classifier(criteria="relevance")
     
     result = relevance_checker(
-        input_text="What is the capital of France?",
-        output_text="Paris is the capital of France.",
-        expected_text="Paris"
+        question="What is the capital of France?",
+        answer="Paris is the capital of France.",
+        expected="Paris"
     )
     
     print(f"Relevance Score: {result.score}")
@@ -88,9 +88,9 @@ def main():
     quality_grader = aiwand.create_quality_classifier()
     
     result = quality_grader(
-        input_text="Explain photosynthesis",
-        output_text="Photosynthesis is the process by which plants use sunlight, water, and carbon dioxide to produce oxygen and energy in the form of sugar.",
-        expected_text=""  # No specific expected answer
+        question="Explain photosynthesis",
+        answer="Photosynthesis is the process by which plants use sunlight, water, and carbon dioxide to produce oxygen and energy in the form of sugar.",
+        expected=""  # No specific expected answer
     )
     
     print(f"Quality Score: {result.score}")
@@ -118,13 +118,13 @@ def main():
     """)
     
     print("\nYou can now simply do:")
-    print("result = aiwand.classify_text(input_text, output_text, expected_text, choice_scores={'A': 1.0, 'B': 0.0, 'C': 0.5})")
+    print("result = aiwand.classify_text(question, answer, expected, choice_scores={'A': 1.0, 'B': 0.0, 'C': 0.5})")
     
     # Show the simplified version in action
     simple_result = aiwand.classify_text(
-        input_text="What color is the sky?",
-        output_text="Blue",
-        expected_text="Blue",
+        question="What color is the sky?",
+        answer="Blue",
+        expected="Blue",
         choice_scores={"A": 1.0, "B": 0.0, "C": 0.5}
     )
     

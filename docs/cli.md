@@ -136,7 +136,7 @@ aiwand generate "Explain neural networks" --model gpt-4 --temperature 0.3
 Classify or grade text responses based on custom criteria.
 
 ```bash
-aiwand classify "input_text" "output_text" [options]
+aiwand classify "question" "answer" [options]
 ```
 
 **Options:**
@@ -155,7 +155,7 @@ aiwand classify "What is 2+2?" "4" --expected "4"
 aiwand classify "Write a haiku" "Roses are red..." --choices '{"A":1.0,"B":0.8,"C":0.6,"D":0.4,"F":0.0}'
 
 # With custom prompt
-aiwand classify "Math question" "Wrong answer" --prompt "Grade this: {input} -> {output}" --choices '{"CORRECT":1.0,"WRONG":0.0}'
+aiwand classify "Math question" "Wrong answer" --prompt "Grade this: {question} -> {answer}" --choices '{"CORRECT":1.0,"WRONG":0.0}'
 
 # Without reasoning
 aiwand classify "Question" "Answer" --no-reasoning

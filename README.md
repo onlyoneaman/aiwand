@@ -54,7 +54,7 @@ content = aiwand.make_ai_request(
 - ⚡ **No Post-Processing** - Get parsed objects directly, skip manual JSON handling
 - 🎯 **Unified API** - Same code works across different AI providers
 - 🔑 **Zero Configuration** - Works with just environment variables
-- 📱 **High-Level Functions** - Built-in summarization, chat, and text generation
+- 📱 **High-Level Functions** - Built-in summarization, chat, text generation, and classification
 
 ## 🚀 Quick Start
 
@@ -179,6 +179,18 @@ text = aiwand.generate_text(
     max_tokens=300,
     temperature=0.3  # Lower = more focused, Higher = more creative
 )
+
+# Text classification and grading
+grader = aiwand.create_binary_classifier(criteria="correctness")
+result = grader(question="What is 2+2?", answer="4", expected="4")
+print(f"Score: {result.score}, Choice: {result.choice}")
+
+# Custom classifier with multiple grades
+math_grader = aiwand.create_classifier(
+    prompt_template="Grade this math answer: {question} -> {answer}",
+    choice_scores={"CORRECT": 1.0, "PARTIAL": 0.5, "WRONG": 0.0}
+)
+result = math_grader(question="What is 5+3?", answer="8", expected="8")
 
 # Helper utilities for testing and development
 random_num = aiwand.generate_random_number(8)  # 8-digit number

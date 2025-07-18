@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.7] - 2025-01-27
+
+### 🧹 Simplified Classifier Interface
+- **Consistent Parameter Naming**: Streamlined classifier interface to use only `question`, `answer`, `expected`
+  - Removed confusing aliases: `input_text`, `output_text`, `expected_text` 
+  - Single, clear naming convention throughout the entire API
+  - Self-documenting function calls: `grader(question="...", answer="...", expected="...")`
+- **Updated Templates**: Changed prompt placeholders from `{input}/{output}` to `{question}/{answer}`
+- **CLI Improvements**: Updated `aiwand classify` command to use clear argument names
+- **Comprehensive Documentation**: Updated all examples, docs, and help text to use consistent naming
+- **Backward Compatibility**: Maintains functionality while providing much clearer interface
+
 ## [0.4.6] - 2025-01-27
 
 ### 🎯 New Classifier Functionality

@@ -28,9 +28,9 @@ class ClassifierResponse(BaseModel):
 
 
 def classify_text(
-    input_text: str,
-    output_text: str,
-    expected_text: str = "",
+    question: str,
+    answer: str,
+    expected: str = "",
     prompt_template: str = "",
     choice_scores: Optional[Dict[str, float]] = None,
     use_reasoning: bool = True,
@@ -44,10 +44,10 @@ def classify_text(
     that's inspired by autoevals but integrated with AIWand's provider system.
     
     Args:
-        input_text: The question, prompt, or context
-        output_text: The response to be evaluated
-        expected_text: The expected or reference response (optional)
-        prompt_template: Custom prompt template with {input}, {output}, {expected} placeholders
+        question: The question, prompt, or context
+        answer: The response to be evaluated
+        expected: The expected or reference response (optional)
+        prompt_template: Custom prompt template with {question}, {answer}, {expected} placeholders
         choice_scores: Mapping of choices to scores (e.g., {"A": 1.0, "B": 0.5, "C": 0.0})
         use_reasoning: Whether to include step-by-step reasoning
         model: Specific model to use
@@ -63,26 +63,26 @@ def classify_text(
     Examples:
         # Simple grading
         result = classify_text(
-            input_text="What is 2+2?",
-            output_text="4", 
-            expected_text="4",
+            question="What is 2+2?",
+            answer="4", 
+            expected="4",
             choice_scores={"CORRECT": 1.0, "INCORRECT": 0.0}
         )
         
         # Custom prompt with reasoning
         result = classify_text(
-            input_text="Write a haiku about spring",
-            output_text="Cherry blossoms bloom\\nGentle breeze through ancient trees\\nSpring awakens all",
+            question="Write a haiku about spring",
+            answer="Cherry blossoms bloom\\nGentle breeze through ancient trees\\nSpring awakens all",
             prompt_template="Evaluate this haiku based on structure and imagery. Grade as: A (excellent), B (good), C (fair), D (poor)",
             choice_scores={"A": 1.0, "B": 0.75, "C": 0.5, "D": 0.25},
             use_reasoning=True
         )
     """
     # Validate inputs
-    if not input_text.strip():
-        raise ValueError("input_text cannot be empty")
-    if not output_text.strip():
-        raise ValueError("output_text cannot be empty")
+    if not question.strip():
+        raise ValueError("question cannot be empty")
+    if not answer.strip():
+        raise ValueError("answer cannot be empty")
     
     # Default choice scores if not provided
     if choice_scores is None:
@@ -93,25 +93,25 @@ def classify_text(
     
     # Default prompt template if not provided
     if not prompt_template.strip():
-        if expected_text.strip():
+        if expected.strip():
             prompt_template = """
 Evaluate the given response by comparing it to the expected answer.
 
-Question/Input: {input}
-Given Response: {output}
-Expected Response: {expected}
+Question: {question}
+Given Answer: {answer}
+Expected Answer: {expected}
 
-Please evaluate how well the given response matches the expected response.
+Please evaluate how well the given answer matches the expected answer.
 Grade the response as: {choices}
 """
         else:
             prompt_template = """
-Evaluate the quality of the given response to the input.
+Evaluate the quality of the given answer to the question.
 
-Input: {input}
-Response: {output}
+Question: {question}
+Answer: {answer}
 
-Please evaluate the quality and appropriateness of the response.
+Please evaluate the quality and appropriateness of the answer.
 Grade the response as: {choices}
 """
     
@@ -129,9 +129,9 @@ Grade the response as: {choices}
     
     # Format the prompt
     formatted_prompt = prompt_template.format(
-        input=input_text,
-        output=output_text,
-        expected=expected_text,
+        question=question,
+        answer=answer,
+        expected=expected,
         choices=choices_text
     )
     
@@ -225,22 +225,28 @@ def create_classifier(
             use_reasoning=True
         )
         
-        # Use it multiple times
-        result1 = grader("2+2", "4", "4")
-        result2 = grader("3+3", "6", "6")
+        # Use it multiple times with clear keyword arguments
+        result1 = grader(question="2+2", answer="4", expected="4")
+        result2 = grader(question="3+3", answer="6", expected="6")
     """
     def classifier(
-        input_text: str,
-        output_text: str,
-        expected_text: str = "",
+        question: str,
+        answer: str,
+        expected: str = "",
         **kwargs
     ) -> ClassifierResponse:
-        """Classify text using the predefined settings."""
+        """Classify text using the predefined settings.
+        
+        Args:
+            question: The question, prompt, or context
+            answer: The response to evaluate
+            expected: Expected response (optional)
+        """
         # Allow overriding settings via kwargs
         return classify_text(
-            input_text=input_text,
-            output_text=output_text,
-            expected_text=expected_text,
+            question=question,
+            answer=answer,
+            expected=expected,
             prompt_template=prompt_template,
             choice_scores=choice_scores,
             use_reasoning=use_reasoning,
@@ -269,13 +275,13 @@ def create_binary_classifier(
         Binary classifier function
     """
     prompt_template = f"""
-Evaluate the {criteria} of the response.
+Evaluate the {criteria} of the answer.
 
-Input: {{input}}
-Response: {{output}}
+Question: {{question}}
+Answer: {{answer}}
 Expected: {{expected}}
 
-Is the response correct and appropriate? Grade as CORRECT or INCORRECT.
+Is the answer correct and appropriate? Grade as CORRECT or INCORRECT.
 """
     
     return create_classifier(
@@ -302,10 +308,10 @@ def create_quality_classifier(
         Quality classifier function
     """
     prompt_template = """
-Evaluate the overall quality of the response.
+Evaluate the overall quality of the answer.
 
-Input: {input}
-Response: {output}
+Question: {question}
+Answer: {answer}
 Expected: {expected}
 
 Consider factors like accuracy, completeness, clarity, and appropriateness.

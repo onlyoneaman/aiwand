@@ -180,9 +180,9 @@ aiwand.generate_uuid() -> str
 
 ```python
 aiwand.classify_text(
-    input_text: str,
-    output_text: str,
-    expected_text: str = "",
+    question: str,
+    answer: str,
+    expected: str = "",
     prompt_template: str = "",
     choice_scores: Optional[Dict[str, float]] = None,
     use_reasoning: bool = True,
@@ -193,10 +193,10 @@ aiwand.classify_text(
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `input_text` | `str` | Required | The question, prompt, or context |
-| `output_text` | `str` | Required | The response to be evaluated |
-| `expected_text` | `str` | `""` | Expected/reference response (optional) |
-| `prompt_template` | `str` | `""` | Custom prompt with {input}, {output}, {expected} |
+| `question` | `str` | Required | The question, prompt, or context |
+| `answer` | `str` | Required | The response to be evaluated |
+| `expected` | `str` | `""` | Expected/reference response (optional) |
+| `prompt_template` | `str` | `""` | Custom prompt with {question}, {answer}, {expected} |
 | `choice_scores` | `Dict[str, float]` | `{"CORRECT": 1.0, "INCORRECT": 0.0}` | Choice-to-score mapping |
 | `use_reasoning` | `bool` | `True` | Include step-by-step reasoning |
 | `model` | `ModelType` | `None` | Specific model to use |
@@ -253,25 +253,25 @@ class ClassifierResponse(BaseModel):
 ```python
 # Simple binary classification
 result = aiwand.classify_text(
-    input_text="What is 2+2?",
-    output_text="4",
-    expected_text="4",
+    question="What is 2+2?",
+    answer="4",
+    expected="4",
     choice_scores={"CORRECT": 1.0, "INCORRECT": 0.0}
 )
 
 # Custom grading scale
 result = aiwand.classify_text(
-    input_text="Write a haiku",
-    output_text="Roses are red...",
+    question="Write a haiku",
+    answer="Roses are red...",
     choice_scores={"A": 1.0, "B": 0.8, "C": 0.6, "D": 0.4, "F": 0.0}
 )
 
 # Reusable classifier
 math_grader = aiwand.create_classifier(
-    prompt_template="Grade this math answer: {input} -> {output}",
+    prompt_template="Grade this math answer: {question} -> {answer}",
     choice_scores={"CORRECT": 1.0, "PARTIAL": 0.5, "WRONG": 0.0}
 )
-result = math_grader("2+2", "4", "4")
+result = math_grader(question="2+2", answer="4", expected="4")
 
 # Predefined classifiers
 checker = aiwand.create_binary_classifier(criteria="relevance")

@@ -73,7 +73,7 @@ def main():
     """)
     
     print("✨ Now you can simply call:")
-    print("result = aiwand.classify_text(input_text, output_text, expected_text, choice_scores={'A': 1.0, 'B': 0.0, 'C': 0.5})")
+    print("result = aiwand.classify_text(question, answer, expected, choice_scores={'A': 1.0, 'B': 0.0, 'C': 0.5})")
     print()
     
     print("📋 Ready to use! Set up your API keys with 'aiwand setup' to start classifying.")
