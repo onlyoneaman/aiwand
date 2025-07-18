@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.5] - 2025-01-27
+
+### 📚 Major Documentation Update
+- **Enhanced README**: Complete rewrite focusing on simple migration value proposition
+  - Lead with drop-in replacement story for existing AI code
+  - Emphasize automatic Pydantic parsing with no post-processing needed
+  - Showcase unified API working seamlessly across OpenAI and Gemini
+  - Position `make_ai_request` as the core functionality
+  - Add comprehensive examples for structured output handling
+- **Migration-Focused Messaging**: Clear before/after code examples showing one-line changes
+- **Improved Developer Experience**: Better organized sections with practical examples
+- **Value Proposition Clarity**: Highlight key benefits of unified AI interface
+
 ## [0.4.4] - 2025-01-27
 
 ### ✨ Enhanced Provider Intelligence
