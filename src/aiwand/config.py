@@ -58,12 +58,16 @@ def _get_cached_client(provider: AIProvider) -> OpenAI:
     return _client_cache[provider]
 
 
-def _resolve_provider_model_client(model: Optional[ModelType] = None) -> Tuple[AIProvider, str, OpenAI]:
+def _resolve_provider_model_client(
+    model: Optional[ModelType] = None, 
+    provider: Optional[Union[AIProvider, str]] = None
+) -> Tuple[AIProvider, str, OpenAI]:
     """
-    Resolve provider, model name, and client based on input model or preferences.
+    Resolve provider, model name, and client based on input model, provider, or preferences.
     
     Args:
         model: Optional model to use for inference
+        provider: Optional provider to use explicitly (AIProvider enum or string)
         
     Returns:
         Tuple of (provider, model_name, client)
@@ -71,23 +75,44 @@ def _resolve_provider_model_client(model: Optional[ModelType] = None) -> Tuple[A
     Raises:
         AIError: When no provider is available
     """
+    # Handle explicit provider specification
+    if provider is not None:
+        # Convert string to AIProvider enum if needed
+        if isinstance(provider, str):
+            try:
+                provider_enum = AIProvider(provider.lower())
+            except ValueError:
+                raise AIError(f"Unknown provider: {provider}. Supported providers: {[p.value for p in AIProvider]}")
+        else:
+            provider_enum = provider
+        
+        # Use explicit provider with provided model or get default model for provider
+        if model is not None:
+            return provider_enum, str(model), _get_cached_client(provider_enum)
+        else:
+            default_model = ProviderRegistry.get_default_model(provider_enum)
+            if not default_model:
+                raise AIError(f"No default model available for provider: {provider_enum}")
+            return provider_enum, str(default_model), _get_cached_client(provider_enum)
+    
+    # No explicit provider, try to infer from model
     if model is not None:
-        # Try to infer provider from model
+        # Try to infer provider from model (now includes pattern matching)
         inferred_provider = ProviderRegistry.infer_provider_from_model(model)
         if inferred_provider is not None:
             return inferred_provider, str(model), _get_cached_client(inferred_provider)
         else:
             # Model provided but can't infer provider, use preferences with provided model
-            provider, _ = get_preferred_provider_and_model()
-            if not provider:
+            fallback_provider, _ = get_preferred_provider_and_model()
+            if not fallback_provider:
                 raise AIError("No AI provider available. Please set up your API keys.")
-            return provider, str(model), _get_cached_client(provider)
+            return fallback_provider, str(model), _get_cached_client(fallback_provider)
     else:
-        # No model provided, use current preferences
-        provider, preferred_model = get_preferred_provider_and_model()
-        if not provider or not preferred_model:
+        # No model or provider provided, use current preferences
+        pref_provider, preferred_model = get_preferred_provider_and_model()
+        if not pref_provider or not preferred_model:
             raise AIError("No AI provider available. Please set up your API keys and run 'aiwand setup'.")
-        return provider, str(preferred_model), _get_cached_client(provider)
+        return pref_provider, str(preferred_model), _get_cached_client(pref_provider)
 
 
 def make_ai_request(
@@ -96,6 +121,7 @@ def make_ai_request(
     temperature: float = 0.7,
     top_p: float = 1.0,
     model: Optional[ModelType] = None,
+    provider: Optional[Union[AIProvider, str]] = None,
     response_format: Optional[Dict[str, Any]] = None,
     system_prompt: Optional[str] = None
 ) -> str:
@@ -109,6 +135,8 @@ def make_ai_request(
         temperature: Response creativity (0.0 to 1.0)
         top_p: Nucleus sampling parameter
         model: Specific model to use (auto-selected if not provided)
+        provider: Optional provider to use explicitly (AIProvider enum or string like 'openai', 'gemini').
+                 Overrides model-based inference when specified.
         response_format: Response format specification
         system_prompt: Optional system prompt to add at the beginning (uses default if None).
                       Can be used alone without messages for simple generation.
@@ -121,7 +149,7 @@ def make_ai_request(
     """
     try:
         # Resolve provider, model, and client
-        current_provider, model_name, client = _resolve_provider_model_client(model)
+        current_provider, model_name, client = _resolve_provider_model_client(model, provider)
         
         # Handle case where messages is None or empty
         if messages is None:

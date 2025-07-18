@@ -154,15 +154,23 @@ class ProviderRegistry:
         Returns:
             AIProvider if model belongs to a known provider, None otherwise
         """
-        model_str = str(model)
+        model_str = str(model).lower()
         
-        # Check each provider's models
+        # First, check exact matches in our registry
         for provider, model_class in cls.PROVIDER_MODELS.items():
             try:
-                model_class(model_str)
+                model_class(str(model))  # Use original case for enum lookup
                 return provider
             except ValueError:
                 continue
+        
+        # If exact match fails, use pattern-based inference as fallback
+        if "gemini" in model_str:
+            return AIProvider.GEMINI
+        
+        # Could add more patterns here:
+        # if "claude" in model_str or "opus" in model_str:
+        #     return AIProvider.ANTHROPIC  # When we add Anthropic support
         
         return None
     
