@@ -5,6 +5,10 @@
 [![PyPI version](https://img.shields.io/pypi/v/aiwand.svg)](https://pypi.org/project/aiwand/)
 [![Python versions](https://img.shields.io/pypi/pyversions/aiwand.svg)](https://pypi.org/project/aiwand/)
 [![License](https://img.shields.io/pypi/l/aiwand.svg)](https://github.com/onlyoneaman/aiwand/blob/main/LICENSE)
+[![Coverage Status](https://img.shields.io/badge/coverage-100%25-success)](https://github.com/onlyoneaman/aiwand/actions?query=workflow%3ACI)
+[![Downloads](https://pepy.tech/badge/aiwand)](https://pepy.tech/project/aiwand)
+[![Downloads](https://pepy.tech/badge/aiwand/month)](https://pepy.tech/project/aiwand/month)
+[![Downloads](https://pepy.tech/badge/aiwand/week)](https://pepy.tech/project/aiwand/week)
 
 ## 🎯 **Two Powerful Features, One Simple API**
 
@@ -232,5 +236,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
+
+Star this repo if you find it useful!
 
 **Made with ❤️ by [Aman Kumar](https://x.com/onlyoneaman)** 
