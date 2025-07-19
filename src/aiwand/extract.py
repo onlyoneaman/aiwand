@@ -15,6 +15,7 @@ def extract(
     model: Optional[ModelType] = None,
     temperature: float = 0.7,
     response_format: Optional[BaseModel] = None,
+    additional_system_instructions: Optional[str] = None,
 ) -> Union[str, Dict[str, Any]]:
     """
     Extract structured data from content and/or links using AI.
@@ -30,6 +31,7 @@ def extract(
         model: Specific AI model to use (auto-selected if not provided)
         temperature: Response creativity (0.0 to 1.0, default 0.7)
         response_format: Pydantic model class for structured output.
+        additional_system_instructions: Any other relavant instructions to help the extraction.
         
     Returns:
         Union[str, Dict[str, Any]]: Extracted data.
@@ -112,7 +114,8 @@ def extract(
         model=model,
         temperature=temperature,
         response_format=response_format,
-        user_prompt=user_prompt
+        user_prompt=user_prompt,
+        additional_system_instructions=additional_system_instructions,
     )
     if response_format:
         return result    
