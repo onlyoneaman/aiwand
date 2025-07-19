@@ -125,7 +125,8 @@ def make_ai_request(
     provider: Optional[Union[AIProvider, str]] = None,
     response_format: Optional[Dict[str, Any]] = None,
     system_prompt: Optional[str] = None,
-    user_prompt: Optional[str] = None
+    user_prompt: Optional[str] = None,
+    additional_system_instructions: Optional[str] = None
 ) -> str:
     """
     Unified wrapper for AI API calls that handles provider differences.
@@ -144,6 +145,8 @@ def make_ai_request(
                       Can be used alone without messages for simple generation.
         user_prompt: Optional user message to add at the end of the messages list.
                      Can be used in parallel with or without existing messages.
+        additional_system_instructions: Optional additional instructions to append to the system prompt.
+                                       If provided, will be added to the end of the system message with proper spacing.
     Returns:
         str: The AI response content
         
@@ -174,6 +177,17 @@ def make_ai_request(
             else:
                 # Use default system prompt only when system_prompt is None
                 final_messages.insert(0, {"role": "system", "content": DEFAULT_SYSTEM_PROMPT})
+
+        # Append additional system instructions if provided
+        if additional_system_instructions is not None:
+            # Find the system message and append additional instructions
+            for msg in final_messages:
+                if msg.get("role") == "system":
+                    current_content = msg["content"]
+                    # Add proper spacing if current content exists and doesn't end with whitespace
+                    if current_content:
+                        msg["content"] = f"{current_content}\n\n{additional_system_instructions}"
+                    break
 
         if user_prompt is not None:
             final_messages.append({"role": "user", "content": user_prompt})

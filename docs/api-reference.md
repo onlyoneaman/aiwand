@@ -208,7 +208,7 @@ print(f"UUID1: {uuid}")  # e.g., "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
 
 ## Advanced Functions
 
-### `make_ai_request(messages=None, max_tokens=None, temperature=0.7, top_p=1.0, model=None, provider=None, response_format=None, system_prompt=None, user_prompt=None)`
+### `make_ai_request(messages=None, max_tokens=None, temperature=0.7, top_p=1.0, model=None, provider=None, response_format=None, system_prompt=None, user_prompt=None, additional_system_instructions=None)`
 
 Low-level unified AI request function with automatic provider switching and advanced features.
 
@@ -222,6 +222,7 @@ Low-level unified AI request function with automatic provider switching and adva
 - `response_format` (dict, optional): Response format specification (e.g., {"type": "json_object"})
 - `system_prompt` (str, optional): Custom system prompt (uses default if None)
 - `user_prompt` (str, optional): User message to append to the messages list. Can be used with or without existing messages.
+- `additional_system_instructions` (str, optional): Additional instructions to append to the system prompt. If provided, will be added to the end of the system message with proper spacing.
 
 **Returns:** AI response content (str)
 
@@ -317,6 +318,30 @@ response = aiwand.make_ai_request(
     messages=[],
     system_prompt="Generate 3 programming tips for beginners.",
     temperature=0.5
+)
+
+# Using additional_system_instructions to extend system prompt
+response = aiwand.make_ai_request(
+    system_prompt="You are a helpful programming tutor.",
+    additional_system_instructions="Always provide code examples and explain each step clearly.",
+    user_prompt="How do I create a Python class?"
+)
+
+# Adding context-specific instructions to existing conversation
+conversation = [
+    {"role": "user", "content": "I'm learning data science"},
+    {"role": "assistant", "content": "Great! Data science combines statistics, programming, and domain expertise..."}
+]
+response = aiwand.make_ai_request(
+    messages=conversation,
+    user_prompt="What should I learn next?",
+    additional_system_instructions="Focus on practical, hands-on learning resources and provide specific next steps."
+)
+
+# Extending default system prompt with specialized instructions
+response = aiwand.make_ai_request(
+    user_prompt="Write a function to calculate fibonacci numbers",
+    additional_system_instructions="Write clean, well-documented code with error handling and include unit tests."
 )
 ```
 
