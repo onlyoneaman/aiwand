@@ -8,12 +8,17 @@ registry-based system that makes it easy to add new providers and models.
 import os
 from enum import Enum
 from typing import Dict, List, Union, Optional, Type, Any
-
+from pydantic import BaseModel
 
 
 class AIError(Exception):
     """Custom exception for AI-related errors."""
     pass
+
+
+class LinkContent(BaseModel):
+    url: str
+    content: str
 
 
 class AIProvider(Enum):

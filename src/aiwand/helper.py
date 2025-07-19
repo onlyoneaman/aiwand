@@ -10,7 +10,10 @@ import re
 import urllib.request
 import urllib.parse
 from pathlib import Path
-from typing import Optional, Literal
+from typing import Optional, Literal, List
+
+from .utils import is_local_file
+from .models import LinkContent
 
 
 def generate_random_number(length: int = 6) -> str:
@@ -269,6 +272,40 @@ def read_file_content(file_path: str, encoding: str = 'utf-8') -> str:
             )
     except PermissionError:
         raise PermissionError(f"Permission denied reading file: {file_path}")
+
+
+def fetch_all_data(
+    links: List[str],
+    timeout: int = 30
+) -> List[LinkContent]:
+    """
+    Fetch content from multiple URLs with proper error handling.
+    Args:
+        links (List[str]): List of URLs to fetch content from
+    Returns:
+        List[LinkContent]: List of LinkContent        
+    Raises:
+        ValueError: If the URL is invalid
+        urllib.error.URLError: If the URL can't be reached
+        urllib.error.HTTPError: If the server returns an error status
+    """
+    all_data = []
+    for link in links:
+        try:
+            local_link = is_local_file(link)
+            if local_link:
+                data = read_file_content(link)
+            else:
+                data = fetch_data(url=link, timeout=timeout)
+            link_data = LinkContent(
+                url=link,
+                content=data
+            )
+            all_data.append(link_data)
+        except Exception as e:
+            print(f"Error fetching content from {link}: {str(e)}")
+            continue
+    return all_data
 
 
 def fetch_data(url: str, timeout: int = 30) -> str:

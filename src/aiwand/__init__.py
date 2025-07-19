@@ -35,6 +35,7 @@ from .helper import (
     # File and URL helpers (still used internally)
     read_file_content,
     fetch_data,
+    fetch_all_data,
     get_file_extension,
     is_text_file,
 )
@@ -74,6 +75,7 @@ __all__ = [
     "generate_uuid",
     "read_file_content",
     "fetch_data",
+    "fetch_all_data",
     "get_file_extension",
     "is_text_file",
     

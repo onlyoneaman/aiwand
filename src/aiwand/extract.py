@@ -5,9 +5,8 @@ Extract functionality for AIWand - structured data extraction from any content
 from typing import Optional, List, Union, Any, Dict
 from pydantic import BaseModel
 from .config import call_ai, ModelType
-from .models import AIError
-from .helper import read_file_content, fetch_data
-from .utils import convert_to_string, string_to_json, is_local_file
+from .helper import fetch_all_data
+from .utils import convert_to_string, string_to_json
 
 
 def extract(
@@ -77,16 +76,11 @@ def extract(
             all_content.append(f"=== Main Content ===\n{content_str}")
     
     if links:
-        for i, link in enumerate(links, 1):
-            try:
-                if not is_local_file(link):
-                    link_content = fetch_data(link)
-                    all_content.append(f"=== Link {i}: {link} ===\n{link_content}")
-                else:
-                    file_content = read_file_content(link)
-                    all_content.append(f"=== File {i}: {link} ===\n{file_content}")
-            except Exception as e:
-                raise AIError(f"Failed to process link '{link}': {str(e)}")
+        links_data = fetch_all_data(links=links)
+        for link_data in links_data:
+            url = link_data.url
+            data = link_data.content
+            all_content.append(f"=== URL {url} ===\n{data}\n")
     
     if not all_content:
         raise ValueError("No valid content found to process")

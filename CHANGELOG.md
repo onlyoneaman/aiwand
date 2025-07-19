@@ -5,7 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.10] - 2025-01-28
+## [0.4.11] - 2025-07-20
+- Minor Changes
+- Changed fetch_url_content -> fetch_data
+- Added *fetch_all_data*
+
+## [0.4.10] - 2025-07-20
 
 ### 🔧 Core Improvements
 - **API Refactoring**: Replaced legacy `make_ai_request` with unified `call_ai` function
@@ -19,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enhanced code structure and readability
   - Improved internal function organization
 
-## [0.4.8] - 2025-01-27
+## [0.4.8] - 2025-07-20
 
 ### 🎯 New Data Extraction Functionality
 - **Structured Data Extraction**: Complete extract system for processing any content with AI
@@ -47,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Clean parameter interface without deprecated options
 - **Updated Examples**: Fixed all demo files and tests to use correct parameter structure
 
-## [0.4.7] - 2025-01-27
+## [0.4.7] - 2025-07-20
 
 ### 🧹 Simplified Classifier Interface
 - **Consistent Parameter Naming**: Streamlined classifier interface to use only `question`, `answer`, `expected`
@@ -59,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Comprehensive Documentation**: Updated all examples, docs, and help text to use consistent naming
 - **Backward Compatibility**: Maintains functionality while providing much clearer interface
 
-## [0.4.6] - 2025-01-27
+## [0.4.6] - 2025-07-20
 
 ### 🎯 New Classifier Functionality
 - **Text Classification & Grading**: Complete classifier system inspired by autoevals
@@ -76,7 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Comprehensive Documentation**: Added classifier section to DEV-README.md and CLI docs
 - **Examples**: Created `classifier_usage.py` and `classifier_test_basic.py` examples
 
-## [0.4.5] - 2025-01-27
+## [0.4.5] - 2025-07-20
 
 ### 📚 Major Documentation Update
 - **Enhanced README**: Complete rewrite focusing on simple migration value proposition
@@ -89,7 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Improved Developer Experience**: Better organized sections with practical examples
 - **Value Proposition Clarity**: Highlight key benefits of unified AI interface
 
-## [0.4.4] - 2025-01-27
+## [0.4.4] - 2025-07-19
 
 ### ✨ Enhanced Provider Intelligence
 - **Smart Pattern-Based Inference**: Added fallback provider detection for unknown models
@@ -115,7 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   3. Explicit provider parameter (new)
   4. User preference fallback (existing)
 
-## [0.4.3] - 2025-01-27
+## [0.4.3] - 2025-07-19
 
 ### 🚀 Major Architecture Refactor
 - **Complete Module Reorganization**: Implemented clean separation of concerns across modules
@@ -157,7 +162,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Seamless Migration**: No changes required for existing user code
 - **Enhanced Functionality**: New capabilities added without breaking changes
 
-## [0.4.2] - 2025-01-27
+## [0.4.2] - 2025-07-19
 
 ### Enhanced
 - **Improved System Prompt Handling**: Enhanced `call_ai` function for better system prompt control
@@ -179,7 +184,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Documented new optional messages parameter behavior
   - Added comprehensive usage patterns for different scenarios
 
-## [0.4.1] - 2025-01-27
+## [0.4.1] - 2025-07-18 
 
 ### Added
 - **Advanced API Access**: Exposed `call_ai` function for direct AI requests
