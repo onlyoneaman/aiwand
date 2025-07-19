@@ -23,7 +23,7 @@ def test_imports():
         
         # Test helper functions
         from aiwand import (
-            read_file_content, fetch_url_content,
+            read_file_content, fetch_data,
             get_file_extension, is_text_file
         )
         print("✓ helper functions imported")

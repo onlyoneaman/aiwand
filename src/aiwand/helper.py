@@ -271,7 +271,7 @@ def read_file_content(file_path: str, encoding: str = 'utf-8') -> str:
         raise PermissionError(f"Permission denied reading file: {file_path}")
 
 
-def fetch_url_content(url: str, timeout: int = 30) -> str:
+def fetch_data(url: str, timeout: int = 30) -> str:
     """
     Fetch content from a URL with proper error handling.
     
@@ -288,7 +288,7 @@ def fetch_url_content(url: str, timeout: int = 30) -> str:
         urllib.error.HTTPError: If the server returns an error status
         
     Examples:
-        >>> content = fetch_url_content("https://example.com")
+        >>> content = fetch_data("https://example.com")
         >>> print(f"Page content: {content[:100]}...")
     """
     try:

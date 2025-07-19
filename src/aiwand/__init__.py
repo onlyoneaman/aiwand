@@ -34,7 +34,7 @@ from .helper import (
     generate_uuid,
     # File and URL helpers (still used internally)
     read_file_content,
-    fetch_url_content,
+    fetch_data,
     get_file_extension,
     is_text_file,
 )
@@ -73,7 +73,7 @@ __all__ = [
     "generate_random_number",
     "generate_uuid",
     "read_file_content",
-    "fetch_url_content",
+    "fetch_data",
     "get_file_extension",
     "is_text_file",
     

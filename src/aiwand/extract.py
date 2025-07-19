@@ -6,7 +6,7 @@ from typing import Optional, List, Union, Any, Dict
 from pydantic import BaseModel
 from .config import call_ai, ModelType
 from .models import AIError
-from .helper import read_file_content, fetch_url_content
+from .helper import read_file_content, fetch_data
 from .utils import convert_to_string, string_to_json, is_local_file
 
 
@@ -80,7 +80,7 @@ def extract(
         for i, link in enumerate(links, 1):
             try:
                 if not is_local_file(link):
-                    link_content = fetch_url_content(link)
+                    link_content = fetch_data(link)
                     all_content.append(f"=== Link {i}: {link} ===\n{link_content}")
                 else:
                     file_content = read_file_content(link)
