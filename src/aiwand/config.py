@@ -110,7 +110,7 @@ def _resolve_provider_model_client(
         return pref_provider, str(preferred_model), _get_cached_client(pref_provider)
 
 
-def make_ai_request(
+def call_ai(
     messages: Optional[List[Dict[str, str]]] = None,
     max_tokens: Optional[int] = None,
     temperature: float = 0.7,

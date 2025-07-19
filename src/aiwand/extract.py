@@ -4,7 +4,7 @@ Extract functionality for AIWand - structured data extraction from any content
 
 from typing import Optional, List, Union, Any, Dict
 from pydantic import BaseModel
-from .config import make_ai_request, ModelType
+from .config import call_ai, ModelType
 from .models import AIError
 from .helper import read_file_content, fetch_url_content
 from .utils import convert_to_string, string_to_json, is_local_file
@@ -111,7 +111,7 @@ def extract(
     
     user_prompt += f"Content to extract from:\n{combined_content}"
     
-    result = make_ai_request(
+    result = call_ai(
         system_prompt=system_prompt,
         model=model,
         temperature=temperature,

@@ -8,7 +8,7 @@ text responses based on custom criteria and choice scores.
 from typing import Dict, Optional, Any, Union
 from pydantic import BaseModel, Field
 
-from .config import make_ai_request, AIError, ModelType
+from .config import call_ai, AIError, ModelType
 from .models import AIProvider
 
 
@@ -146,7 +146,7 @@ Your grade must be exactly one of the specified options."""
     
     try:
         # Use structured output
-        result = make_ai_request(
+        result = call_ai(
             system_prompt=system_prompt,
             response_format=DynamicClassifierModel,
             model=model,

@@ -69,7 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Lead with drop-in replacement story for existing AI code
   - Emphasize automatic Pydantic parsing with no post-processing needed
   - Showcase unified API working seamlessly across OpenAI and Gemini
-  - Position `make_ai_request` as the core functionality
+  - Position `call_ai` as the core functionality
   - Add comprehensive examples for structured output handling
 - **Migration-Focused Messaging**: Clear before/after code examples showing one-line changes
 - **Improved Developer Experience**: Better organized sections with practical examples
@@ -82,11 +82,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Models containing "gemini" automatically use Gemini provider (e.g., `gemini-2.5-flash-preview-05-20`)
   - Works with mixed case and custom model names
   - Graceful handling of new models before they're added to registry
-- **Explicit Provider Parameter**: New `provider` parameter in `make_ai_request()`
+- **Explicit Provider Parameter**: New `provider` parameter in `call_ai()`
   - Accept AIProvider enum or string values (`'openai'`, `'gemini'`)
   - Overrides automatic model-based inference when specified
   - Useful for custom models or explicit provider control
-  - Example: `make_ai_request(model="custom-model", provider="gemini")`
+  - Example: `call_ai(model="custom-model", provider="gemini")`
 
 ### 🔧 Improved Error Handling
 - **Better Unknown Model Support**: Enhanced fallback behavior for unrecognized models
@@ -105,7 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🚀 Major Architecture Refactor
 - **Complete Module Reorganization**: Implemented clean separation of concerns across modules
-  - `config.py`: Focused on core AI functionality (`make_ai_request`, client management)
+  - `config.py`: Focused on core AI functionality (`call_ai`, client management)
   - `preferences.py`: Dedicated configuration and user preference management
   - `setup.py`: Interactive setup and configuration display utilities
   - `models.py`: Extensible provider and model registry system
@@ -115,7 +115,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Centralized provider configuration (API keys, base URLs, default models)
   - Easy addition of new providers with minimal code changes
   - Self-documenting system showing all capabilities at runtime
-- **Smart Provider Inference**: Enhanced `make_ai_request` with model-first provider detection
+- **Smart Provider Inference**: Enhanced `call_ai` with model-first provider detection
   - Automatically detects provider from model name (e.g., `gemini-2.0-flash-lite` → Gemini)
   - Falls back to user preferences when model is unspecified or unknown
   - Works with all registered models across all providers
@@ -146,7 +146,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.2] - 2025-01-27
 
 ### Enhanced
-- **Improved System Prompt Handling**: Enhanced `make_ai_request` function for better system prompt control
+- **Improved System Prompt Handling**: Enhanced `call_ai` function for better system prompt control
   - Empty string system prompts (`""`) are now respected instead of using default
   - Prevents duplicate system messages when messages already contain a system message
   - Made `messages` parameter optional - can now use `system_prompt` alone for simple generation
@@ -160,7 +160,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Real-world examples like Bhagavad Gita chat implementation
 
 ### Documentation
-- **Updated API Reference**: Enhanced documentation for `make_ai_request` with new capabilities
+- **Updated API Reference**: Enhanced documentation for `call_ai` with new capabilities
   - Added examples for system-prompt-only usage
   - Documented new optional messages parameter behavior
   - Added comprehensive usage patterns for different scenarios
@@ -168,7 +168,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.1] - 2025-01-27
 
 ### Added
-- **Advanced API Access**: Exposed `make_ai_request` function for direct AI requests
+- **Advanced API Access**: Exposed `call_ai` function for direct AI requests
   - Full access to unified AI request system with provider switching
   - Built-in response format handling for structured output (JSON)
   - Custom system prompt support with sensible defaults
@@ -183,7 +183,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `get_model_name()` - Get current model name from preferences
   - `DEFAULT_SYSTEM_PROMPT` - Access to default system prompt constant
 - **Comprehensive Examples**: New example file `examples/direct_ai_request.py`
-  - Demonstrates advanced `make_ai_request` usage patterns
+  - Demonstrates advanced `call_ai` usage patterns
   - Shows structured output, conversation handling, and model selection
   - Includes best practices for different use cases
 

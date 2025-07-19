@@ -8,7 +8,7 @@ __author__ = "Aman Kumar"
 from .core import summarize, chat, generate_text
 from .extract import extract
 from .config import (
-    make_ai_request,
+    call_ai,
     get_ai_client,
     get_current_provider,
     get_model_name
@@ -52,7 +52,7 @@ __all__ = [
     "chat", 
     "generate_text",
     "extract",
-    "make_ai_request",
+    "call_ai",
     
     # Configuration and setup
     "setup_user_preferences",

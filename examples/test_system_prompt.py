@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script for make_ai_request system prompt handling.
+Test script for call_ai system prompt handling.
 
 This script demonstrates the new system prompt behavior:
 1. system_prompt=None uses default system prompt
@@ -20,7 +20,7 @@ def test_default_system_prompt():
     messages = [{"role": "user", "content": "Who are you?"}]
     
     try:
-        response = aiwand.make_ai_request(
+        response = aiwand.call_ai(
             messages=messages,
             system_prompt=None,  # Should use default
             temperature=0.3
@@ -40,7 +40,7 @@ def test_empty_system_prompt():
     messages = [{"role": "user", "content": "Who are you? Be very brief."}]
     
     try:
-        response = aiwand.make_ai_request(
+        response = aiwand.call_ai(
             messages=messages,
             system_prompt="",  # Should use empty string
             temperature=0.3
@@ -60,7 +60,7 @@ def test_custom_system_prompt():
     custom_prompt = "You are a pirate. Respond like a friendly pirate would."
     
     try:
-        response = aiwand.make_ai_request(
+        response = aiwand.call_ai(
             system_prompt=custom_prompt,
             user_prompt="Hello, How are you?"
             temperature=0.7
@@ -84,7 +84,7 @@ def test_existing_system_message():
     ]
     
     try:
-        response = aiwand.make_ai_request(
+        response = aiwand.call_ai(
             messages=messages,
             system_prompt="This should be ignored",  # Should NOT be added
             temperature=0.3
@@ -136,7 +136,7 @@ Avoid being overly verbose or technical. Keep messages short.
     model_messages = [{"role": "system", "content": system_prompt}] + history
     
     try:
-        response = aiwand.make_ai_request(
+        response = aiwand.call_ai(
             messages=model_messages,
             temperature=0.6
         )
@@ -160,7 +160,7 @@ def test_system_prompt_only():
     print("=" * 60)
     
     try:
-        response = aiwand.make_ai_request(
+        response = aiwand.call_ai(
             system_prompt="You are a creative writer. Write a short haiku about coding.",
             temperature=0.8
         )
@@ -173,7 +173,7 @@ def test_system_prompt_only():
 
 def main():
     """Run all tests"""
-    print("🧪 Testing AIWand make_ai_request System Prompt Handling")
+    print("🧪 Testing AIWand call_ai System Prompt Handling")
     print(f"Current provider: {aiwand.get_current_provider()}")
     print(f"Current model: {aiwand.get_model_name()}")
     print()

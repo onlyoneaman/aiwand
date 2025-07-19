@@ -36,7 +36,7 @@ result = content.parsed  # Different response handling
 import aiwand
 
 # Same code works with OpenAI, Gemini, and their structured outputs!
-content = aiwand.make_ai_request(
+content = aiwand.call_ai(
     model="gpt-4o",          # or "gemini-2.0-flash" 
     messages=messages,
     temperature=0.8,
@@ -90,20 +90,20 @@ AI_DEFAULT_PROVIDER=openai
 
 ### Core AI Functionality
 
-The `make_ai_request()` function is the heart of AIWand - a unified interface for all AI providers:
+The `call_ai()` function is the heart of AIWand - a unified interface for all AI providers:
 
 ```python
 import aiwand
 from pydantic import BaseModel
 
 # Basic text generation
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     messages=[{"role": "user", "content": "Explain quantum computing"}],
     model="gpt-4o"  # Automatically uses OpenAI
 )
 
 # Switch providers seamlessly
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     messages=[{"role": "user", "content": "Explain quantum computing"}],
     model="gemini-2.0-flash"  # Automatically uses Gemini
 )
@@ -114,7 +114,7 @@ class BlogPost(BaseModel):
     content: str
     tags: list[str]
 
-blog_post = aiwand.make_ai_request(
+blog_post = aiwand.call_ai(
     messages=[{"role": "user", "content": "Write a blog post about AI"}],
     model="gpt-4o",
     response_format=BlogPost  # Returns parsed BlogPost object!
@@ -122,14 +122,14 @@ blog_post = aiwand.make_ai_request(
 print(blog_post.title)  # Direct access to structured data
 
 # Custom/preview models with explicit provider
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     model="gemini-2.5-flash-preview-05-20",  # New model not in our registry
     provider="gemini",  # Explicit provider specification
     messages=[{"role": "user", "content": "Hello from the future!"}]
 )
 
 # Advanced parameters
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     messages=[
         {"role": "system", "content": "You are a helpful coding assistant"},
         {"role": "user", "content": "Write a Python function to sort a list"}
@@ -223,18 +223,18 @@ unique_id = aiwand.generate_uuid()  # UUID4
 ### Automatic Model Detection
 ```python
 # AIWand automatically detects the right provider:
-response = aiwand.make_ai_request(model="gpt-4o", ...)        # → OpenAI
-response = aiwand.make_ai_request(model="gemini-2.0-flash", ...)  # → Gemini
-response = aiwand.make_ai_request(model="o3-mini", ...)       # → OpenAI
+response = aiwand.call_ai(model="gpt-4o", ...)        # → OpenAI
+response = aiwand.call_ai(model="gemini-2.0-flash", ...)  # → Gemini
+response = aiwand.call_ai(model="o3-mini", ...)       # → OpenAI
 
 # Pattern-based detection for unknown models:
-response = aiwand.make_ai_request(model="gemini-experimental-123", ...)  # → Gemini
+response = aiwand.call_ai(model="gemini-experimental-123", ...)  # → Gemini
 ```
 
 ### Explicit Provider Control
 ```python
 # Force a specific provider for custom models:
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     model="my-custom-model",
     provider="gemini",  # or AIProvider.GEMINI
     messages=[...]
@@ -242,7 +242,7 @@ response = aiwand.make_ai_request(
 
 # Works with both string and enum:
 from aiwand import AIProvider
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     model="any-model",
     provider=AIProvider.OPENAI,
     messages=[...]
@@ -260,7 +260,7 @@ class ProductReview(BaseModel):
     recommendation: bool
 
 # Works identically with both providers:
-review = aiwand.make_ai_request(
+review = aiwand.call_ai(
     model="gpt-4o",  # or "gemini-2.0-flash"
     messages=[{"role": "user", "content": "Review this product: ..."}],
     response_format=ProductReview

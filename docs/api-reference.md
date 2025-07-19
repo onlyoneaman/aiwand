@@ -208,7 +208,7 @@ print(f"UUID1: {uuid}")  # e.g., "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
 
 ## Advanced Functions
 
-### `make_ai_request(messages=None, max_tokens=None, temperature=0.7, top_p=1.0, model=None, provider=None, response_format=None, system_prompt=None, user_prompt=None, additional_system_instructions=None)`
+### `call_ai(messages=None, max_tokens=None, temperature=0.7, top_p=1.0, model=None, provider=None, response_format=None, system_prompt=None, user_prompt=None, additional_system_instructions=None)`
 
 Low-level unified AI request function with automatic provider switching and advanced features.
 
@@ -235,10 +235,10 @@ import aiwand
 
 # Basic request
 messages = [{"role": "user", "content": "Explain quantum computing"}]
-response = aiwand.make_ai_request(messages)
+response = aiwand.call_ai(messages)
 
 # Advanced request with all options
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     system_prompt="You are a data scientist. Provide structured analysis.",
     user_prompt="Analyze this data",
     response_format={"type": "json_object"},
@@ -253,7 +253,7 @@ conversation = [
     {"role": "user", "content": "What is Python?"},
     {"role": "assistant", "content": "Python is a programming language..."}
 ]
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     messages=conversation,
     user_prompt="How do I install it?",  # Adds this as new user message
     system_prompt="You are a helpful programming tutor."
@@ -265,7 +265,7 @@ conversation = [
     {"role": "assistant", "content": "Great! Python is an excellent language..."},
     {"role": "user", "content": "What should I learn first?"}
 ]
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     messages=conversation,
     system_prompt="You are a patient programming tutor."
 )
@@ -301,27 +301,27 @@ history.append({"role": "user", "content": current_message})
 # Model expects system prompt first, then history
 model_messages = [{"role": "system", "content": system_prompt}] + history
 
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     model="gemini-2.0-flash",
     messages=model_messages
 )
 
 # Simple generation using only system prompt (no messages needed)
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     system_prompt="You are a creative writer. Write a short story about a time traveler.",
     temperature=0.8,
     max_tokens=200
 )
 
 # Empty messages with system prompt
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     messages=[],
     system_prompt="Generate 3 programming tips for beginners.",
     temperature=0.5
 )
 
 # Using additional_system_instructions to extend system prompt
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     system_prompt="You are a helpful programming tutor.",
     additional_system_instructions="Always provide code examples and explain each step clearly.",
     user_prompt="How do I create a Python class?"
@@ -332,14 +332,14 @@ conversation = [
     {"role": "user", "content": "I'm learning data science"},
     {"role": "assistant", "content": "Great! Data science combines statistics, programming, and domain expertise..."}
 ]
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     messages=conversation,
     user_prompt="What should I learn next?",
     additional_system_instructions="Focus on practical, hands-on learning resources and provide specific next steps."
 )
 
 # Extending default system prompt with specialized instructions
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     user_prompt="Write a function to calculate fibonacci numbers",
     additional_system_instructions="Write clean, well-documented code with error handling and include unit tests."
 )
@@ -383,7 +383,7 @@ import aiwand
 print(aiwand.DEFAULT_SYSTEM_PROMPT)
 
 # Use in custom request
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     messages=[{"role": "user", "content": "Hello"}],
     system_prompt=aiwand.DEFAULT_SYSTEM_PROMPT
 )

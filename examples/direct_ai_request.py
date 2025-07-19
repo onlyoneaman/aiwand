@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Example demonstrating direct usage of make_ai_request function.
+Example demonstrating direct usage of call_ai function.
 
 This shows how to use the low-level AI request function directly,
 which provides maximum flexibility including response format handling,
@@ -12,7 +12,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from aiwand import (
-    make_ai_request, 
+    call_ai, 
     DEFAULT_SYSTEM_PROMPT, 
     AIError, 
     OpenAIModel, 
@@ -22,11 +22,11 @@ from aiwand import (
 
 
 def basic_request_example():
-    """Basic usage of make_ai_request."""
+    """Basic usage of call_ai."""
     print("=== Basic AI Request ===")
     
     try:        
-        response = make_ai_request(
+        response = call_ai(
             user_prompt="Explain quantum computing in one paragraph."
         )
         print(f"Response: {response}")
@@ -42,7 +42,7 @@ def custom_system_prompt_example():
     try:        
         custom_system = "You are a technical expert who explains programming concepts with practical examples and code snippets."
         
-        response = make_ai_request(
+        response = call_ai(
             system_prompt=custom_system,
             user_prompt="What is Python?"
             temperature=0.3  # Lower temperature for more focused technical responses
@@ -63,7 +63,7 @@ def conversation_example():
             {"role": "user", "content": "Hi, I'm learning about machine learning."},
         ]
         
-        response1 = make_ai_request(
+        response1 = call_ai(
             messages=conversation,
             system_prompt="You are a patient ML tutor who provides clear explanations."
         )
@@ -73,7 +73,7 @@ def conversation_example():
         conversation.append({"role": "assistant", "content": response1})
         conversation.append({"role": "user", "content": "What's the difference between supervised and unsupervised learning?"})
         
-        response2 = make_ai_request(
+        response2 = call_ai(
             messages=conversation,
             system_prompt="You are a patient ML tutor who provides clear explanations."
         )
@@ -106,7 +106,7 @@ def structured_response_example():
             "conclusion": "brief summary"
         }"""
         
-        response = make_ai_request(
+        response = call_ai(
             messages=messages,
             system_prompt=structured_system,
             response_format=response_format,
@@ -133,7 +133,7 @@ def model_specific_example():
         else:
             model = GeminiModel.GEMINI_2_0_FLASH  # Fast Gemini model
             
-        response = make_ai_request(
+        response = call_ai(
             model=model,
             system_prompt="You are a creative poet who writes beautiful, concise poetry.",
             user_prompt="Write a haiku about coding.",
@@ -167,7 +167,7 @@ def main():
     model_specific_example()
     
     print("\n✅ Examples completed!")
-    print("\n💡 Key Benefits of make_ai_request:")
+    print("\n💡 Key Benefits of call_ai:")
     print("  • Automatic provider switching (OpenAI ↔ Gemini)")
     print("  • Built-in response format handling")
     print("  • Flexible system prompt management")

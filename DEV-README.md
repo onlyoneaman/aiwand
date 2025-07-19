@@ -4,11 +4,11 @@ Quick reference guide for all AIWand functionalities.
 
 ## 🚀 Core AI Functions
 
-### `aiwand.make_ai_request()`
+### `aiwand.call_ai()`
 **Unified AI request function - works with OpenAI & Gemini**
 
 ```python
-aiwand.make_ai_request(
+aiwand.call_ai(
     messages: Optional[List[Dict[str, str]]] = None,
     max_tokens: Optional[int] = None,
     temperature: float = 0.7,
@@ -38,7 +38,7 @@ aiwand.make_ai_request(
 **Examples:**
 ```python
 # Basic usage
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     messages=[{"role": "user", "content": "Hello!"}],
     model="gpt-4o"
 )
@@ -48,14 +48,14 @@ class BlogPost(BaseModel):
     title: str
     content: str
 
-post = aiwand.make_ai_request(
+post = aiwand.call_ai(
     messages=[{"role": "user", "content": "Write a blog post"}],
     model="gemini-2.0-flash",
     response_format=BlogPost
 )  # Returns BlogPost object
 
 # Explicit provider
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     model="custom-model",
     provider="gemini",
     messages=[{"role": "user", "content": "Hello!"}]
@@ -66,7 +66,7 @@ conversation = [
     {"role": "user", "content": "What is Python?"},
     {"role": "assistant", "content": "Python is a programming language..."}
 ]
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     messages=conversation,
     user_prompt="How do I install it?",  # Appends as new user message
     system_prompt="You are a helpful programming tutor."
@@ -358,7 +358,7 @@ ProviderRegistry.is_provider_available(provider) -> bool
 from aiwand import AIError
 
 try:
-    response = aiwand.make_ai_request(...)
+    response = aiwand.call_ai(...)
 except AIError as e:
     print(f"AI error: {e}")
 ```
@@ -372,7 +372,7 @@ import aiwand
 from pydantic import BaseModel
 
 # Simple chat
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     messages=[{"role": "user", "content": "Hello!"}],
     model="gpt-4o"
 )
@@ -383,14 +383,14 @@ class Recipe(BaseModel):
     ingredients: list[str]
     steps: list[str]
 
-recipe = aiwand.make_ai_request(
+recipe = aiwand.call_ai(
     messages=[{"role": "user", "content": "Give me a pasta recipe"}],
     model="gemini-2.0-flash",
     response_format=Recipe
 )
 
 # Provider control
-response = aiwand.make_ai_request(
+response = aiwand.call_ai(
     model="custom-model",
     provider="gemini",
     messages=[{"role": "user", "content": "Hello!"}]

@@ -3,7 +3,7 @@ Core AI functionality for AIWand
 """
 
 from typing import Optional, List, Dict
-from .config import make_ai_request, ModelType
+from .config import call_ai, ModelType
 
 
 def summarize(
@@ -44,7 +44,7 @@ def summarize(
     if max_length:
         user_prompt += f" Keep the summary under {max_length} words."
     
-    return make_ai_request(
+    return call_ai(
         model=model,
         system_prompt=system_prompt,
         user_prompt=f"{user_prompt}\n\n{text}"
@@ -81,7 +81,7 @@ def chat(
     messages = conversation_history or []
     messages.append({"role": "user", "content": message})
     
-    return make_ai_request(
+    return call_ai(
         messages=messages,
         temperature=temperature,
         model=model,
@@ -116,7 +116,7 @@ def generate_text(
     
     system_prompt = "You are a skilled creative writer and content generator. You excel at producing high-quality, engaging, and contextually appropriate text based on user prompts. You adapt your writing style, tone, and format to match the specific requirements and context provided."
     
-    return make_ai_request(
+    return call_ai(
         max_tokens=max_tokens,
         temperature=temperature,
         model=model,
