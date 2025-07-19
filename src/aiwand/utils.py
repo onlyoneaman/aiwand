@@ -28,5 +28,6 @@ def is_url(link: str) -> bool:
 
 
 def is_local_file(path: str) -> bool:
+    path = path.strip()
     parsed = urlparse(path)
-    return parsed.scheme == '' or parsed.scheme == 'file'
+    return parsed.scheme == 'file'
