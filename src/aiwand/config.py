@@ -262,9 +262,9 @@ def get_model_name() -> str:
     Raises:
         AIError: When no provider is available
     """
-    provider, model = get_preferred_provider_and_model()
+    _, model = get_preferred_provider_and_model()
     
-    if not provider or not model:
+    if not model:
         raise AIError(
             "No AI provider available. Please set up your API keys and run 'aiwand setup' "
             "to configure your preferences."
