@@ -220,6 +220,7 @@ Low-level unified AI request function with automatic provider switching and adva
 - `model` (str/enum, optional): Specific model to use (auto-selected if not provided)
 - `response_format` (dict, optional): Response format specification (e.g., {"type": "json_object"})
 - `system_prompt` (str, optional): Custom system prompt (uses default if None)
+- `user_prompt` (str, optional): Custom user prompt (uses default if None)
 
 **Returns:** AI response content (str)
 

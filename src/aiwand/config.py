@@ -124,7 +124,8 @@ def make_ai_request(
     model: Optional[ModelType] = GeminiModel.GEMINI_2_0_FLASH_LITE.value,
     provider: Optional[Union[AIProvider, str]] = None,
     response_format: Optional[Dict[str, Any]] = None,
-    system_prompt: Optional[str] = None
+    system_prompt: Optional[str] = None,
+    user_prompt: Optional[str] = None
 ) -> str:
     """
     Unified wrapper for AI API calls that handles provider differences.
@@ -141,7 +142,8 @@ def make_ai_request(
         response_format: Response format specification
         system_prompt: Optional system prompt to add at the beginning (uses default if None).
                       Can be used alone without messages for simple generation.
-        
+        user_prompt: Optional user message to add at the end of the messages list.
+                     Can be used in parallel with or without existing messages.
     Returns:
         str: The AI response content
         
@@ -172,6 +174,9 @@ def make_ai_request(
             else:
                 # Use default system prompt only when system_prompt is None
                 final_messages.insert(0, {"role": "system", "content": DEFAULT_SYSTEM_PROMPT})
+
+        if user_prompt is not None:
+            final_messages.append({"role": "user", "content": user_prompt})
         
         # If we only have a system message (no user messages), add a default user message
         # This allows using system_prompt alone as a kind of generation prompt
