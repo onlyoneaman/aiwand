@@ -58,12 +58,11 @@ def test_custom_system_prompt():
     print("=" * 60)
     
     custom_prompt = "You are a pirate. Respond like a friendly pirate would."
-    messages = [{"role": "user", "content": "Hello, how are you?"}]
     
     try:
         response = aiwand.make_ai_request(
-            messages=messages,
             system_prompt=custom_prompt,
+            user_prompt="Hello, How are you?"
             temperature=0.7
         )
         print(f"Custom prompt: {custom_prompt}")

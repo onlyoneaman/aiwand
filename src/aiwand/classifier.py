@@ -144,17 +144,14 @@ Available grades: {', '.join(choice_scores.keys())}
 
 Your grade must be exactly one of the specified options."""
     
-    messages = [{"role": "user", "content": formatted_prompt}]
-    
     try:
         # Use structured output
         result = make_ai_request(
-            messages=messages,
             system_prompt=system_prompt,
             response_format=DynamicClassifierModel,
             model=model,
             provider=provider,
-            temperature=0.0  # Use deterministic output for grading
+            user_prompt=formatted_prompt
         )
         
         # Validate grade

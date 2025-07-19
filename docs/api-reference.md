@@ -237,8 +237,8 @@ response = aiwand.make_ai_request(messages)
 
 # Advanced request with all options
 response = aiwand.make_ai_request(
-    messages=[{"role": "user", "content": "Analyze this data"}],
     system_prompt="You are a data scientist. Provide structured analysis.",
+    user_prompt="Analyze this data",
     response_format={"type": "json_object"},
     temperature=0.3,
     model=aiwand.OpenAIModel.GPT_4O,

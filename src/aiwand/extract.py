@@ -68,16 +68,13 @@ def extract(
     if not content and not links:
         raise ValueError("Must provide either content or links")
     
-    # Collect all content to process
     all_content = []
     
-    # Process main content if provided
     if content is not None:
         content_str = convert_to_string(content)
         if content_str.strip():
             all_content.append(f"=== Main Content ===\n{content_str}")
     
-    # Process links if provided
     if links:
         for i, link in enumerate(links, 1):
             try:
@@ -93,10 +90,8 @@ def extract(
     if not all_content:
         raise ValueError("No valid content found to process")
     
-    # Combine all content
     combined_content = "\n\n".join(all_content)
     
-    # Prepare system prompt for extraction
     system_prompt = (
         "You are an expert data extraction specialist. You excel at identifying, "
         "analyzing, and extracting structured information from unstructured text. "
@@ -104,7 +99,6 @@ def extract(
         "maintaining data integrity. You follow the specified format requirements precisely."
     )
     
-    # Build user prompt
     user_prompt = "Extract relevant structured data from the following content:\n\n"
         
     user_prompt += (
@@ -116,15 +110,12 @@ def extract(
     
     user_prompt += f"Content to extract from:\n{combined_content}"
     
-    messages = [{"role": "user", "content": user_prompt}]
-
-    # Make the AI request
     result = make_ai_request(
-        messages=messages,
         system_prompt=system_prompt,
         model=model,
         temperature=temperature,
-        response_format=response_format
+        response_format=response_format,
+        user_prompt=user_prompt
     )
     if response_format:
         return result    

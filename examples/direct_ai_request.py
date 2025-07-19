@@ -25,12 +25,10 @@ def basic_request_example():
     """Basic usage of make_ai_request."""
     print("=== Basic AI Request ===")
     
-    try:
-        messages = [
-            {"role": "user", "content": "Explain quantum computing in one paragraph."}
-        ]
-        
-        response = make_ai_request(messages=messages)
+    try:        
+        response = make_ai_request(
+            user_prompt="Explain quantum computing in one paragraph."
+        )
         print(f"Response: {response}")
         
     except AIError as e:
@@ -41,16 +39,12 @@ def custom_system_prompt_example():
     """Example with custom system prompt."""
     print("\n=== Custom System Prompt ===")
     
-    try:
-        messages = [
-            {"role": "user", "content": "What is Python?"}
-        ]
-        
+    try:        
         custom_system = "You are a technical expert who explains programming concepts with practical examples and code snippets."
         
         response = make_ai_request(
-            messages=messages,
             system_prompt=custom_system,
+            user_prompt="What is Python?"
             temperature=0.3  # Lower temperature for more focused technical responses
         )
         print(f"Response: {response}")
@@ -131,11 +125,7 @@ def model_specific_example():
     
     try:
         provider = get_current_provider()
-        print(f"Current provider: {provider}")
-        
-        messages = [
-            {"role": "user", "content": "Write a haiku about coding."}
-        ]
+        print(f"Current provider: {provider}")        
         
         # Try to use a specific model based on current provider
         if provider and "openai" in str(provider).lower():
@@ -144,9 +134,9 @@ def model_specific_example():
             model = GeminiModel.GEMINI_2_0_FLASH  # Fast Gemini model
             
         response = make_ai_request(
-            messages=messages,
             model=model,
             system_prompt="You are a creative poet who writes beautiful, concise poetry.",
+            user_prompt="Write a haiku about coding.",
             temperature=0.9  # Higher creativity for poetry
         )
         print(f"Haiku: {response}")
