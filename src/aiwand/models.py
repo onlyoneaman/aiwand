@@ -10,6 +10,12 @@ from enum import Enum
 from typing import Dict, List, Union, Optional, Type, Any
 
 
+
+class AIError(Exception):
+    """Custom exception for AI-related errors."""
+    pass
+
+
 class AIProvider(Enum):
     """Supported AI providers."""
     GEMINI = "gemini"

@@ -15,6 +15,7 @@ from .models import (
     ModelType,
     GeminiModel,
     ProviderRegistry,
+    AIError
 )
 from .preferences import get_preferred_provider_and_model
 
@@ -23,11 +24,6 @@ DEFAULT_SYSTEM_PROMPT = "You are AIWand, a helpful AI assistant that provides cl
 
 # Client cache to avoid recreating clients
 _client_cache: Dict[AIProvider, OpenAI] = {}
-
-
-class AIError(Exception):
-    """Custom exception for AI-related errors."""
-    pass
 
 
 def get_current_provider() -> Optional[AIProvider]:

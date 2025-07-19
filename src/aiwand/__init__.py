@@ -8,7 +8,6 @@ __author__ = "Aman Kumar"
 from .core import summarize, chat, generate_text
 from .extract import extract
 from .config import (
-    AIError,
     make_ai_request,
     DEFAULT_SYSTEM_PROMPT,
     get_ai_client,
@@ -20,6 +19,7 @@ from .setup import (
     show_current_config, 
 )
 from .models import (
+    AIError,
     AIProvider,
     OpenAIModel,
     GeminiModel,

@@ -4,13 +4,12 @@ Interactive setup and configuration display for AIWand.
 This module provides user-facing setup utilities and configuration display functions.
 """
 
-from .models import AIProvider, ProviderRegistry
+from .models import AIError, AIProvider, ProviderRegistry
 from .preferences import (
     load_user_preferences,
     save_user_preferences,
     get_preferred_provider_and_model,
-    get_config_file,
-    AIError,
+    get_config_file
 )
 
 

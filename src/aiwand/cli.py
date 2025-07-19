@@ -7,7 +7,7 @@ import json
 import sys
 from .core import summarize, chat, generate_text
 from .extract import extract
-from .config import AIError
+from .models import AIError
 from .setup import setup_user_preferences, show_current_config
 from .helper import find_chrome_binary, get_chrome_version, generate_random_number, generate_uuid
 from .classifier import classify_text

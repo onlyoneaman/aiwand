@@ -11,16 +11,12 @@ from pathlib import Path
 from typing import Dict, Any, Optional, Tuple, Union
 
 from .models import (
+    AIError,
     AIProvider,
     OpenAIModel,
     GeminiModel,
     ProviderRegistry,
 )
-
-
-class AIError(Exception):
-    """Custom exception for AI-related errors."""
-    pass
 
 
 def get_config_dir() -> Path:
