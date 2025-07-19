@@ -16,7 +16,8 @@ aiwand.make_ai_request(
     model: Optional[ModelType] = None,
     provider: Optional[Union[AIProvider, str]] = None,
     response_format: Optional[Dict[str, Any]] = None,
-    system_prompt: Optional[str] = None
+    system_prompt: Optional[str] = None,
+    user_prompt: Optional[str] = None
 ) -> str
 ```
 
@@ -30,6 +31,7 @@ aiwand.make_ai_request(
 | `provider` | `AIProvider/str` | `None` | Force specific provider ("openai"/"gemini") |
 | `response_format` | `Dict/Pydantic` | `None` | Structured output format |
 | `system_prompt` | `str` | `None` | System prompt (uses default if None) |
+| `user_prompt` | `str` | `None` | User message to append to messages list |
 
 **Returns:** `str` or parsed Pydantic object (if `response_format` provided)
 
@@ -57,6 +59,17 @@ response = aiwand.make_ai_request(
     model="custom-model",
     provider="gemini",
     messages=[{"role": "user", "content": "Hello!"}]
+)
+
+# Using user_prompt to extend conversation
+conversation = [
+    {"role": "user", "content": "What is Python?"},
+    {"role": "assistant", "content": "Python is a programming language..."}
+]
+response = aiwand.make_ai_request(
+    messages=conversation,
+    user_prompt="How do I install it?",  # Appends as new user message
+    system_prompt="You are a helpful programming tutor."
 )
 ```
 

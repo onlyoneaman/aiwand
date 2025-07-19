@@ -208,7 +208,7 @@ print(f"UUID1: {uuid}")  # e.g., "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
 
 ## Advanced Functions
 
-### `make_ai_request(messages=None, max_tokens=None, temperature=0.7, top_p=1.0, model=None, response_format=None, system_prompt=None)`
+### `make_ai_request(messages=None, max_tokens=None, temperature=0.7, top_p=1.0, model=None, provider=None, response_format=None, system_prompt=None, user_prompt=None)`
 
 Low-level unified AI request function with automatic provider switching and advanced features.
 
@@ -218,9 +218,10 @@ Low-level unified AI request function with automatic provider switching and adva
 - `temperature` (float): Response creativity (0.0-1.0, default: 0.7)
 - `top_p` (float): Nucleus sampling parameter (0.0-1.0, default: 1.0)
 - `model` (str/enum, optional): Specific model to use (auto-selected if not provided)
+- `provider` (str/enum, optional): AI provider to use explicitly ('openai', 'gemini', or AIProvider enum). Overrides model-based inference.
 - `response_format` (dict, optional): Response format specification (e.g., {"type": "json_object"})
 - `system_prompt` (str, optional): Custom system prompt (uses default if None)
-- `user_prompt` (str, optional): Custom user prompt (uses default if None)
+- `user_prompt` (str, optional): User message to append to the messages list. Can be used with or without existing messages.
 
 **Returns:** AI response content (str)
 
@@ -242,7 +243,19 @@ response = aiwand.make_ai_request(
     response_format={"type": "json_object"},
     temperature=0.3,
     model=aiwand.OpenAIModel.GPT_4O,
+    provider="openai",
     max_tokens=500
+)
+
+# Using user_prompt to extend existing conversation
+conversation = [
+    {"role": "user", "content": "What is Python?"},
+    {"role": "assistant", "content": "Python is a programming language..."}
+]
+response = aiwand.make_ai_request(
+    messages=conversation,
+    user_prompt="How do I install it?",  # Adds this as new user message
+    system_prompt="You are a helpful programming tutor."
 )
 
 # Conversation with history
