@@ -2,10 +2,11 @@
 AIWand - A simple AI toolkit for text processing using OpenAI and Gemini
 """
 
-__version__ = "0.4.7"
+__version__ = "0.4.8"
 __author__ = "Aman Kumar"
 
 from .core import summarize, chat, generate_text
+from .extract import extract
 from .config import (
     AIError,
     make_ai_request,
@@ -26,7 +27,15 @@ from .models import (
     ProviderType,
     ProviderRegistry,
 )
-from .helper import generate_random_number, generate_uuid
+from .helper import (
+    generate_random_number, 
+    generate_uuid,
+    # File and URL helpers (still used internally)
+    read_file_content,
+    fetch_url_content,
+    get_file_extension,
+    is_text_file,
+)
 from .classifier import (
     ClassifierResponse,
     classify_text,
@@ -40,6 +49,7 @@ __all__ = [
     "summarize",
     "chat", 
     "generate_text",
+    "extract",
     "make_ai_request",
     
     # Configuration and setup
@@ -48,10 +58,8 @@ __all__ = [
     "get_ai_client",
     "get_current_provider", 
     "get_model_name",
-    "DEFAULT_SYSTEM_PROMPT",
     
-    # Types and enums
-    "AIError",
+    # AI Models and Providers
     "AIProvider",
     "OpenAIModel", 
     "GeminiModel",
@@ -59,14 +67,22 @@ __all__ = [
     "ProviderType",
     "ProviderRegistry",
     
-    # Helper utilities
+    # Helper functions
     "generate_random_number",
     "generate_uuid",
+    "read_file_content",
+    "fetch_url_content",
+    "get_file_extension",
+    "is_text_file",
     
-    # Classifier functionality
+    # Classification
     "ClassifierResponse",
     "classify_text",
-    "create_classifier",
+    "create_classifier", 
     "create_binary_classifier",
     "create_quality_classifier",
+    
+    # Configuration
+    "AIError",
+    "DEFAULT_SYSTEM_PROMPT",
 ] 

@@ -180,6 +180,27 @@ text = aiwand.generate_text(
     temperature=0.3  # Lower = more focused, Higher = more creative
 )
 
+# Structured data extraction from content and links
+contact_info = aiwand.extract(content="John Doe, email: john@example.com")
+
+# Extract from URLs and files
+data = aiwand.extract(links=["https://example.com/article", "/path/to/file.txt"])
+
+# Combine content and links with structured output
+from pydantic import BaseModel
+
+class ContactInfo(BaseModel):
+    name: str
+    email: str
+    phone: str
+
+result = aiwand.extract(
+    content="Meeting notes about John...",
+    links=["https://company.com/about"],
+    response_format=ContactInfo,  # Get structured Pydantic object
+    temperature=0.1  # Lower for more consistent extraction
+)
+
 # Text classification and grading
 grader = aiwand.create_binary_classifier(criteria="correctness")
 result = grader(question="What is 2+2?", answer="4", expected="4")

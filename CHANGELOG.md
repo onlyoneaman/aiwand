@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.8] - 2025-01-27
+
+### 🎯 New Data Extraction Functionality
+- **Structured Data Extraction**: Complete extract system for processing any content with AI
+  - `aiwand.extract()` - Extract structured data from text, files, and URLs
+  - Smart content conversion: Handles str, dict, list, or any object with __str__ method
+  - Multi-source processing: Combine content with multiple URLs and file paths
+  - Pydantic integration: Use `response_format` parameter for structured output objects
+  - Automatic JSON parsing: Returns dict when possible, formatted string otherwise
+- **Flexible Input Sources**: 
+  - Text content: Direct string input or any convertible object
+  - URLs: Automatic fetching and processing of web content
+  - Files: Read local files and include in extraction context
+  - Mixed sources: Combine content + links for comprehensive extraction
+- **CLI Integration**: New `aiwand extract` command with full parameter support
+  - `aiwand extract "content"` - Extract from text
+  - `aiwand extract --links "url1" "url2"` - Extract from URLs/files
+  - `--model`, `--temperature`, `--json` options for customization
+- **Comprehensive Documentation**: 
+  - Updated README with extract examples and structured output patterns
+  - Complete API reference documentation with all parameters and examples
+  - CLI reference with usage patterns and options
+- **Robust Implementation**: 
+  - Proper error handling for failed URL fetches and invalid files
+  - Smart temperature defaults (0.7) for balanced creativity/consistency
+  - Clean parameter interface without deprecated options
+- **Updated Examples**: Fixed all demo files and tests to use correct parameter structure
+
 ## [0.4.7] - 2025-01-27
 
 ### 🧹 Simplified Classifier Interface

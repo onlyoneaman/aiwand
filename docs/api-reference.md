@@ -100,6 +100,51 @@ text = aiwand.generate_text(
 )
 ```
 
+### `extract(content=None, links=None, model=None, temperature=0.7, response_format=None)`
+
+Extract structured data from content and/or links using AI.
+
+**Parameters:**
+- `content` (Union[str, Any], optional): Any content to extract from - will be converted to string. Can be str, dict, list, or any object with __str__ method.
+- `links` (List[str], optional): List of URLs or file paths to fetch and include in extraction. URLs (http/https) will be fetched, file paths will be read.
+- `model` (str, optional): Specific AI model to use (auto-selected if not provided)
+- `temperature` (float): Response creativity (0.0-1.0, default 0.7)
+- `response_format` (BaseModel, optional): Pydantic model class for structured output
+
+**Returns:** Union[str, Dict[str, Any]]: Extracted data. Dict if JSON parsing succeeds, formatted string otherwise.
+
+**Raises:**
+- `ValueError`: If neither content nor links are provided
+- `AIError`: If the AI call fails
+- `FileNotFoundError`: If file path doesn't exist
+
+**Example:**
+```python
+import aiwand
+from pydantic import BaseModel
+
+# Simple text extraction
+result = aiwand.extract(content="John Doe, email: john@example.com")
+
+# Extract from URLs
+result = aiwand.extract(links=["https://example.com/article"])
+
+# Mix content and links with structured output
+class ContactInfo(BaseModel):
+    name: str
+    email: str
+
+result = aiwand.extract(
+    content="Meeting notes: contact John at john@example.com",
+    links=["https://company.com/about", "/path/to/business_card.txt"],
+    response_format=ContactInfo
+)
+
+# Complex content (dict/list converted to string)
+data = {"name": "John", "email": "john@example.com"}
+result = aiwand.extract(content=data)
+```
+
 ## Helper Functions
 
 ### `generate_random_number(length=6)`

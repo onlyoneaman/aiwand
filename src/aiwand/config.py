@@ -13,6 +13,7 @@ from openai import OpenAI
 from .models import (
     AIProvider,
     ModelType,
+    GeminiModel,
     ProviderRegistry,
 )
 from .preferences import get_preferred_provider_and_model
@@ -120,7 +121,7 @@ def make_ai_request(
     max_tokens: Optional[int] = None,
     temperature: float = 0.7,
     top_p: float = 1.0,
-    model: Optional[ModelType] = None,
+    model: Optional[ModelType] = GeminiModel.GEMINI_2_0_FLASH_LITE.value,
     provider: Optional[Union[AIProvider, str]] = None,
     response_format: Optional[Dict[str, Any]] = None,
     system_prompt: Optional[str] = None

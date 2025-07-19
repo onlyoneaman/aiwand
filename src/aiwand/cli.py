@@ -5,18 +5,19 @@ Command Line Interface for AIWand
 import argparse
 import json
 import sys
-from typing import Optional
 from .core import summarize, chat, generate_text
+from .extract import extract
 from .config import AIError
 from .setup import setup_user_preferences, show_current_config
 from .helper import find_chrome_binary, get_chrome_version, generate_random_number, generate_uuid
 from .classifier import classify_text
 
 
+
 def main():
     """Main CLI entry point."""
     # Check if this is a direct prompt (only works with quoted text containing spaces/punctuation)
-    known_commands = {'summarize', 'chat', 'generate', 'classify', 'setup', 'status', 'helper'}
+    known_commands = {'summarize', 'chat', 'generate', 'classify', 'extract', 'setup', 'status', 'helper'}
     
     # Handle non-command arguments
     if len(sys.argv) > 1 and sys.argv[1] not in known_commands and not sys.argv[1].startswith('-'):
@@ -119,6 +120,17 @@ def main():
     chrome_parser.add_argument('--version', action='store_true', help='Also show Chrome version')
     chrome_parser.add_argument('--path-only', action='store_true', help='Output only the path (no quotes, for scripting)')
     
+    # Extract command
+    extract_parser = subparsers.add_parser('extract', help='Extract structured data from content and/or links')
+    extract_parser.add_argument('content', nargs='?', help='Content to extract from (any format - will be converted to string)')
+    extract_parser.add_argument('--links', nargs='*', 
+                               help='URLs or file paths to read and include in extraction')
+    extract_parser.add_argument('--model', help='AI model to use (auto-selected if not provided)')
+    extract_parser.add_argument('--temperature', type=float, default=0.7, 
+                               help='Response creativity (0.0-1.0, default 0.7)')
+    extract_parser.add_argument('--json', action='store_true', 
+                               help='Force JSON output')
+
     args = parser.parse_args()
     
     if not args.command:
@@ -153,30 +165,57 @@ def main():
             print(result)
             
         elif args.command == 'classify':
-            # Parse choice scores if provided
-            choice_scores = None
-            if args.choices:
-                try:
-                    choice_scores = json.loads(args.choices)
-                except json.JSONDecodeError:
-                    print("Error: Invalid JSON format for --choices", file=sys.stderr)
+            try:
+                choices = json.loads(args.choices) if args.choices else None
+                result = classify_text(
+                    question=args.question,
+                    answer=args.answer,
+                    expected_response=args.expected,
+                    choices=choices,
+                    custom_prompt=args.prompt,
+                    no_reasoning=args.no_reasoning,
+                    model=args.model
+                )
+                print(json.dumps(result, indent=2))
+            except json.JSONDecodeError:
+                print("Error: Invalid JSON format for choices", file=sys.stderr)
+                sys.exit(1)
+                
+        elif args.command == 'extract':
+            try:
+                # Check that we have either content or links
+                if not args.content and not args.links:
+                    print("Error: Must provide either content or --links", file=sys.stderr)
                     sys.exit(1)
-            
-            result = classify_text(
-                question=args.question,
-                answer=args.answer,
-                expected=args.expected,
-                prompt_template=args.prompt or "",
-                choice_scores=choice_scores,
-                use_reasoning=not args.no_reasoning,
-                model=args.model
-            )
-            
-            print(f"Score: {result.score}")
-            print(f"Choice: {result.choice}")
-            if result.reasoning:
-                print(f"Reasoning: {result.reasoning}")
-            
+                
+                result = extract(
+                    content=args.content,
+                    links=args.links,
+                    model=args.model,
+                    temperature=args.temperature
+                )
+                
+                # Format output
+                if isinstance(result, dict) or args.json:
+                    if isinstance(result, dict):
+                        print(json.dumps(result, indent=2))
+                    else:
+                        # Try to parse as JSON for pretty printing
+                        try:
+                            parsed = json.loads(result)
+                            print(json.dumps(parsed, indent=2))
+                        except json.JSONDecodeError:
+                            print(result)
+                else:
+                    print(result)
+                    
+            except FileNotFoundError as e:
+                print(f"Error: {e}", file=sys.stderr)
+                sys.exit(1)
+            except Exception as e:
+                print(f"Error: {e}", file=sys.stderr)
+                sys.exit(1)
+                
         elif args.command == 'setup':
             setup_user_preferences()
             

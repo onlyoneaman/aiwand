@@ -131,6 +131,42 @@ aiwand generate "Write a story about AI" --max-tokens 800 --temperature 0.8
 aiwand generate "Explain neural networks" --model gpt-4 --temperature 0.3
 ```
 
+### `extract`
+
+Extract structured data from content and/or links using AI.
+
+```bash
+aiwand extract [content] [options]
+```
+
+**Options:**
+- `--links` - URLs or file paths to read and include in extraction
+- `--model` - AI model to use (auto-selected if not provided)
+- `--temperature` - Response creativity (0.0-1.0, default 0.7)
+- `--json` - Force JSON output format
+
+**Examples:**
+
+```bash
+# Extract from text content
+aiwand extract "Dr. Sarah Johnson, email: sarah@example.com, phone: (555) 123-4567"
+
+# Extract from URLs
+aiwand extract --links "https://example.com/contact-page" "https://example.com/about"
+
+# Extract from files
+aiwand extract --links "/path/to/business_card.txt" "/path/to/resume.pdf"
+
+# Combine content and links
+aiwand extract "Meeting notes about new contact" --links "https://company.com/team"
+
+# Specify model and temperature for consistent extraction
+aiwand extract "Contact information..." --model gpt-4 --temperature 0.1
+
+# Force JSON output
+aiwand extract "Data to extract" --json
+```
+
 ### `classify`
 
 Classify or grade text responses based on custom criteria.

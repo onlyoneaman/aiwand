@@ -6,8 +6,11 @@ import sys
 import os
 import random
 import uuid
+import re
+import urllib.request
+import urllib.parse
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Literal
 
 
 def generate_random_number(length: int = 6) -> str:
@@ -168,3 +171,206 @@ def get_chrome_version(chrome_path: Optional[str] = None) -> Optional[str]:
         return None
     except Exception:
         return None 
+
+
+def detect_input_type(content: str) -> Literal["text", "file", "url"]:
+    """
+    Detect whether the input content is text, a file path, or a URL.
+    
+    Args:
+        content (str): The input content to analyze
+        
+    Returns:
+        Literal["text", "file", "url"]: The detected input type
+        
+    Examples:
+        >>> detect_input_type("Hello world")
+        'text'
+        >>> detect_input_type("/path/to/file.txt")
+        'file'
+        >>> detect_input_type("https://example.com")
+        'url'
+    """
+    content = content.strip()
+    
+    # Check if it's a URL
+    url_pattern = re.compile(
+        r'^https?://'  # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
+        r'localhost|'  # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+    
+    if url_pattern.match(content):
+        return "url"
+    
+    # Check if it's a file path
+    # Use Path to handle cross-platform paths
+    try:
+        path = Path(content)
+        if path.exists() and path.is_file():
+            return "file"
+    except (OSError, ValueError):
+        # Invalid path format
+        pass
+    
+    # Also check for common file patterns even if file doesn't exist
+    # This handles cases where user provides a path that might not exist
+    file_pattern = re.compile(
+        r'^(?:[a-zA-Z]:)?[/\\]?(?:[^/\\:*?"<>|]+[/\\])*[^/\\:*?"<>|]*\.[a-zA-Z0-9]+$'
+    )
+    if file_pattern.match(content):
+        return "file"
+    
+    # Default to text
+    return "text"
+
+
+def read_file_content(file_path: str, encoding: str = 'utf-8') -> str:
+    """
+    Read the content of a file with proper error handling.
+    
+    Args:
+        file_path (str): Path to the file to read
+        encoding (str): File encoding (default: 'utf-8')
+        
+    Returns:
+        str: Content of the file
+        
+    Raises:
+        FileNotFoundError: If the file doesn't exist
+        PermissionError: If the file can't be read due to permissions
+        UnicodeDecodeError: If the file can't be decoded with the specified encoding
+        
+    Examples:
+        >>> content = read_file_content("document.txt")
+        >>> print(f"File content: {content[:100]}...")
+    """
+    try:
+        path = Path(file_path)
+        if not path.exists():
+            raise FileNotFoundError(f"File not found: {file_path}")
+        
+        if not path.is_file():
+            raise ValueError(f"Path is not a file: {file_path}")
+        
+        with open(path, 'r', encoding=encoding) as file:
+            return file.read()
+            
+    except UnicodeDecodeError:
+        # Try with different encoding
+        try:
+            with open(path, 'r', encoding='latin-1') as file:
+                return file.read()
+        except UnicodeDecodeError:
+            raise UnicodeDecodeError(
+                f"Could not decode file {file_path} with utf-8 or latin-1 encoding"
+            )
+    except PermissionError:
+        raise PermissionError(f"Permission denied reading file: {file_path}")
+
+
+def fetch_url_content(url: str, timeout: int = 30) -> str:
+    """
+    Fetch content from a URL with proper error handling.
+    
+    Args:
+        url (str): URL to fetch content from
+        timeout (int): Request timeout in seconds (default: 30)
+        
+    Returns:
+        str: Content fetched from the URL
+        
+    Raises:
+        ValueError: If the URL is invalid
+        urllib.error.URLError: If the URL can't be reached
+        urllib.error.HTTPError: If the server returns an error status
+        
+    Examples:
+        >>> content = fetch_url_content("https://example.com")
+        >>> print(f"Page content: {content[:100]}...")
+    """
+    try:
+        if not url.startswith(("http://", "https://")):
+            url = "https://" + url
+        
+        # Add user agent to avoid being blocked by some servers
+        req = urllib.request.Request(
+            url,
+            headers={
+                'User-Agent': 'AIWand/1.0 (Content Extraction Tool)'
+            }
+        )
+        
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            # Get content type and encoding
+            content_type = response.headers.get('content-type', '')
+            encoding = 'utf-8'
+            
+            # Try to extract encoding from content-type header
+            if 'charset=' in content_type:
+                encoding = content_type.split('charset=')[1].split(';')[0].strip()
+            
+            content = response.read().decode(encoding, errors='replace')
+            
+            # Basic content filtering - remove script and style tags for better extraction
+            # This is a simple approach, could be enhanced with proper HTML parsing
+            content = re.sub(r'<script[^>]*>.*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
+            content = re.sub(r'<style[^>]*>.*?</style>', '', content, flags=re.DOTALL | re.IGNORECASE)
+            content = re.sub(r'<[^>]+>', ' ', content)  # Remove HTML tags
+            content = re.sub(r'\s+', ' ', content).strip()  # Normalize whitespace
+            
+            return content
+            
+    except urllib.error.HTTPError as e:
+        raise urllib.error.HTTPError(
+            url, e.code, f"HTTP {e.code}: {e.reason}", e.headers, e.fp
+        )
+    except urllib.error.URLError as e:
+        raise urllib.error.URLError(f"Failed to fetch URL {url}: {e.reason}")
+    except Exception as e:
+        raise ValueError(f"Error fetching content from {url}: {str(e)}")
+
+
+def get_file_extension(file_path: str) -> str:
+    """
+    Get the file extension from a file path.
+    
+    Args:
+        file_path (str): Path to the file
+        
+    Returns:
+        str: File extension (without the dot)
+        
+    Examples:
+        >>> ext = get_file_extension("document.pdf")
+        >>> print(f"Extension: {ext}")  # Extension: pdf
+    """
+    return Path(file_path).suffix.lstrip('.')
+
+
+def is_text_file(file_path: str) -> bool:
+    """
+    Check if a file is likely to be a text file based on its extension.
+    
+    Args:
+        file_path (str): Path to the file
+        
+    Returns:
+        bool: True if the file is likely a text file
+        
+    Examples:
+        >>> is_text_file("document.txt")
+        True
+        >>> is_text_file("image.jpg")
+        False
+    """
+    text_extensions = {
+        'txt', 'md', 'rst', 'csv', 'json', 'xml', 'html', 'htm', 
+        'py', 'js', 'css', 'yaml', 'yml', 'toml', 'ini', 'cfg',
+        'log', 'sql', 'sh', 'bat', 'ps1', 'dockerfile', 'makefile'
+    }
+    
+    extension = get_file_extension(file_path).lower()
+    return extension in text_extensions 
