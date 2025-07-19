@@ -14,7 +14,7 @@ def extract(
     links: Optional[List[str]] = None,
     model: Optional[ModelType] = None,
     temperature: float = 0.7,
-    response_format: Optional[BaseModel] = None
+    response_format: Optional[BaseModel] = None,
 ) -> Union[str, Dict[str, Any]]:
     """
     Extract structured data from content and/or links using AI.
@@ -93,17 +93,19 @@ def extract(
         "You provide accurate, well-organized data while preserving context and "
         "maintaining data integrity. You follow the specified format requirements precisely."
     )
-    
-    user_prompt = "Extract relevant structured data from the following content:\n\n"
-        
-    user_prompt += (
+            
+    system_prompt += (
         "Organize the extracted data in a clear, logical structure. "
         "return the data as JSON format. "
-        "Use appropriate categories and present the information in a way that's "
-        "easy to understand and use. Include any relevant metadata or context.\n\n"
     )
+
+    if not response_format:
+        user_prompt += (
+            "Use appropriate categories and present the information in a way that's "
+            "easy to understand and use. Include any relevant metadata or context.\n\n"
+        )
     
-    user_prompt += f"Content to extract from:\n{combined_content}"
+    user_prompt = f"Extract relevant structured data from the following content:\n{combined_content}"
     
     result = call_ai(
         system_prompt=system_prompt,
