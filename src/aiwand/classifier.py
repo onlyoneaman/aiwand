@@ -5,7 +5,7 @@ This module provides a simplified classifier that can be used to grade or classi
 text responses based on custom criteria and choice scores.
 """
 
-from typing import Dict, Optional, List, Any, Union
+from typing import Dict, Optional, Any, Union
 from pydantic import BaseModel, Field
 
 from .config import make_ai_request, AIError, ModelType

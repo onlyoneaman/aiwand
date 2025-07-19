@@ -1,7 +1,6 @@
 import json
 from typing import Any
 from urllib.parse import urlparse
-import urllib.request
 
 def convert_to_string(content: Any) -> str:
     """Convert any content to string representation."""
@@ -31,13 +30,3 @@ def is_url(link: str) -> bool:
 def is_local_file(path: str) -> bool:
     parsed = urlparse(path)
     return parsed.scheme == '' or parsed.scheme == 'file'
-
-def fetch_url(url: str):
-
-    req = urllib.request.Request(
-        url,
-        headers={'User-Agent': 'AIWand/1.0 (Content Extraction Tool)'}
-    )
-
-    with urllib.request.urlopen(req) as response:
-        return response.read()

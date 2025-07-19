@@ -9,10 +9,12 @@ from .core import summarize, chat, generate_text
 from .extract import extract
 from .config import (
     make_ai_request,
-    DEFAULT_SYSTEM_PROMPT,
     get_ai_client,
     get_current_provider,
     get_model_name
+)
+from .constants import (
+    DEFAULT_SYSTEM_PROMPT
 )
 from .setup import (
     setup_user_preferences, 

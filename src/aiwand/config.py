@@ -10,6 +10,7 @@ import json
 from typing import Dict, Any, Optional, Tuple, List, Union
 from openai import OpenAI
 
+from .constants import DEFAULT_SYSTEM_PROMPT
 from .models import (
     AIProvider,
     ModelType,
@@ -18,9 +19,6 @@ from .models import (
     AIError
 )
 from .preferences import get_preferred_provider_and_model
-
-# Default system prompt
-DEFAULT_SYSTEM_PROMPT = "You are AIWand, a helpful AI assistant that provides clear, accurate, and concise responses. You excel at text processing, analysis, and generation tasks."
 
 # Client cache to avoid recreating clients
 _client_cache: Dict[AIProvider, OpenAI] = {}
