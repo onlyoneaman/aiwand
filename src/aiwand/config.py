@@ -125,7 +125,8 @@ def call_ai(
     system_prompt: Optional[str] = None,
     user_prompt: Optional[str] = None,
     additional_system_instructions: Optional[str] = None,
-    images: Optional[List[Union[str, Path, bytes]]] = None
+    images: Optional[List[Union[str, Path, bytes]]] = None,
+    reasoning_effort: Optional[str] = None
 ) -> str:
     """
     Unified wrapper for AI API calls that handles provider differences.
@@ -148,6 +149,8 @@ def call_ai(
                                        If provided, will be added to the end of the system message with proper spacing.
         images: Optional list of images to add to the messages list.
                 Can be a list of strings (URLs), Path objects, or bytes.
+        reasoning_effort: Optional reasoning effort to use for the AI call.
+                          Can be "low", "medium", "high".
     Returns:
         str: The AI response content
         
@@ -206,7 +209,10 @@ def call_ai(
             "temperature": temperature,
             "top_p": top_p
         }
-        
+
+        if reasoning_effort:
+            params["reasoning_effort"] = reasoning_effort
+
         if max_tokens:
             params["max_tokens"] = max_tokens
         
