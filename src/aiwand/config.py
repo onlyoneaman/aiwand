@@ -7,6 +7,7 @@ and provider resolution utilities.
 
 import os
 import json
+from pathlib import Path  
 from typing import Dict, Any, Optional, Tuple, List, Union
 from openai import OpenAI
 
@@ -19,6 +20,9 @@ from .models import (
     AIError
 )
 from .preferences import get_preferred_provider_and_model
+from .utils import (
+    image_to_data_url
+)
 
 # Client cache to avoid recreating clients
 _client_cache: Dict[AIProvider, OpenAI] = {}
@@ -120,7 +124,8 @@ def call_ai(
     response_format: Optional[Dict[str, Any]] = None,
     system_prompt: Optional[str] = None,
     user_prompt: Optional[str] = None,
-    additional_system_instructions: Optional[str] = None
+    additional_system_instructions: Optional[str] = None,
+    images: Optional[List[Union[str, Path, bytes]]] = None
 ) -> str:
     """
     Unified wrapper for AI API calls that handles provider differences.
@@ -141,6 +146,8 @@ def call_ai(
                      Can be used in parallel with or without existing messages.
         additional_system_instructions: Optional additional instructions to append to the system prompt.
                                        If provided, will be added to the end of the system message with proper spacing.
+        images: Optional list of images to add to the messages list.
+                Can be a list of strings (URLs), Path objects, or bytes.
     Returns:
         str: The AI response content
         
@@ -205,6 +212,14 @@ def call_ai(
         
         if response_format:
             params["response_format"] = response_format
+
+
+        if images:
+            image_parts = [
+                {"type": "image_url", "image_url": {"url": image_to_data_url(img)}}
+                for img in images
+            ]
+            final_messages.append({"role": "user", "content": image_parts})
 
         # Choose API call method based on provider and features
         if current_provider == AIProvider.GEMINI and response_format:

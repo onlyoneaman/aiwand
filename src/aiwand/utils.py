@@ -1,4 +1,7 @@
 import json
+import pathlib
+import mimetypes
+import base64
 from typing import Any
 from urllib.parse import urlparse
 
@@ -31,3 +34,14 @@ def is_local_file(path: str) -> bool:
     path = path.strip()
     parsed = urlparse(path)
     return parsed.scheme == 'file'
+
+
+def image_to_data_url(src: str | pathlib.Path | bytes) -> str:
+    if isinstance(src, bytes):
+        raw, mime = src, "image/png"
+    else:
+        path = pathlib.Path(src).expanduser()
+        raw = path.read_bytes()
+        mime = mimetypes.guess_type(path.name)[0] or "image/png"
+    b64 = base64.b64encode(raw).decode()
+    return f"data:{mime};base64,{b64}"

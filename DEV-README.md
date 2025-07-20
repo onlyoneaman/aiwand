@@ -17,7 +17,9 @@ aiwand.call_ai(
     provider: Optional[Union[AIProvider, str]] = None,
     response_format: Optional[Dict[str, Any]] = None,
     system_prompt: Optional[str] = None,
-    user_prompt: Optional[str] = None
+    user_prompt: Optional[str] = None,
+    additional_system_instructions: Optional[str] = None,
+    images: Optional[List[Union[str, Path, bytes]]] = None
 ) -> str
 ```
 
@@ -32,6 +34,8 @@ aiwand.call_ai(
 | `response_format` | `Dict/Pydantic` | `None` | Structured output format |
 | `system_prompt` | `str` | `None` | System prompt (uses default if None) |
 | `user_prompt` | `str` | `None` | User message to append to messages list |
+| `additional_system_instructions` | `str` | `None` | Additional system instructions to append to the system prompt |
+| `images` | `List[Union[str, Path, bytes]]` | `None` | List of images to add to the messages list |
 
 **Returns:** `str` or parsed Pydantic object (if `response_format` provided)
 

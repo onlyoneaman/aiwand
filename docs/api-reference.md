@@ -208,7 +208,7 @@ print(f"UUID1: {uuid}")  # e.g., "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
 
 ## Advanced Functions
 
-### `call_ai(messages=None, max_tokens=None, temperature=0.7, top_p=1.0, model=None, provider=None, response_format=None, system_prompt=None, user_prompt=None, additional_system_instructions=None)`
+### `call_ai(messages=None, max_tokens=None, temperature=0.7, top_p=1.0, model=None, provider=None, response_format=None, system_prompt=None, user_prompt=None, additional_system_instructions=None, images=None)`
 
 Low-level unified AI request function with automatic provider switching and advanced features.
 
@@ -223,6 +223,7 @@ Low-level unified AI request function with automatic provider switching and adva
 - `system_prompt` (str, optional): Custom system prompt (uses default if None)
 - `user_prompt` (str, optional): User message to append to the messages list. Can be used with or without existing messages.
 - `additional_system_instructions` (str, optional): Additional instructions to append to the system prompt. If provided, will be added to the end of the system message with proper spacing.
+- `images` (list, optional): List of images to add to the messages list. Can be a list of strings (URLs), Path objects, or bytes.
 
 **Returns:** AI response content (str)
 
