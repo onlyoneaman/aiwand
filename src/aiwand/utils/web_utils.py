@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from typing import List
 
 from ..models import LinkContent
-from .file_utils import is_local_file
+from .file_utils import is_remote_url
 
 
 def fetch_all_data(
@@ -25,8 +25,7 @@ def fetch_all_data(
     all_data = []
     for link in links:
         try:
-            local_link = is_local_file(link)
-            if local_link:
+            if not is_remote_url(link):
                 data = read_file_content(link)
             else:
                 data = fetch_data(url=link, timeout=timeout)
