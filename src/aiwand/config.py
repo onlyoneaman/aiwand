@@ -7,6 +7,7 @@ and provider resolution utilities.
 
 import os
 import json
+import copy
 from pathlib import Path  
 from typing import Dict, Any, Optional, Tuple, List, Union
 from openai import OpenAI
@@ -130,7 +131,8 @@ def call_ai(
     images: Optional[List[Union[str, Path, bytes]]] = None,
     reasoning_effort: Optional[str] = None,
     tool_choice: Optional[str] = None,
-    tools: Optional[List[Dict[str, Any]]] = None
+    tools: Optional[List[Dict[str, Any]]] = None,
+    debug: Optional[bool] = False
 ) -> str:
     """
     Unified wrapper for AI API calls that handles provider differences.
@@ -209,7 +211,14 @@ def call_ai(
         has_user_message = any(msg.get("role") in ["user", "assistant"] for msg in final_messages)
         if not has_user_message:
             final_messages.append({"role": "user", "content": "Please respond based on your instructions."})
-        
+
+        if images:
+            image_parts = [
+                {"type": "image_url", "image_url": {"url": image_to_data_url(img)}}
+                for img in images
+            ]
+            final_messages.append({"role": "user", "content": image_parts})
+
         # Prepare common parameters
         params = {
             "model": model_name,
@@ -233,13 +242,19 @@ def call_ai(
         if response_format:
             params["response_format"] = response_format
 
-
-        if images:
-            image_parts = [
-                {"type": "image_url", "image_url": {"url": image_to_data_url(img)}}
-                for img in images
-            ]
-            final_messages.append({"role": "user", "content": image_parts})
+        if debug:
+            copied_messages = copy.deepcopy(final_messages)
+            for msg in copied_messages:
+                msg = copied_messages[-1]
+                if msg.get("role") == "user" and msg.get("content"):
+                    for content in msg["content"]:
+                        if content.get("type") == "image_url":
+                            content["image_url"]["url"] = "<IMAGE_URLs>"
+            print(json.dumps(copied_messages, indent=2))
+            print(f"Model: {current_provider}/{model_name}")
+            for k, v in params.items():
+                if k != "messages":
+                    print(f"{k}: {v}\n")
 
         # Choose API call method based on provider and features
         if current_provider == AIProvider.GEMINI and response_format:
