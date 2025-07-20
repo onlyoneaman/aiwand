@@ -2,6 +2,7 @@ import json
 import pathlib
 import mimetypes
 import base64
+import urllib
 from typing import Any
 
 def convert_to_string(content: Any) -> str:
@@ -32,6 +33,10 @@ def is_url(link: str) -> bool:
 def image_to_data_url(src: str | pathlib.Path | bytes) -> str:
     if isinstance(src, bytes):
         raw, mime = src, "image/png"
+    elif isinstance(src, str) and src.startswith("http"):
+        with urllib.request.urlopen(src) as response:
+            raw = response.read()
+            mime = response.headers.get_content_type()
     else:
         path = pathlib.Path(src).expanduser()
         raw = path.read_bytes()
