@@ -39,24 +39,48 @@ class BaseModel(Enum):
 
 class OpenAIModel(BaseModel):
     """Supported OpenAI models."""
-    # Latest reasoning models (best performance)
+
+    O4_MINI = "o4-mini"
+    O4_MINI_DEEP_RESEARCH = "o4-mini-deep-research"
+
+    O3_PRO = "o3-pro"
+    O3_DEEP_RESEARCH = "o3-deep-research"
     O3_MINI = "o3-mini"
     O3 = "o3"
+
+    O1_PRO = "o1-pro"
     O1 = "o1"
-    O1_MINI = "o1-mini"
-    
-    # Latest GPT-4.1 series (huge context, best for coding)
+    O1_PREVIEW = "o1-preview"
+
+    CODEX_MINI = "codex-mini-latest"
+
     GPT_4_1 = "gpt-4.1"
     GPT_4_1_MINI = "gpt-4.1-mini"
+    GPT_4_1_NANO = "gpt-4.1-nano"
     
-    # Latest GPT-4o series (multimodal, fast)
     GPT_4O = "gpt-4o"
     GPT_4O_MINI = "gpt-4o-mini"
-    
-    # Legacy but still capable
+    CHATGPT_4O_LATEST = "chatgpt-4o-latest"
+
+    GPT_IMAGE_1 = "gpt-image-1"
+    DALL_E_3 = "dall-e-3"
+    DALL_E_2 = "dall-e-2"    
+
+    WHISPER_1 = "whisper-1"
+    TTS_1 = "tts-1"
+    TTS_1_HD = "tts-1-hd"
+    TTS_1_1106 = "tts-1-1106"
+    TTS_1_HD_1106 = "tts-1-hd-1106"
+
     GPT_4_TURBO = "gpt-4-turbo"
     GPT_4 = "gpt-4"
     GPT_3_5_TURBO = "gpt-3.5-turbo"
+    GPT_3_5_TURBO_16k = "gpt-3.5-turbo-16k"
+
+    TEXT_EMBEDDING_ADA_2 = "text-embedding-ada-002"
+    TEXT_EMBEDDING_3_SMALL = "text-embedding-3-small"
+    TEXT_EMBEDDING_3_LARGE = "text-embedding-3-large"
+
 
 
 class GeminiModel(BaseModel):
