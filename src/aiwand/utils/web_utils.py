@@ -41,6 +41,27 @@ def fetch_all_data(
     return all_data
 
 
+def get_soup(
+        url: str, 
+        timeout: int = 30,
+        parser: str = 'html.parser',
+        **kwargs
+     ) -> BeautifulSoup:
+    """
+    Get a BeautifulSoup object for a given URL.
+    """
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
+    req = urllib.request.Request(
+        url,
+        headers={
+            'User-Agent': 'AIWand/1.0 (Content Extraction Tool)'
+        }
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as response:
+        return BeautifulSoup(response.read(), parser, **kwargs)
+
+
 def fetch_data(url: str, timeout: int = 30) -> str:
     """
     Fetch content from a URL with proper error handling.
@@ -59,23 +80,14 @@ def fetch_data(url: str, timeout: int = 30) -> str:
         >>> print(f"Page content: {content[:100]}...")
     """
     try:
-        if not url.startswith(("http://", "https://")):
-            url = "https://" + url
+        soup = get_soup(url, timeout=timeout)
         
-        # Add user agent to avoid being blocked by some servers
-        req = urllib.request.Request(
-            url,
-            headers={
-                'User-Agent': 'AIWand/1.0 (Content Extraction Tool)'
-            }
-        )
+        title = soup.title.string
+        text = soup.get_text(separator=" ")
+
+        full_text = f"""Title: {title}\nURL Source: {url}\nContent:\n{text}"""
         
-        with urllib.request.urlopen(req, timeout=timeout) as response:
-            soup = BeautifulSoup(response.read(), 'html.parser')
-            text = soup.get_text()
-            
-            return text
-            
+        return full_text
     except urllib.error.HTTPError as e:
         raise urllib.error.HTTPError(
             url, e.code, f"HTTP {e.code}: {e.reason}", e.headers, e.fp
