@@ -14,7 +14,7 @@ from .config import (
     get_model_name,
     list_models
 )
-from .constants import (
+from .prompts import (
     DEFAULT_SYSTEM_PROMPT
 )
 from .setup import (

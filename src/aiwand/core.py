@@ -4,6 +4,10 @@ Core AI functionality for AIWand
 
 from typing import Optional, List, Dict
 from .config import call_ai, ModelType
+from .prompts import (
+    SUMMARIZE_SYSTEM_PROMPT, CHAT_SYSTEM_PROMPT,
+    GENERATE_TEXT_SYSTEM_PROMPT
+)
 
 
 def summarize(
@@ -31,8 +35,6 @@ def summarize(
     if not text.strip():
         raise ValueError("Text cannot be empty")
     
-    system_prompt = "You are an expert text summarizer. You excel at extracting key information and presenting it clearly and concisely while preserving the essential meaning and context."
-    
     style_prompts = {
         "concise": "Provide a concise summary of the following text:",
         "detailed": "Provide a detailed summary of the following text:",
@@ -46,7 +48,7 @@ def summarize(
     
     return call_ai(
         model=model,
-        system_prompt=system_prompt,
+        system_prompt=SUMMARIZE_SYSTEM_PROMPT,
         user_prompt=f"{user_prompt}\n\n{text}"
     )
 
@@ -76,16 +78,14 @@ def chat(
     if not message.strip():
         raise ValueError("Message cannot be empty")
     
-    system_prompt = "You are a helpful, knowledgeable, and engaging conversational AI assistant. You provide thoughtful responses, ask clarifying questions when needed, and maintain context throughout the conversation. You are friendly, professional, and adapt your tone to match the user's needs."
-    
     messages = conversation_history or []
-    messages.append({"role": "user", "content": message})
     
     return call_ai(
         messages=messages,
         temperature=temperature,
         model=model,
-        system_prompt=system_prompt
+        system_prompt=CHAT_SYSTEM_PROMPT,
+        user_prompt=message
     )
 
 
@@ -114,12 +114,10 @@ def generate_text(
     if not prompt.strip():
         raise ValueError("Prompt cannot be empty")
     
-    system_prompt = "You are a skilled creative writer and content generator. You excel at producing high-quality, engaging, and contextually appropriate text based on user prompts. You adapt your writing style, tone, and format to match the specific requirements and context provided."
-    
     return call_ai(
         max_tokens=max_tokens,
         temperature=temperature,
         model=model,
-        system_prompt=system_prompt,
+        system_prompt=GENERATE_TEXT_SYSTEM_PROMPT,
         user_prompt=prompt
     ) 

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional, Tuple, List, Union
 from openai import OpenAI
 
-from .constants import DEFAULT_SYSTEM_PROMPT
+from .prompts import DEFAULT_SYSTEM_PROMPT
 from .models import (
     AIProvider,
     ModelType,
