@@ -1,4 +1,5 @@
 import aiwand
+import pprint
 from dotenv import load_dotenv
 
 def main():
@@ -15,8 +16,9 @@ def main():
     print(data)
 
     data2 = aiwand.extract(
-        links=links
+        images=links,
     )
+    pprint.pp(data2)
 
     return data
 

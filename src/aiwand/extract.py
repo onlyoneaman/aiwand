@@ -11,6 +11,7 @@ from .utils import convert_to_string, string_to_json, fetch_all_data
 def extract(
     content: Optional[Union[str, Any]] = None,
     links: Optional[List[str]] = None,
+    images: Optional[List[str]] = None,
     model: Optional[ModelType] = None,
     temperature: float = 0.7,
     response_format: Optional[BaseModel] = None,
@@ -27,6 +28,7 @@ def extract(
             Can be str, dict, list, or any object with __str__ method.
         links: List of URLs or file paths to fetch and include in extraction.
             URLs (http/https) will be fetched, file paths will be read.
+        images: List of image URLs to include in extraction.
         model: Specific AI model to use (auto-selected if not provided)
         temperature: Response creativity (0.0 to 1.0, default 0.7)
         response_format: Pydantic model class for structured output.
@@ -66,8 +68,8 @@ def extract(
         data = {"name": "John", "email": "john@example.com"}
         result = extract(content=data)
     """
-    if not content and not links:
-        raise ValueError("Must provide either content or links")
+    if not content and not links and not images:
+        raise ValueError("Must provide either content / links / images")
     
     all_content = []
     
@@ -83,7 +85,7 @@ def extract(
             data = link_data.content
             all_content.append(f"=== URL {url} ===\n{data}\n")
     
-    if not all_content:
+    if not all_content and not images:
         raise ValueError("No valid content found to process")
     
     combined_content = "\n\n".join(all_content)
@@ -100,13 +102,13 @@ def extract(
         "return the data as JSON format. "
     )
 
-    if not response_format:
-        user_prompt += (
+    if response_format:
+        user_prompt = f"Extract relevant structured data from the following content:\n{combined_content}"
+    else:
+        user_prompt = (
             "Use appropriate categories and present the information in a way that's "
             "easy to understand and use. Include any relevant metadata or context.\n\n"
-        )
-    
-    user_prompt = f"Extract relevant structured data from the following content:\n{combined_content}"
+        )    
     
     result = call_ai(
         system_prompt=system_prompt,
@@ -115,6 +117,7 @@ def extract(
         response_format=response_format,
         user_prompt=user_prompt,
         additional_system_instructions=additional_system_instructions,
+        images=images
     )
     if response_format:
         return result    
