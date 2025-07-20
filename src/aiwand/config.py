@@ -244,7 +244,13 @@ def call_ai(
         raise AIError(f"AI request failed: {str(e)}")
 
 
-def get_ai_client() -> OpenAI:
+def list_models():
+    client = get_ai_client(AIProvider.OPENAI)
+    models = client.models.list()
+    return models
+
+
+def get_ai_client(provider: Optional[AIProvider] = None) -> OpenAI:
     """
     Get configured AI client with smart provider selection.
     
@@ -254,7 +260,8 @@ def get_ai_client() -> OpenAI:
     Raises:
         AIError: When no API provider is available
     """
-    provider, _ = get_preferred_provider_and_model()
+    if provider is None:
+        provider, _ = get_preferred_provider_and_model()
     
     if not provider:
         available = ProviderRegistry.get_available_providers()

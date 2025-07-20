@@ -11,7 +11,8 @@ from .config import (
     call_ai,
     get_ai_client,
     get_current_provider,
-    get_model_name
+    get_model_name,
+    list_models
 )
 from .constants import (
     DEFAULT_SYSTEM_PROMPT
@@ -61,7 +62,8 @@ __all__ = [
     "get_ai_client",
     "get_current_provider", 
     "get_model_name",
-    
+    "list_models",
+
     # AI Models and Providers
     "AIProvider",
     "OpenAIModel", 
