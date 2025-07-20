@@ -40,8 +40,7 @@ setup(
     install_requires=[
         "openai>=1.0.0",
         "python-dotenv>=0.19.0",
-        "pydantic>=2.0.0",
-        "beautifulsoup4"
+        "beautifulsoup4>=4.0"
     ],
     extras_require={
         "dev": [
