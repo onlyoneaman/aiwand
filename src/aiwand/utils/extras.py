@@ -3,7 +3,6 @@ import pathlib
 import mimetypes
 import base64
 from typing import Any
-from urllib.parse import urlparse
 
 def convert_to_string(content: Any) -> str:
     """Convert any content to string representation."""
@@ -28,12 +27,6 @@ def string_to_json(content: str) -> dict:
 def is_url(link: str) -> bool:
     """Check if a link is a URL (starts with http/https)."""
     return link.strip().startswith(('http://', 'https://', 'www.')) 
-
-
-def is_local_file(path: str) -> bool:
-    path = path.strip()
-    parsed = urlparse(path)
-    return parsed.scheme == 'file'
 
 
 def image_to_data_url(src: str | pathlib.Path | bytes) -> str:

@@ -34,11 +34,13 @@ from .helper import (
     generate_random_number, 
     generate_uuid,
     # File and URL helpers (still used internally)
-    read_file_content,
-    fetch_data,
-    fetch_all_data,
     get_file_extension,
     is_text_file,
+)
+from .utils import (
+    fetch_data,
+    fetch_all_data,
+    read_file_content,
 )
 from .classifier import (
     ClassifierResponse,
@@ -75,12 +77,14 @@ __all__ = [
     # Helper functions
     "generate_random_number",
     "generate_uuid",
-    "read_file_content",
-    "fetch_data",
-    "fetch_all_data",
     "get_file_extension",
     "is_text_file",
-    
+
+    # utils
+    "fetch_data",
+    "read_file_content",
+    "fetch_all_data", 
+       
     # Classification
     "ClassifierResponse",
     "classify_text",

@@ -5,8 +5,7 @@ Extract functionality for AIWand - structured data extraction from any content
 from typing import Optional, List, Union, Any, Dict
 from pydantic import BaseModel
 from .config import call_ai, ModelType
-from .helper import fetch_all_data
-from .utils import convert_to_string, string_to_json
+from .utils import convert_to_string, string_to_json, fetch_all_data
 
 
 def extract(
