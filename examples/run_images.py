@@ -1,5 +1,6 @@
 import aiwand
 import pprint
+from pydantic import BaseModel
 from dotenv import load_dotenv
 
 def main():
@@ -19,6 +20,21 @@ def main():
         images=links,
     )
     pprint.pp(data2)
+
+    class ReceiptItem(BaseModel):
+        name: str
+        quantity: str
+        rate: str
+        total: str
+    class FullResponse(BaseModel):
+        total: str
+        store_name: str
+        items: list[ReceiptItem]
+    data3 = aiwand.extract(
+        images=links,
+        response_format=FullResponse
+    )        
+    pprint.pp(data3)
 
     return data
 
