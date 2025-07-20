@@ -11,6 +11,7 @@ import urllib.request
 import urllib.parse
 from pathlib import Path
 from typing import Optional, Literal, List
+from bs4 import BeautifulSoup
 
 from .utils import is_local_file
 from .models import LinkContent
@@ -314,16 +315,13 @@ def fetch_data(url: str, timeout: int = 30) -> str:
     
     Args:
         url (str): URL to fetch content from
-        timeout (int): Request timeout in seconds (default: 30)
-        
+        timeout (int): Request timeout in seconds (default: 30)        
     Returns:
-        str: Content fetched from the URL
-        
+        str: Content fetched from the URL        
     Raises:
         ValueError: If the URL is invalid
         urllib.error.URLError: If the URL can't be reached
-        urllib.error.HTTPError: If the server returns an error status
-        
+        urllib.error.HTTPError: If the server returns an error status        
     Examples:
         >>> content = fetch_data("https://example.com")
         >>> print(f"Page content: {content[:100]}...")
@@ -341,24 +339,10 @@ def fetch_data(url: str, timeout: int = 30) -> str:
         )
         
         with urllib.request.urlopen(req, timeout=timeout) as response:
-            # Get content type and encoding
-            content_type = response.headers.get('content-type', '')
-            encoding = 'utf-8'
+            soup = BeautifulSoup(response.read(), 'html.parser')
+            text = soup.get_text()
             
-            # Try to extract encoding from content-type header
-            if 'charset=' in content_type:
-                encoding = content_type.split('charset=')[1].split(';')[0].strip()
-            
-            content = response.read().decode(encoding, errors='replace')
-            
-            # Basic content filtering - remove script and style tags for better extraction
-            # This is a simple approach, could be enhanced with proper HTML parsing
-            content = re.sub(r'<script[^>]*>.*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
-            content = re.sub(r'<style[^>]*>.*?</style>', '', content, flags=re.DOTALL | re.IGNORECASE)
-            content = re.sub(r'<[^>]+>', ' ', content)  # Remove HTML tags
-            content = re.sub(r'\s+', ' ', content).strip()  # Normalize whitespace
-            
-            return content
+            return text
             
     except urllib.error.HTTPError as e:
         raise urllib.error.HTTPError(
