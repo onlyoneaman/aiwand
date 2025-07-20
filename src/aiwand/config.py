@@ -21,7 +21,8 @@ from .models import (
 )
 from .preferences import get_preferred_provider_and_model
 from .utils import (
-    image_to_data_url
+    image_to_data_url,
+    retry_with_backoff
 )
 
 # Client cache to avoid recreating clients
@@ -114,6 +115,7 @@ def _resolve_provider_model_client(
         return pref_provider, str(preferred_model), _get_cached_client(pref_provider)
 
 
+@retry_with_backoff(max_retries=2)
 def call_ai(
     messages: Optional[List[Dict[str, str]]] = None,
     max_tokens: Optional[int] = None,
