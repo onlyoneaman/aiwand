@@ -262,8 +262,8 @@ def call_ai(
         raise AIError(f"AI request failed: {str(e)}")
 
 
-def list_models():
-    client = get_ai_client(AIProvider.OPENAI)
+def list_models(provider: Optional[AIProvider] = None):
+    client = get_ai_client(provider)
     models = client.models.list()
     return models
 
