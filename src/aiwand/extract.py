@@ -16,6 +16,7 @@ def extract(
     temperature: float = 0.7,
     response_format: Optional[BaseModel] = None,
     additional_system_instructions: Optional[str] = None,
+    debug: Optional[bool] = False,
 ) -> Union[str, Dict[str, Any]]:
     """
     Extract structured data from content and/or links using AI.
@@ -117,7 +118,8 @@ def extract(
         response_format=response_format,
         user_prompt=user_prompt,
         additional_system_instructions=additional_system_instructions,
-        images=images
+        images=images,
+        debug=debug
     )
     if response_format:
         return result    

@@ -12,12 +12,13 @@ def main():
         system_prompt="You are a helpful assistant that can extract text from images.",
         user_prompt="Extract the whole text from the image.",
         images=links,
-        debug=True
+        debug=True,
+        model='gpt-4o'
     )
     print(data)
 
     data2 = aiwand.extract(
-        images=links,
+        images=links
     )
     pprint.pp(data2)
 
