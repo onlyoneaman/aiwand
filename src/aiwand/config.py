@@ -126,7 +126,9 @@ def call_ai(
     user_prompt: Optional[str] = None,
     additional_system_instructions: Optional[str] = None,
     images: Optional[List[Union[str, Path, bytes]]] = None,
-    reasoning_effort: Optional[str] = None
+    reasoning_effort: Optional[str] = None,
+    tool_choice: Optional[str] = None,
+    tools: Optional[List[Dict[str, Any]]] = None
 ) -> str:
     """
     Unified wrapper for AI API calls that handles provider differences.
@@ -151,6 +153,10 @@ def call_ai(
                 Can be a list of strings (URLs), Path objects, or bytes.
         reasoning_effort: Optional reasoning effort to use for the AI call.
                           Can be "low", "medium", "high".
+        tool_choice: Optional tool choice to use for the AI call.
+                     Can be "auto", "none", "required".
+        tools: Optional list of tools to use for the AI call.
+               Can be a list of tool dictionaries with 'type', 'function', and 'description'.
     Returns:
         str: The AI response content
         
@@ -212,6 +218,12 @@ def call_ai(
 
         # if reasoning_effort:
             # params["reasoning_effort"] = reasoning_effort
+
+        if tool_choice:
+            params["tool_choice"] = tool_choice
+        
+        if tools:
+            params["tools"] = tools 
 
         if max_tokens:
             params["max_tokens"] = max_tokens
