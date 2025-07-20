@@ -210,8 +210,8 @@ def call_ai(
             "top_p": top_p
         }
 
-        if reasoning_effort:
-            params["reasoning_effort"] = reasoning_effort
+        # if reasoning_effort:
+            # params["reasoning_effort"] = reasoning_effort
 
         if max_tokens:
             params["max_tokens"] = max_tokens
