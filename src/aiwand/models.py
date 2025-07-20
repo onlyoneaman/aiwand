@@ -61,20 +61,27 @@ class OpenAIModel(BaseModel):
 
 class GeminiModel(BaseModel):
     """Supported Gemini models."""
-    # Latest Gemini 2.5 series (best performance)
     GEMINI_2_5_PRO = "gemini-2.5-pro"
     GEMINI_2_5_FLASH = "gemini-2.5-flash"
-    GEMINI_2_5_FLASH_LITE = "gemini-2.5-flash-lite"
+    GEMINI_2_5_FLASH_LITE = "gemini-2.5-flash-lite-preview-06-17"
+    GEMINI_LIVE_2_5_FLASH_PREVIEW = "gemini-live-2.5-flash-preview"
+    GEMINI_LIVE_2_0_FLASH_LIVE = "gemini-2.0-flash-live-001"
+    GEMINI_EMBEDDINGS_001 = "gemini-embedding-001"
+
+    VEO_2 = "veo-2.0-generate-001"
+    VEO_3 = "veo-3.0-generate-preview"
+    IMAGEN_3 = "imagen-3.0-generate-002"
+    IMAGEN_4 = "imagen-4.0-generate-preview-06-06"
+    IMAGEN_4_ULTRA = "imagen-4.0-ultra-generate-preview-06-06"
     
-    # Gemini 2.0 series (current stable)
-    GEMINI_2_0_FLASH_EXP = "gemini-2.0-flash-exp"
     GEMINI_2_0_FLASH = "gemini-2.0-flash"
     GEMINI_2_0_PRO = "gemini-2.0-pro"
     GEMINI_2_0_FLASH_LITE = "gemini-2.0-flash-lite"
+    GEMINI_2_0_FLASH_PREVIEW_IMAGE_GENERATION = "gemini-2.0-flash-preview-image-generation"
     
-    # Legacy but still capable
     GEMINI_1_5_FLASH = "gemini-1.5-flash"
     GEMINI_1_5_PRO = "gemini-1.5-pro"
+    GEMINI_1_5_FLASH_8b = "gemini-1.5-flash-8b"
 
 
 # Type aliases for models
