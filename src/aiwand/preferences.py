@@ -104,3 +104,32 @@ def get_preferred_provider_and_model() -> Tuple[Optional[AIProvider], Optional[U
         preferred_model = ProviderRegistry.get_default_model(preferred_provider)
     
     return preferred_provider, preferred_model 
+
+
+def get_current_provider() -> Optional[AIProvider]:
+    """Get the currently active provider."""
+    provider, _ = get_preferred_provider_and_model()
+    return provider
+
+
+def get_model_name() -> str:
+    """
+    Get the model name for the current provider.
+    
+    Returns:
+        str: Model name to use
+        
+    Raises:
+        AIError: When no provider is available
+    """
+    _, model = get_preferred_provider_and_model()
+    
+    if not model:
+        raise AIError(
+            "No AI provider available. Please set up your API keys and run 'aiwand setup' "
+            "to configure your preferences."
+        )
+    
+    return str(model) 
+
+

@@ -10,9 +10,11 @@ from .extract import extract
 from .config import (
     call_ai,
     get_ai_client,
-    get_current_provider,
-    get_model_name,
     list_models
+)
+from .preferences import (
+    get_current_provider,
+    get_model_name
 )
 from .prompts import (
     DEFAULT_SYSTEM_PROMPT

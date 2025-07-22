@@ -30,11 +30,6 @@ from .utils import (
 _client_cache: Dict[AIProvider, OpenAI] = {}
 
 
-def get_current_provider() -> Optional[AIProvider]:
-    """Get the currently active provider."""
-    provider, _ = get_preferred_provider_and_model()
-    return provider
-
 
 def _get_cached_client(provider: AIProvider) -> OpenAI:
     """Get or create a cached client for the provider."""
@@ -308,23 +303,3 @@ def get_ai_client(provider: Optional[AIProvider] = None) -> OpenAI:
     
     return _get_cached_client(provider)
 
-
-def get_model_name() -> str:
-    """
-    Get the model name for the current provider.
-    
-    Returns:
-        str: Model name to use
-        
-    Raises:
-        AIError: When no provider is available
-    """
-    _, model = get_preferred_provider_and_model()
-    
-    if not model:
-        raise AIError(
-            "No AI provider available. Please set up your API keys and run 'aiwand setup' "
-            "to configure your preferences."
-        )
-    
-    return str(model) 
