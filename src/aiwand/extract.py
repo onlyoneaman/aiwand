@@ -5,12 +5,15 @@ Extract functionality for AIWand - structured data extraction from any content
 from typing import Optional, List, Union, Any, Dict
 from pydantic import BaseModel
 from .config import call_ai, ModelType
-from .utils import convert_to_string, string_to_json, fetch_all_data
+from .utils import (
+    convert_to_string, string_to_json, fetch_all_data, fetch_doc
+)
 
 
 def extract(
     content: Optional[Union[str, Any]] = None,
     links: Optional[List[str]] = None,
+    document_links: Optional[List[str]] = None,
     images: Optional[List[str]] = None,
     model: Optional[ModelType] = None,
     temperature: float = 0.7,
@@ -27,8 +30,9 @@ def extract(
     Args:
         content: Any content to extract from - will be converted to string.
             Can be str, dict, list, or any object with __str__ method.
-        links: List of URLs or file paths to fetch and include in extraction.
+        links: List of web URLs or file paths to fetch and include in extraction.
             URLs (http/https) will be fetched, file paths will be read.
+        document_links: List of document URLs to include in extraction.
         images: List of image URLs to include in extraction.
         model: Specific AI model to use (auto-selected if not provided)
         temperature: Response creativity (0.0 to 1.0, default 0.7)
@@ -68,10 +72,7 @@ def extract(
         # Complex content (dict/list converted to string)
         data = {"name": "John", "email": "john@example.com"}
         result = extract(content=data)
-    """
-    if not content and not links and not images:
-        raise ValueError("Must provide either content / links / images")
-    
+    """    
     all_content = []
     
     if content is not None:
@@ -85,10 +86,7 @@ def extract(
             url = link_data.url
             data = link_data.content
             all_content.append(f"=== URL {url} ===\n{data}\n")
-    
-    if not all_content and not images:
-        raise ValueError("No valid content found to process")
-    
+        
     combined_content = "\n\n".join(all_content)
     
     system_prompt = (
@@ -121,6 +119,7 @@ def extract(
         user_prompt=user_prompt,
         additional_system_instructions=additional_system_instructions,
         images=images,
+        document_links=document_links,
         debug=debug
     )
     if response_format:
