@@ -2,6 +2,7 @@ import urllib.request
 from pathlib import Path
 from bs4 import BeautifulSoup
 from typing import List
+import httpx
 
 from ..models import LinkContent
 from .file_utils import is_remote_url
@@ -38,6 +39,16 @@ def fetch_all_data(
             print(f"Error fetching content from {link}: {str(e)}")
             continue
     return all_data
+
+
+def fetch_doc(doc_url: str, timeout: int = 30) -> str:
+    """
+    Fetch a document from a URL.
+    """
+    try:
+        return httpx.get(doc_url).content
+    except Exception as e:
+        raise ValueError(f"Error fetching document from {doc_url}: {str(e)}")
 
 
 def get_soup(
