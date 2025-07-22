@@ -28,7 +28,8 @@ from .utils import (
     retry_with_backoff,
     get_gemini_response,
     remove_empty_values,
-    print_debug_messages
+    print_debug_messages,
+    get_openai_response
 )
 
 # Client cache to avoid recreating clients
@@ -130,6 +131,7 @@ def call_ai(
     user_prompt: Optional[str] = None,
     additional_system_instructions: Optional[str] = None,
     images: Optional[List[Union[str, Path, bytes]]] = None,
+    document_links: Optional[List[str]] = None,
     reasoning_effort: Optional[str] = None,
     tool_choice: Optional[str] = None,
     tools: Optional[List[Dict[str, Any]]] = None,
@@ -215,6 +217,13 @@ def call_ai(
             ]
             final_messages.append({"role": "user", "content": image_parts})
 
+        if document_links:
+            document_parts = [
+                {"type": "input_file", "file_url": url}
+                for url in document_links
+            ]
+            final_messages.append({"role": "user", "content": document_parts})
+
         # Prepare common parameters
         params = {
             "model": model_name,
@@ -233,7 +242,7 @@ def call_ai(
         if current_provider == AIProvider.GEMINI:
             content = get_gemini_response(client, params, debug)
         elif current_provider == AIProvider.OPENAI:
-            content = get_chat_completions_response(client, params, debug)
+            content = get_openai_response(client, params, debug)
         else:
             content = get_chat_completions_response(client, params, debug=debug)
         return content
