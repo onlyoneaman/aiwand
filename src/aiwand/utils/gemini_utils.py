@@ -1,6 +1,7 @@
 from typing import Dict, Any, List, Optional
 import base64
 import re
+import mimetypes
 from google.genai import (
     client as gemini_client,
     types as gemini_types
@@ -79,10 +80,14 @@ def _convert_content_to_parts(content: Any) -> List[gemini_types.Part]:
         if content.strip():
             parts.append(gemini_types.Part.from_text(text=content))
     elif isinstance(content, list):
-        # List of content items (text and/or images)
+        # List of content items (text and/or images/documents)
         for item in content:
             if isinstance(item, dict):
                 if item.get("type") == "text":
+                    text = item.get("text", "")
+                    if text.strip():
+                        parts.append(gemini_types.Part.from_text(text=text))
+                elif item.get("type") == "input_text":
                     text = item.get("text", "")
                     if text.strip():
                         parts.append(gemini_types.Part.from_text(text=text))
@@ -102,6 +107,54 @@ def _convert_content_to_parts(content: Any) -> List[gemini_types.Part]:
                     else:
                         # It's a regular URL - Gemini can handle URLs directly
                         parts.append(gemini_types.Part.from_uri(file_uri=url, mime_type=""))
+                elif item.get("type") == "input_file":
+                    # Handle document files
+                    if "file_data" in item:
+                        # Base64 encoded file data
+                        file_data = item.get("file_data", "")
+                        filename = item.get("filename", "")
+                        
+                        if file_data.startswith("data:"):
+                            # Parse data URL format: data:mime/type;base64,data
+                            try:
+                                data_bytes, mime_type = _parse_data_url(file_data)
+                                parts.append(gemini_types.Part.from_bytes(
+                                    data=data_bytes,
+                                    mime_type=mime_type
+                                ))
+                            except ValueError as e:
+                                print(f"Warning: Failed to process file data URL for {filename}: {e}")
+                        else:
+                            # Assume it's raw base64 data, try to guess mime type from filename
+                            try:
+                                data_bytes = base64.b64decode(file_data)
+                                # Guess mime type from filename extension
+                                mime_type, _ = mimetypes.guess_type(filename)
+                                if not mime_type:
+                                    # Default to PDF if we can't guess
+                                    mime_type = "application/pdf"
+                                
+                                parts.append(gemini_types.Part.from_bytes(
+                                    data=data_bytes,
+                                    mime_type=mime_type
+                                ))
+                            except Exception as e:
+                                print(f"Warning: Failed to process base64 file data for {filename}: {e}")
+                    
+                    elif "file_url" in item:
+                        # Remote file URL
+                        file_url = item.get("file_url", "")
+                        if file_url:
+                            # Guess mime type from URL extension
+                            mime_type, _ = mimetypes.guess_type(file_url)
+                            if not mime_type:
+                                # Default to PDF if we can't guess
+                                mime_type = "application/pdf"
+                            
+                            parts.append(gemini_types.Part.from_uri(
+                                file_uri=file_url,
+                                mime_type=mime_type
+                            ))
             elif isinstance(item, str):
                 # Plain string in the list
                 if item.strip():
@@ -172,18 +225,18 @@ def get_gemini_response(client: gemini_client, params: Dict[str, Any], debug: bo
     contents = get_gemini_contents(messages)
 
     response_format = params.get("response_format")
-    
-    response = client.models.generate_content(
-        model=model, 
-        contents=contents, 
-        config=config
-    )
 
     if debug:
         print('params', params)
         print('model', model)
         print('contents', contents)
         print('config', config)
+    
+    response = client.models.generate_content(
+        model=model, 
+        contents=contents, 
+        config=config
+    )
 
     if response_format:
         return response_format(**response.parsed)
