@@ -219,23 +219,16 @@ def call_ai(
             "model": model_name,
             "messages": final_messages,
             "temperature": temperature,
-            "top_p": top_p
+            "top_p": top_p,
+            "tool_choice": tool_choice,
+            "tools": tools,
+            "max_tokens": max_tokens,
+            # "reasoning_effort": reasoning_effort,
+            "response_format": response_format,
         }
 
-        # if reasoning_effort:
-            # params["reasoning_effort"] = reasoning_effort
-
-        if tool_choice:
-            params["tool_choice"] = tool_choice
-        
-        if tools:
-            params["tools"] = tools 
-
-        if max_tokens:
-            params["max_tokens"] = max_tokens
-        
-        if response_format:
-            params["response_format"] = response_format
+        # if any value in params is None, remove it
+        params = {k: v for k, v in params.items() if v is not None}
 
         if debug:
             copied_messages = copy.deepcopy(final_messages)
