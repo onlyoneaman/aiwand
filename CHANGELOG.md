@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.19] - 2025-07-20
 - Add *debug* to extract
+- Use genai for Gemini
 
 ## [0.4.18] - 2025-07-20
 - Add *is_remote_url* function to utils
