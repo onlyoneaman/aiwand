@@ -7,9 +7,11 @@ and provider resolution utilities.
 
 import os
 import json
-import copy
 from pathlib import Path  
 from typing import Dict, Any, Optional, Tuple, List, Union
+from google.genai import (
+    Client as GeminiClient
+)
 from openai import OpenAI
 
 from .prompts import DEFAULT_SYSTEM_PROMPT
@@ -23,15 +25,18 @@ from .models import (
 from .preferences import get_preferred_provider_and_model
 from .utils import (
     image_to_data_url,
-    retry_with_backoff
+    retry_with_backoff,
+    get_gemini_response,
+    remove_empty_values,
+    print_debug_messages
 )
 
 # Client cache to avoid recreating clients
-_client_cache: Dict[AIProvider, OpenAI] = {}
+_client_cache: Dict[AIProvider, Union[OpenAI, GeminiClient]] = {}
 
 
 
-def _get_cached_client(provider: AIProvider) -> OpenAI:
+def _get_cached_client(provider: AIProvider) -> Union[OpenAI, GeminiClient]:
     """Get or create a cached client for the provider."""
     if provider not in _client_cache:
         # Get provider configuration from registry
@@ -44,9 +49,10 @@ def _get_cached_client(provider: AIProvider) -> OpenAI:
         api_key = os.getenv(env_var)
         if not api_key:
             raise AIError(f"{provider.value.title()} API key not found. Please set {env_var} environment variable.")
-        
-        # Create client with provider-specific configuration
-        if base_url:
+
+        if provider == AIProvider.GEMINI:
+            _client_cache[provider] = GeminiClient(api_key=api_key)
+        elif base_url:
             _client_cache[provider] = OpenAI(api_key=api_key, base_url=base_url)
         else:
             _client_cache[provider] = OpenAI(api_key=api_key)
@@ -114,7 +120,7 @@ def _resolve_provider_model_client(
 @retry_with_backoff(max_retries=2)
 def call_ai(
     messages: Optional[List[Dict[str, str]]] = None,
-    max_tokens: Optional[int] = None,
+    max_output_tokens: Optional[int] = None,
     temperature: float = 0.7,
     top_p: float = 1.0,
     model: Optional[ModelType] = GeminiModel.GEMINI_2_0_FLASH_LITE.value,
@@ -135,7 +141,7 @@ def call_ai(
     Args:
         messages: Optional list of message dictionaries with 'role' and 'content'.
                  If None or empty, a default user message will be added.
-        max_tokens: Maximum tokens to generate
+        max_output_tokens: Maximum tokens to generate
         temperature: Response creativity (0.0 to 1.0)
         top_p: Nucleus sampling parameter
         model: Specific model to use (auto-selected if not provided)
@@ -180,12 +186,7 @@ def call_ai(
         # 1. No existing system message in messages
         # 2. Either system_prompt was explicitly provided (including empty string) or we should use default
         if not has_system_message:
-            if system_prompt is not None:
-                # Use provided system_prompt (even if empty string)
-                final_messages.insert(0, {"role": "system", "content": system_prompt})
-            else:
-                # Use default system prompt only when system_prompt is None
-                final_messages.insert(0, {"role": "system", "content": DEFAULT_SYSTEM_PROMPT})
+            final_messages.insert(0, {"role": "system", "content": system_prompt or DEFAULT_SYSTEM_PROMPT})
 
         # Append additional system instructions if provided
         if additional_system_instructions is not None:
@@ -205,7 +206,7 @@ def call_ai(
         # This allows using system_prompt alone as a kind of generation prompt
         has_user_message = any(msg.get("role") in ["user", "assistant"] for msg in final_messages)
         if not has_user_message:
-            final_messages.append({"role": "user", "content": "Please respond based on your instructions."})
+            final_messages.append({"role": "user", "content": "Please respond based on the instructions."})
 
         if images:
             image_parts = [
@@ -222,49 +223,39 @@ def call_ai(
             "top_p": top_p,
             "tool_choice": tool_choice,
             "tools": tools,
-            "max_tokens": max_tokens,
+            "max_completion_tokens": max_output_tokens,
             # "reasoning_effort": reasoning_effort,
             "response_format": response_format,
         }
+        remove_empty_values(params=params)
 
-        # if any value in params is None, remove it
-        params = {k: v for k, v in params.items() if v is not None}
-
-        if debug:
-            copied_messages = copy.deepcopy(final_messages)
-            for msg in copied_messages:
-                msg = copied_messages[-1]
-                if msg.get("role") == "user" and msg.get("content"):
-                    for content in msg["content"]:
-                        if content.get("type") == "image_url":
-                            content["image_url"]["url"] = "<IMAGE_URLs>"
-            print(json.dumps(copied_messages, indent=2))
-            print(f"Model: {current_provider}/{model_name}")
-            for k, v in params.items():
-                if k != "messages":
-                    print(f"{k}: {v}\n")
-
-        # Choose API call method based on provider and features
-        if current_provider == AIProvider.GEMINI and response_format:
-            # For Gemini with structured output, use beta endpoint
-            response = client.beta.chat.completions.parse(**params)
+        content = None
+        if current_provider == AIProvider.GEMINI:
+            content = get_gemini_response(client, params, debug)
+        elif current_provider == AIProvider.OPENAI:
+            content = get_chat_completions_response(client, params, debug)
         else:
-            # Standard chat completions for all other cases
-            response = client.chat.completions.create(**params)
-        
-        content = response.choices[0].message.content.strip()
-        if response_format:
-            if isinstance(content, dict):
-                parsed = content
-            else:
-                parsed = json.loads(content)
-            return response_format(**parsed)
+            content = get_chat_completions_response(client, params, debug=debug)
         return content
-    
     except AIError as e:
         raise AIError(str(e))
     except Exception as e:
         raise AIError(f"AI request failed: {str(e)}")
+
+
+def get_chat_completions_response(client: OpenAI, params: Dict[str, Any], debug: bool = False) -> str:
+    if debug:
+        print_debug_messages(messages=params.get("messages"), params=params)
+    response = client.chat.completions.create(**params)
+    content = response.choices[0].message.content.strip()
+    response_format = params.get("response_format")
+    if response_format:
+        if isinstance(content, dict):
+            parsed = content
+        else:
+            parsed = json.loads(content)
+        return response_format(**parsed)
+    return content
 
 
 def list_models(provider: Optional[AIProvider] = None):

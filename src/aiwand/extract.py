@@ -104,12 +104,14 @@ def extract(
     )
 
     if response_format:
-        user_prompt = f"Extract relevant structured data from the following content:\n{combined_content}"
+        user_prompt = "Return the data as JSON format."    
     else:
         user_prompt = (
             "Use appropriate categories and present the information in a way that's "
             "easy to understand and use. Include any relevant metadata or context.\n\n"
         )    
+    
+    user_prompt += f"\n\nExtract relevant structured data from the following content:\n{combined_content}"
     
     result = call_ai(
         system_prompt=system_prompt,

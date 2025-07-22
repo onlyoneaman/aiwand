@@ -68,13 +68,13 @@ conversation.append({"role": "assistant", "content": response1})
 response2 = aiwand.chat("What did I just say?", conversation_history=conversation)
 ```
 
-### `generate_text(prompt, max_tokens=500, temperature=0.7, model=None)`
+### `generate_text(prompt, max_output_tokens=500, temperature=0.7, model=None)`
 
 Generate text from a prompt.
 
 **Parameters:**
 - `prompt` (str): Text prompt
-- `max_tokens` (int): Maximum tokens to generate
+- `max_output_tokens` (int): Maximum tokens to generate
 - `temperature` (float): Response creativity (0.0-1.0)
 - `model` (str, optional): Specific model to use (auto-selected if not provided)
 
@@ -94,7 +94,7 @@ text = aiwand.generate_text("Write a poem about coding")
 # Customized generation
 text = aiwand.generate_text(
     prompt="Write a technical explanation of neural networks",
-    max_tokens=300,
+    max_output_tokens=300,
     temperature=0.3,
     model="gpt-4"
 )
@@ -208,13 +208,13 @@ print(f"UUID1: {uuid}")  # e.g., "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
 
 ## Advanced Functions
 
-### `call_ai(messages=None, max_tokens=None, temperature=0.7, top_p=1.0, model=None, provider=None, response_format=None, system_prompt=None, user_prompt=None, additional_system_instructions=None, images=None)`
+### `call_ai(messages=None, max_output_tokens=None, temperature=0.7, top_p=1.0, model=None, provider=None, response_format=None, system_prompt=None, user_prompt=None, additional_system_instructions=None, images=None)`
 
 Low-level unified AI request function with automatic provider switching and advanced features.
 
 **Parameters:**
 - `messages` (list, optional): List of message dictionaries with 'role' and 'content'. If None or empty, a default user message will be added.
-- `max_tokens` (int, optional): Maximum tokens to generate
+- `max_output_tokens` (int, optional): Maximum tokens to generate
 - `temperature` (float): Response creativity (0.0-1.0, default: 0.7)
 - `top_p` (float): Nucleus sampling parameter (0.0-1.0, default: 1.0)
 - `model` (str/enum, optional): Specific model to use (auto-selected if not provided)
@@ -246,7 +246,7 @@ response = aiwand.call_ai(
     temperature=0.3,
     model=aiwand.OpenAIModel.GPT_4O,
     provider="openai",
-    max_tokens=500
+    max_output_tokens=500
 )
 
 # Using user_prompt to extend existing conversation
@@ -311,7 +311,7 @@ response = aiwand.call_ai(
 response = aiwand.call_ai(
     system_prompt="You are a creative writer. Write a short story about a time traveler.",
     temperature=0.8,
-    max_tokens=200
+    max_output_tokens=200
 )
 
 # Empty messages with system prompt

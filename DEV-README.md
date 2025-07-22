@@ -10,7 +10,7 @@ Quick reference guide for all AIWand functionalities.
 ```python
 aiwand.call_ai(
     messages: Optional[List[Dict[str, str]]] = None,
-    max_tokens: Optional[int] = None,
+    max_output_tokens: Optional[int] = None,
     temperature: float = 0.7,
     top_p: float = 1.0,
     model: Optional[ModelType] = None,
@@ -26,7 +26,7 @@ aiwand.call_ai(
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `messages` | `List[Dict[str, str]]` | `None` | Chat messages with 'role' and 'content' |
-| `max_tokens` | `int` | `None` | Maximum tokens to generate |
+| `max_output_tokens` | `int` | `None` | Maximum tokens to generate |
 | `temperature` | `float` | `0.7` | Creativity level (0.0-1.0) |
 | `top_p` | `float` | `1.0` | Nucleus sampling parameter |
 | `model` | `ModelType` | `None` | Specific model (auto-detected provider) |
@@ -123,7 +123,7 @@ aiwand.chat(
 ```python
 aiwand.generate_text(
     prompt: str,
-    max_tokens: int = None,
+    max_output_tokens: int = None,
     temperature: float = 0.7,
     model: Optional[str] = None
 ) -> str
@@ -132,7 +132,7 @@ aiwand.generate_text(
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `prompt` | `str` | Required | Generation prompt |
-| `max_tokens` | `int` | `None` | Maximum tokens |
+| `max_output_tokens` | `int` | `None` | Maximum tokens |
 | `temperature` | `float` | `0.7` | Creativity level |
 | `model` | `str` | `None` | Specific model to use |
 

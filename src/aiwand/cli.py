@@ -158,7 +158,7 @@ def main():
         elif args.command == 'generate':
             result = generate_text(
                 prompt=args.prompt,
-                max_tokens=args.max_tokens,
+                max_output_tokens=args.max_output_tokens,
                 temperature=args.temperature,
                 model=args.model
             )

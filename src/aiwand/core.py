@@ -91,7 +91,7 @@ def chat(
 
 def generate_text(
     prompt: str,
-    max_tokens: int = None,
+    max_output_tokens: int = None,
     temperature: float = 0.7,
     model: Optional[ModelType] = None
 ) -> str:
@@ -100,7 +100,7 @@ def generate_text(
     
     Args:
         prompt (str): The prompt to generate text from
-        max_tokens (int): Maximum number of tokens to generate
+        max_output_tokens (int): Maximum number of tokens to generate
         temperature (float): Response creativity (0.0 to 1.0)
         model (Optional[ModelType]): Specific model to use (auto-selected if not provided)
         
@@ -115,7 +115,7 @@ def generate_text(
         raise ValueError("Prompt cannot be empty")
     
     return call_ai(
-        max_tokens=max_tokens,
+        max_output_tokens=max_output_tokens,
         temperature=temperature,
         model=model,
         system_prompt=GENERATE_TEXT_SYSTEM_PROMPT,

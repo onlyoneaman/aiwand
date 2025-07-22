@@ -4,6 +4,9 @@ Basic usage examples for AIWand package
 """
 
 import aiwand
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def main():
     """Run basic examples."""
@@ -64,7 +67,7 @@ def main():
         print("-" * 30)
         generated = aiwand.generate_text(
             "Write a short poem about artificial intelligence",
-            max_tokens=100,
+            max_output_tokens=100,
             temperature=0.8
         )
         print(f"Generated Text:\n{generated}\n")
@@ -87,6 +90,18 @@ def main():
         response2 = aiwand.chat(msg2, conversation_history=conversation)
         print(f"User: {msg2}")
         print(f"AI: {response2}")
+
+        # call_ai
+        response = aiwand.call_ai(
+            debug=True,
+            messages=[
+                {'role': 'assistant', 'content': 'You are a helpful assistant.'},
+                {'role': 'user', 'content': 'How many countries are there in the world?'},
+                {'role': 'assistant', 'content': 'There are 200 countries in the world.'}
+            ],
+            user_prompt='Are you sure?'
+        )
+        print(f"AI: {response}")
         
     except aiwand.AIError as e:
         print(f"AIWand Error: {e}")

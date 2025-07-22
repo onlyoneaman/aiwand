@@ -40,7 +40,7 @@ def demo_simple_text():
     print()
     
     try:
-        result = extract(content=text)
+        result = extract(content=text, debug=True)
         print("Extracted contact information:")
         if isinstance(result, dict):
             print(json.dumps(result, indent=2))
