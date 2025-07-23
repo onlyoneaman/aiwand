@@ -2,6 +2,10 @@ import aiwand
 from openai import Client
 from dotenv import load_dotenv
 from pydantic import BaseModel
+from google import genai
+from google.genai import types
+
+import requests
 
 load_dotenv()
 
@@ -36,6 +40,20 @@ def main():
     )
     print(response.output_text)
 
+    image_path = "https://goo.gle/instrument-img"
+    image_bytes = requests.get(image_path).content
+    image = types.Part.from_bytes(
+      data=image_bytes, mime_type="image/jpeg"
+    )
+
+    client = genai.Client()
+
+    response = client.models.generate_content(
+        model="gemini-2.0-flash-lite",
+        contents=["What is this image?", image],
+    )
+    print(response.text)
+
     class Consistuency(BaseModel):
         name: str
         party: str
@@ -59,7 +77,7 @@ def main():
 
     response = aiwand.extract(
         document_links=doc_links,
-        # model="gpt-4o",
+        model="gpt-4o",
         response_format=FullResponse
     )
     print(response)
