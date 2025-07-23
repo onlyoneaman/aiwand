@@ -6,7 +6,9 @@ and provider resolution utilities.
 """
 
 import os
+import base64
 import json
+import mimetypes
 from pathlib import Path  
 from typing import Dict, Any, Optional, Tuple, List, Union
 from google.genai import (
@@ -29,7 +31,8 @@ from .utils import (
     get_gemini_response,
     remove_empty_values,
     print_debug_messages,
-    get_openai_response
+    get_openai_response,
+    fetch_doc
 )
 
 # Client cache to avoid recreating clients
@@ -218,10 +221,20 @@ def call_ai(
             final_messages.append({"role": "user", "content": image_parts})
 
         if document_links:
-            document_parts = [
-                {"type": "input_file", "file_url": url}
-                for url in document_links
-            ]
+            document_parts = []
+            for url in document_links:
+                fetched_data = fetch_doc(url)
+                mime_type, _ = mimetypes.guess_type(url)
+                if isinstance(fetched_data, str):
+                    base64_string = base64.b64encode(fetched_data.encode('utf-8')).decode('utf-8')
+                else:
+                    base64_string = base64.b64encode(fetched_data).decode('utf-8')
+                doc_part = {
+                    "type": "input_file",
+                    "filename": url.split("/")[-1],
+                    "file_data": f"data:{mime_type};base64,{base64_string}",
+                }
+                document_parts.append(doc_part)
             final_messages.append({"role": "user", "content": document_parts})
 
         # Prepare common parameters
