@@ -10,23 +10,28 @@
 [![Downloads](https://pepy.tech/badge/aiwand/month)](https://pepy.tech/project/aiwand/month)
 [![Downloads](https://pepy.tech/badge/aiwand/week)](https://pepy.tech/project/aiwand/week)
 
-## 🎯 **Two Powerful Features, One Simple API**
+## 🚀 **Stop Wrestling with AI APIs**
 
-### 1. **`call_ai`** - Unified AI Interface
+**Before:** Provider chaos, manual parsing, complex setup
+```python
+# Different APIs, manual JSON parsing, provider-specific code
+import openai, google.generativeai as genai
+response = openai.chat.completions.create(...)
+result = json.loads(response.choices[0].message.content)  # 😫
+```
 
-**Drop-in replacement for OpenAI and Gemini** - Same code works with both providers, automatic model detection, and structured output magic.
-
+**After:** One API, automatic everything
 ```python
 import aiwand
 from pydantic import BaseModel
 
-# Works with any model - provider auto-detected
+# 🎯 Universal AI calls - any model, any provider
 response = aiwand.call_ai(
-    model="gpt-4o",              # or "gemini-2.0-flash"
+    model="gpt-4o",              # or "gemini-2.0-flash" 
     messages=[{"role": "user", "content": "Explain quantum computing"}]
 )
 
-# Structured output with Pydantic - no JSON parsing needed!
+# ✨ Structured output magic - no JSON wrestling
 class BlogPost(BaseModel):
     title: str
     content: str
@@ -37,195 +42,120 @@ blog = aiwand.call_ai(
     messages=[{"role": "user", "content": "Write a blog about AI"}],
     response_format=BlogPost    # Returns BlogPost object directly!
 )
-print(blog.title)  # Direct access, no parsing
-```
+print(blog.title)  # Just works ✨
 
-### 2. **`extract`** - Smart Data Extraction
-
-**Pass any content or links** - Extracts structured data from text, URLs, files, or mixed sources. Creates or uses your Pydantic models.
-
-```python
-# Extract from text
+# 🧠 Smart extraction from anywhere
 contact = aiwand.extract(content="John Doe, john@example.com, (555) 123-4567")
+webpage_data = aiwand.extract(links=["https://company.com/about"])
+document_data = aiwand.extract(document_links=["resume.pdf", "report.docx"])
+image_data = aiwand.extract(images=["chart.png", "diagram.jpg"])
 
-# Extract from URLs or files
-data = aiwand.extract(links=["https://company.com/about", "resume.pdf"])
-
-# Mix content + links with custom structure
-from pydantic import BaseModel
-
-class ContactInfo(BaseModel):
-    name: str
-    email: str
-    phone: str
-
-result = aiwand.extract(
+# Mix all sources together
+mixed_data = aiwand.extract(
     content="Meeting notes: call John tomorrow",
-    links=["https://company.com/team", "business_card.txt"],
-    response_format=ContactInfo  # Get ContactInfo object back
+    links=["https://company.com/team"],
+    document_links=["business_card.pdf"],
+    images=["photo.jpg"]
 )
 ```
 
-## 🚀 Quick Start
-
-### Installation & Setup
+## 🔧 Installation & Setup
 
 ```bash
 pip install aiwand
 
-# Set your API key (either one works)
-export OPENAI_API_KEY="your-key"     # or
-export GEMINI_API_KEY="your-key"     # or both
+# Set your API key (either works, or both for fallback)
+export OPENAI_API_KEY="your-key"     
+export GEMINI_API_KEY="your-key"     
 ```
 
-### Core Usage
+## 💡 Core Features
+
+### **`call_ai`** - Universal AI Interface
+Drop-in replacement for OpenAI and Gemini with automatic provider detection:
 
 ```python
-import aiwand
-
-# 1. Basic AI calls - auto provider selection
-response = aiwand.call_ai(
-    model="gpt-4o",  # Uses OpenAI
-    messages=[{"role": "user", "content": "Hello!"}]
-)
-
-response = aiwand.call_ai(
-    model="gemini-2.0-flash",  # Uses Gemini  
-    messages=[{"role": "user", "content": "Hello!"}]
-)
-
-# 2. Extract data from anywhere
-contact = aiwand.extract(content="Dr. Sarah Johnson, sarah@lab.com")
-webpage_data = aiwand.extract(links=["https://example.com"])
-mixed_data = aiwand.extract(
-    content="Meeting notes...",
-    links=["document.pdf", "https://site.com"]
-)
-```
-
-## ✨ **Key Benefits**
-
-| Feature | Benefit |
-|---------|---------|
-| 🔄 **Provider Agnostic** | Same code works with OpenAI and Gemini |
-| 🏗️ **Structured Output** | Get Pydantic objects directly, no JSON parsing |
-| 🧠 **Smart Detection** | Automatic provider selection based on model |
-| 📄 **Universal Extraction** | Extract from text, URLs, files - anything |
-| ⚡ **Zero Configuration** | Works with just API keys |
-| 🎯 **Drop-in Ready** | Minimal code changes from existing AI code |
-
-## 🔧 **Advanced Examples**
-
-### Smart Provider Switching
-
-```python
-# Automatic provider detection
+# Same code, any provider
 responses = []
 for model in ["gpt-4o", "gemini-2.0-flash", "o3-mini"]:
     response = aiwand.call_ai(
-        model=model,  # Auto-detects OpenAI vs Gemini
-        messages=[{"role": "user", "content": "Compare yourself to other AI models"}]
+        model=model,  # Auto-detects provider
+        messages=[{"role": "user", "content": f"What makes {model} special?"}]
     )
-    responses.append(f"{model}: {response}")
-
-# Force specific provider for custom models
-response = aiwand.call_ai(
-    model="my-custom-model",
-    provider="gemini",  # Explicit override
-    messages=[{"role": "user", "content": "Test custom model"}]
-)
+    responses.append(response)
 ```
 
-### Structured Data Extraction
+### **`extract`** - Smart Data Extraction  
+Extract structured data from text, web links, documents, and images:
 
 ```python
 from pydantic import BaseModel
-from typing import List
 
 class CompanyInfo(BaseModel):
     name: str
     founded: int
     employees: int
-    technologies: List[str]
-    headquarters: str
+    technologies: list[str]
 
-# Extract from company website
+# Extract from all source types
 company = aiwand.extract(
-    links=["https://company.com/about"],
-    response_format=CompanyInfo
+    content="Research notes about tech companies...", 
+    links=["https://company.com/about"],           # Web pages
+    document_links=["annual_report.pdf"],          # Documents  
+    images=["company_chart.png", "logo.jpg"],      # Images
+    response_format=CompanyInfo  # Get typed object back
 )
 
-# Extract from mixed sources
-analysis = aiwand.extract(
-    content="Research on tech companies in 2024",
-    links=[
-        "https://techcrunch.com/company-news",
-        "market_report.pdf",
-        "/path/to/notes.txt"
-    ],
-    response_format=CompanyInfo
-)
+print(f"{company.name} founded in {company.founded}")  # Direct access
 ```
 
-### Built-in Convenience Functions
+## ⚡ Quick Examples
 
 ```python
-# High-level functions for common tasks
-summary = aiwand.summarize("Long article text...", style="bullet-points")
-response = aiwand.chat("What is machine learning?")
-story = aiwand.generate_text("Write a poem about coding")
+import aiwand
 
-# Classification and grading
-grader = aiwand.create_binary_classifier(criteria="correctness")
+# Instant AI calls
+summary = aiwand.summarize("Long article...", style="bullet-points")
+response = aiwand.chat("What is machine learning?")
+story = aiwand.generate_text("Write a haiku about coding")
+
+# Smart classification  
+grader = aiwand.create_binary_classifier(criteria="technical accuracy")
 result = grader(question="What is 2+2?", answer="4", expected="4")
-print(f"Score: {result.score}")
+print(f"Accuracy: {result.score}/5")
 ```
 
-## 🎨 CLI Usage
+## 🎨 CLI Magic
 
 ```bash
-# Direct chat (quoted for multi-word)
-aiwand "Explain quantum computing in simple terms"
+# Quick chat
+aiwand "Explain quantum computing simply"
 
-# Extract from content
-aiwand extract "John Doe, john@example.com" --json
+# Extract from anything
+aiwand extract "Dr. Sarah Johnson, sarah@lab.com" --json
+aiwand extract --links https://example.com --document-links resume.pdf --images chart.png
 
-# Extract from URLs/files  
-aiwand extract --links https://company.com resume.pdf
-
-# Other functions
-aiwand summarize "Long text..." --style bullet-points
+# Built-in functions
+aiwand summarize "Long text..." --style concise
 aiwand chat "Hello there!"
 ```
+
+## ✨ Why Choose AIWand?
+
+| 🔄 **Provider Agnostic** | Same code, OpenAI or Gemini |
+|---|---|
+| 🏗️ **Structured Output** | Pydantic objects, no JSON parsing |
+| 🧠 **Smart Detection** | Automatic provider selection |
+| 📄 **Universal Extraction** | Text, web links, documents, images |
+| ⚡ **Zero Setup** | Just add API keys |
+| 🎯 **Drop-in Ready** | Minimal code changes |
 
 ## 📚 Documentation
 
 - **[API Reference](docs/api-reference.md)** - Complete function docs
-- **[CLI Guide](docs/cli.md)** - Command line usage
+- **[CLI Guide](docs/cli.md)** - Command line usage  
 - **[Installation](docs/installation.md)** - Setup details
 - **[Development](docs/development.md)** - Contributing guide
-
-## 🔑 **Why AIWand?**
-
-**Before AIWand** - Provider-specific code, manual JSON parsing, complex setup:
-```python
-# OpenAI specific
-import openai
-response = openai.chat.completions.create(...)
-result = json.loads(response.choices[0].message.content)  # Manual parsing
-
-# Gemini specific  
-import google.generativeai as genai
-response = genai.generate_content(...)
-result = parse_json_response(response.text)  # Different API
-```
-
-**After AIWand** - One API, automatic everything:
-```python
-import aiwand
-result = aiwand.call_ai(model="any-model", response_format=MyModel, ...)
-# result is already a MyModel object! ✨
-```
 
 ## 🤝 Contributing
 
@@ -237,6 +167,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-Star this repo if you find it useful!
+⭐ **Star this repo if AIWand makes your AI development easier!**
 
 **Made with ❤️ by [Aman Kumar](https://x.com/onlyoneaman)** 
