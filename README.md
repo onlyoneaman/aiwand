@@ -12,26 +12,38 @@
 
 ## 🚀 **Stop Wrestling with AI APIs**
 
-**Before:** Provider chaos, manual parsing, complex setup
-```python
-# Different APIs, manual JSON parsing, provider-specific code
-import openai, google.generativeai as genai
-response = openai.chat.completions.create(...)
-result = json.loads(response.choices[0].message.content)  # 😫
-```
+**Before:** Different APIs, manual JSON parsing, provider-specific code 😫  
+**After:** One API, automatic everything ✨
 
-**After:** One API, automatic everything
 ```python
 import aiwand
+# Works with any model - provider auto-detected
+response = aiwand.call_ai(model="gpt-4o", user_prompt="Explain quantum computing?")
+
+# returns structured json data directly
+data = aiwand.extract(content="John Doe, john@example.com, (555) 123-4567")
+```
+
+## 🔧 Installation & Setup
+
+```bash
+pip install aiwand
+export OPENAI_API_KEY="your-key"     # Set either key (or both for fallback)
+export GEMINI_API_KEY="your-key"     
+```
+
+## 💡 Core Features
+
+### **`call_ai`** - Universal AI Interface
+Same code works with OpenAI and Gemini - automatic provider detection:
+
+```python
 from pydantic import BaseModel
 
-# 🎯 Universal AI calls - any model, any provider
-response = aiwand.call_ai(
-    model="gpt-4o",              # or "gemini-2.0-flash" 
-    messages=[{"role": "user", "content": "Explain quantum computing"}]
-)
+# Basic AI calls
+response = aiwand.call_ai(model="gpt-4o", user_prompt="Explain quantum computing?")
 
-# ✨ Structured output magic - no JSON wrestling
+# Structured output - get Pydantic objects directly
 class BlogPost(BaseModel):
     title: str
     content: str
@@ -39,50 +51,14 @@ class BlogPost(BaseModel):
 
 blog = aiwand.call_ai(
     model="gemini-2.0-flash",
-    messages=[{"role": "user", "content": "Write a blog about AI"}],
-    response_format=BlogPost    # Returns BlogPost object directly!
+    user_prompt="Write a blog about AI",
+    response_format=BlogPost    # Returns BlogPost object!
 )
-print(blog.title)  # Just works ✨
+print(blog.title)  # Direct access, no JSON parsing
 
-# 🧠 Smart extraction from anywhere
-contact = aiwand.extract(content="John Doe, john@example.com, (555) 123-4567")
-webpage_data = aiwand.extract(links=["https://company.com/about"])
-document_data = aiwand.extract(document_links=["resume.pdf", "report.docx"])
-image_data = aiwand.extract(images=["chart.png", "diagram.jpg"])
-
-# Mix all sources together
-mixed_data = aiwand.extract(
-    content="Meeting notes: call John tomorrow",
-    links=["https://company.com/team"],
-    document_links=["business_card.pdf"],
-    images=["photo.jpg"]
-)
-```
-
-## 🔧 Installation & Setup
-
-```bash
-pip install aiwand
-
-# Set your API key (either works, or both for fallback)
-export OPENAI_API_KEY="your-key"     
-export GEMINI_API_KEY="your-key"     
-```
-
-## 💡 Core Features
-
-### **`call_ai`** - Universal AI Interface
-Drop-in replacement for OpenAI and Gemini with automatic provider detection:
-
-```python
-# Same code, any provider
-responses = []
+# Works with any model
 for model in ["gpt-4o", "gemini-2.0-flash", "o3-mini"]:
-    response = aiwand.call_ai(
-        model=model,  # Auto-detects provider
-        messages=[{"role": "user", "content": f"What makes {model} special?"}]
-    )
-    responses.append(response)
+    response = aiwand.call_ai(model=model, user_prompt=f"What makes {model} special?")
 ```
 
 ### **`extract`** - Smart Data Extraction  
@@ -97,13 +73,19 @@ class CompanyInfo(BaseModel):
     employees: int
     technologies: list[str]
 
-# Extract from all source types
+# Extract from individual sources
+contact = aiwand.extract(content="John Doe, john@example.com, (555) 123-4567")
+webpage = aiwand.extract(links=["https://company.com/about"])
+docs = aiwand.extract(document_links=["resume.pdf", "report.docx"])
+images = aiwand.extract(images=["chart.png", "diagram.jpg"])
+
+# Or mix all sources together with custom structure
 company = aiwand.extract(
     content="Research notes about tech companies...", 
     links=["https://company.com/about"],           # Web pages
     document_links=["annual_report.pdf"],          # Documents  
-    images=["company_chart.png", "logo.jpg"],      # Images
-    response_format=CompanyInfo  # Get typed object back
+    images=["company_chart.png"],                  # Images
+    response_format=CompanyInfo                    # Get typed object back
 )
 
 print(f"{company.name} founded in {company.founded}")  # Direct access
