@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from .extras import remove_empty_values
 from .llm_utils import get_system_msg
+from .web_utils import fetch_doc
 
 
 def get_gemini_config(params: Dict[str, Any]) -> gemini_types.GenerateContentConfig:
@@ -105,7 +106,6 @@ def _convert_content_to_parts(content: Any) -> List[gemini_types.Part]:
                         except ValueError as e:
                             print(f"Warning: Failed to process image data URL: {e}")
                     else:
-                        # It's a regular URL - Gemini can handle URLs directly
                         parts.append(gemini_types.Part.from_uri(file_uri=url, mime_type=""))
                 elif item.get("type") == "input_file":
                     # Handle document files
@@ -142,19 +142,34 @@ def _convert_content_to_parts(content: Any) -> List[gemini_types.Part]:
                                 print(f"Warning: Failed to process base64 file data for {filename}: {e}")
                     
                     elif "file_url" in item:
-                        # Remote file URL
+                        # Remote file URL - fetch content and convert to inline data
                         file_url = item.get("file_url", "")
                         if file_url:
-                            # Guess mime type from URL extension
-                            mime_type, _ = mimetypes.guess_type(file_url)
-                            if not mime_type:
-                                # Default to PDF if we can't guess
-                                mime_type = "application/pdf"
-                            
-                            parts.append(gemini_types.Part.from_uri(
-                                file_uri=file_url,
-                                mime_type=mime_type
-                            ))
+                            try:
+                                fetched_data = fetch_doc(file_url)
+                                if fetched_data:
+                                    # Convert fetched content to bytes
+                                    if isinstance(fetched_data, str):
+                                        # For text-like content, encode as UTF-8
+                                        data_bytes = fetched_data.encode('utf-8')
+                                        mime_type = "text/plain"
+                                    else:
+                                        # For binary content
+                                        data_bytes = fetched_data
+                                        # Guess mime type from URL extension
+                                        mime_type, _ = mimetypes.guess_type(file_url)
+                                        if not mime_type:
+                                            # Default to PDF if we can't guess
+                                            mime_type = "application/pdf"
+                                    
+                                    parts.append(gemini_types.Part.from_bytes(
+                                        data=data_bytes,
+                                        mime_type=mime_type
+                                    ))
+                                else:
+                                    print(f"Warning: Failed to fetch content from file URL: {file_url}")
+                            except Exception as e:
+                                print(f"Warning: Failed to process file URL {file_url}: {e}")
             elif isinstance(item, str):
                 # Plain string in the list
                 if item.strip():
