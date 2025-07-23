@@ -82,6 +82,15 @@ def main():
     )
     print(response)
 
+    pokedex_link = 'https://bella.amankumar.ai/examples/pokedex.pdf'
+    response = aiwand.call_ai(
+      document_links=[pokedex_link],
+      user_prompt="which pokemon has highest speed? check correctly, share the page number and info about this pokemon",
+      # debug=True,
+      # model="gpt-4o"
+    )
+    print(response)
+
 
 if __name__ == "main":
     main()
