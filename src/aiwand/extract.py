@@ -18,6 +18,7 @@ def extract(
     model: Optional[ModelType] = None,
     temperature: float = 0.7,
     response_format: Optional[BaseModel] = None,
+    system_instructions: Optional[str] = None,
     additional_system_instructions: Optional[str] = None,
     debug: Optional[bool] = False,
 ) -> Union[str, Dict[str, Any]]:
@@ -37,6 +38,7 @@ def extract(
         model: Specific AI model to use (auto-selected if not provided)
         temperature: Response creativity (0.0 to 1.0, default 0.7)
         response_format: Pydantic model class for structured output.
+        system_instructions: Any system instructions to help the extraction.
         additional_system_instructions: Any other relavant instructions to help the extraction.
         
     Returns:
@@ -89,17 +91,14 @@ def extract(
         
     combined_content = "\n\n".join(all_content)
     
-    system_prompt = (
+    system_prompt = system_instructions or (
         "You are an expert data extraction specialist. You excel at identifying, "
         "analyzing, and extracting structured information from unstructured text. "
         "You provide accurate, well-organized data while preserving context and "
         "maintaining data integrity. You follow the specified format requirements precisely."
-    )
-            
-    system_prompt += (
         "Organize the extracted data in a clear, logical structure. "
-        "return the data as JSON format. "
-    )
+        "return the data as JSON format."
+    ) 
 
     if response_format:
         user_prompt = "Return the data as JSON format."    
