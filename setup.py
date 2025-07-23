@@ -22,6 +22,10 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/onlyoneaman/aiwand",
+    keywords=["aiwand", "ai", "wand", "ai wand", "ai toolkit", "openai", "gemini", "llm",
+    "pydantic", "provider switching", "structured output", "text processing",
+    "call_ai", "extract", "summarization", "chat", "generate", "classification",
+    ],
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     classifiers=[
