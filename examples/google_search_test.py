@@ -8,10 +8,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def main():
-    user_prompt = "'What was the latest Indian Premier League match and who won?"
+    user_prompt = "'When was the last F1 GP and who won?"
     response = aiwand.call_ai(
         debug=True,
-        model="gemini-2.0-flash-lite",
+        model="gemini-2.5-flash-lite",
         use_google_search=True,
         user_prompt=user_prompt
     )
