@@ -2,7 +2,7 @@
 AIWand - A simple AI toolkit for text processing using OpenAI and Gemini
 """
 
-__version__ = "0.4.24"
+__version__ = "0.4.25"
 __author__ = "Aman Kumar"
 
 from .core import summarize, chat, generate_text
