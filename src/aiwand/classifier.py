@@ -33,6 +33,7 @@ def classify_text(
     expected: str = "",
     prompt_template: str = "",
     choice_scores: Optional[Dict[str, float]] = None,
+    system_msg: str = "",
     use_reasoning: bool = True,
     model: Optional[ModelType] = None,
     provider: Optional[Union[AIProvider, str]] = None
@@ -47,8 +48,9 @@ def classify_text(
         question: The question, prompt, or context
         answer: The response to be evaluated
         expected: The expected or reference response (optional)
-        prompt_template: Custom prompt template with {question}, {answer}, {expected} placeholders
+        prompt_template: Custom evaluation logic/criteria (goes into system prompt)
         choice_scores: Mapping of choices to scores (e.g., {"A": 1.0, "B": 0.5, "C": 0.0})
+        system_msg: Custom system message for evaluation context
         use_reasoning: Whether to include step-by-step reasoning
         model: Specific model to use
         provider: Specific provider to use
@@ -69,11 +71,11 @@ def classify_text(
             choice_scores={"CORRECT": 1.0, "INCORRECT": 0.0}
         )
         
-        # Custom prompt with reasoning
+        # Custom evaluation with specific criteria
         result = classify_text(
             question="Write a haiku about spring",
             answer="Cherry blossoms bloom\\nGentle breeze through ancient trees\\nSpring awakens all",
-            prompt_template="Evaluate this haiku based on structure and imagery. Grade as: A (excellent), B (good), C (fair), D (poor)",
+            prompt_template="Evaluate this haiku based on structure (5-7-5 syllables) and imagery quality.",
             choice_scores={"A": 1.0, "B": 0.75, "C": 0.5, "D": 0.25},
             use_reasoning=True
         )
@@ -91,58 +93,49 @@ def classify_text(
     if not choice_scores:
         raise ValueError("choice_scores cannot be empty")
     
-    # Default prompt template if not provided
-    if not prompt_template.strip():
-        if expected.strip():
-            prompt_template = """
-Evaluate the given response by comparing it to the expected answer.
-
-Question: {question}
-Given Answer: {answer}
-Expected Answer: {expected}
-
-Please evaluate how well the given answer matches the expected answer.
-Grade the response as: {choices}
-"""
-        else:
-            prompt_template = """
-Evaluate the quality of the given answer to the question.
-
-Question: {question}
-Answer: {answer}
-
-Please evaluate the quality and appropriateness of the answer.
-Grade the response as: {choices}
-"""
+    # Build system prompt components
+    base_system_msg = system_msg if system_msg.strip() else "You are an AI classifier and grader. Evaluate responses according to the given criteria."
     
-    # Format choices for the prompt
-    choices_text = ", ".join([f"{choice} ({score})" for choice, score in choice_scores.items()])
+    # Add evaluation logic from prompt_template to system prompt
+    evaluation_logic = ""
+    if prompt_template.strip():
+        evaluation_logic = f"\nEvaluation Criteria: {prompt_template.strip()}"
+    else:
+        # Default evaluation logic
+        if expected.strip():
+            evaluation_logic = "\nEvaluation Criteria: Compare the given answer to the expected answer and evaluate how well they match."
+        else:
+            evaluation_logic = "\nEvaluation Criteria: Evaluate the quality and appropriateness of the answer to the question."
+    
+    # Available choices (only names, not scores)
+    available_choices = ", ".join(choice_scores.keys())
+    
+    # Complete system prompt
+    system_prompt = f"""{base_system_msg}
+
+{evaluation_logic}
+
+Available grades: {available_choices}
+
+{"Provide your step-by-step reasoning in the 'reasoning' field, then your final grade in the 'grade' field." if use_reasoning else "Provide your final grade in the 'grade' field."}
+
+Your grade must be exactly one of the specified options."""
+    
+    # Create user prompt (clean, without choice scores)
+    user_prompt_parts = [f"Question: {question}", f"Answer: {answer}"]
+    if expected.strip():
+        user_prompt_parts.append(f"Expected: {expected}")
+    
+    user_prompt = "\n".join(user_prompt_parts)
     
     # Create dynamic response model
     if use_reasoning:
         class DynamicClassifierModel(BaseModel):
             reasoning: str = Field(description="Step-by-step analysis and reasoning")
-            grade: str = Field(description=f"Final grade, must be one of: {', '.join(choice_scores.keys())}")
+            grade: str = Field(description=f"Final grade, must be one of: {available_choices}")
     else:
         class DynamicClassifierModel(BaseModel):
-            grade: str = Field(description=f"Final grade, must be one of: {', '.join(choice_scores.keys())}")
-    
-    # Format the prompt
-    formatted_prompt = prompt_template.format(
-        question=question,
-        answer=answer,
-        expected=expected,
-        choices=choices_text
-    )
-    
-    # System prompt for classification
-    system_prompt = f"""You are an AI classifier and grader. Evaluate responses according to the given criteria.
-
-Available grades: {', '.join(choice_scores.keys())}
-
-{"Provide your step-by-step reasoning in the 'reasoning' field, then your final grade in the 'grade' field." if use_reasoning else "Provide your final grade in the 'grade' field."}
-
-Your grade must be exactly one of the specified options."""
+            grade: str = Field(description=f"Final grade, must be one of: {available_choices}")
     
     try:
         # Use structured output
@@ -151,7 +144,7 @@ Your grade must be exactly one of the specified options."""
             response_format=DynamicClassifierModel,
             model=model,
             provider=provider,
-            user_prompt=formatted_prompt
+            user_prompt=user_prompt
         )
         
         # Validate grade
@@ -168,7 +161,7 @@ Your grade must be exactly one of the specified options."""
             if matched_key:
                 grade = matched_key
             else:
-                raise AIError(f"Invalid grade '{result.grade}' received. Expected one of: {', '.join(choice_scores.keys())}")
+                raise AIError(f"Invalid grade '{result.grade}' received. Expected one of: {available_choices}")
         
         score = choice_scores[grade]
         reasoning = getattr(result, 'reasoning', '') if use_reasoning else ''
@@ -194,6 +187,7 @@ Your grade must be exactly one of the specified options."""
 def create_classifier(
     prompt_template: str,
     choice_scores: Dict[str, float],
+    system_msg: str = "",
     use_reasoning: bool = True,
     model: Optional[ModelType] = None,
     provider: Optional[Union[AIProvider, str]] = None
@@ -205,8 +199,9 @@ def create_classifier(
     that you'll use multiple times.
     
     Args:
-        prompt_template: Template for evaluation prompts
+        prompt_template: Evaluation criteria and logic (goes into system prompt)
         choice_scores: Mapping of choices to scores
+        system_msg: Custom system message for evaluation context
         use_reasoning: Whether to include reasoning
         model: Default model to use
         provider: Default provider to use
@@ -217,7 +212,7 @@ def create_classifier(
     Example:
         # Create a reusable grader
         grader = create_classifier(
-            prompt_template="Grade this math answer: {input} -> {output} (expected: {expected})",
+            prompt_template="Compare the math answer to the expected result. Check for mathematical accuracy.",
             choice_scores={"CORRECT": 1.0, "PARTIAL": 0.5, "INCORRECT": 0.0},
             use_reasoning=True
         )
@@ -246,6 +241,7 @@ def create_classifier(
             expected=expected,
             prompt_template=prompt_template,
             choice_scores=choice_scores,
+            system_msg=system_msg,
             use_reasoning=use_reasoning,
             model=kwargs.get('model', model),
             provider=kwargs.get('provider', provider)
@@ -271,15 +267,7 @@ def create_binary_classifier(
     Returns:
         Binary classifier function
     """
-    prompt_template = f"""
-Evaluate the {criteria} of the answer.
-
-Question: {{question}}
-Answer: {{answer}}
-Expected: {{expected}}
-
-Is the answer correct and appropriate? Grade as CORRECT or INCORRECT.
-"""
+    prompt_template = f"Evaluate the {criteria} of the answer. Is the answer correct and appropriate for the given question?"
     
     return create_classifier(
         prompt_template=prompt_template,
@@ -304,16 +292,7 @@ def create_quality_classifier(
     Returns:
         Quality classifier function
     """
-    prompt_template = """
-Evaluate the overall quality of the answer.
-
-Question: {question}
-Answer: {answer}
-Expected: {expected}
-
-Consider factors like accuracy, completeness, clarity, and appropriateness.
-Grade as: A (excellent), B (good), C (average), D (below average), F (poor)
-"""
+    prompt_template = "Evaluate the overall quality of the answer considering factors like accuracy, completeness, clarity, and appropriateness."
     
     return create_classifier(
         prompt_template=prompt_template,
