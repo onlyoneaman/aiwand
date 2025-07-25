@@ -224,6 +224,11 @@ Low-level unified AI request function with automatic provider switching and adva
 - `user_prompt` (str, optional): User message to append to the messages list. Can be used with or without existing messages.
 - `additional_system_instructions` (str, optional): Additional instructions to append to the system prompt. If provided, will be added to the end of the system message with proper spacing.
 - `images` (list, optional): List of images to add to the messages list. Can be a list of strings (URLs), Path objects, or bytes.
+- `document_links` (list, optional): List of URLs to fetch and include in the messages list.
+- `reasoning_effort` (str, optional): Reasoning effort for Gemini models. Can be "low", "medium", or "high".
+- `tool_choice` (str, optional): Tool choice for OpenAI models. Can be "auto", "none", or "required".
+- `tools` (list, optional): List of tools to use for the AI call. Can be a list of tool dictionaries with 'type', 'function', and 'description'.
+- `use_google_search` (bool, optional): Whether to use the Google search tool for Gemini models. Only works with Gemini models.
 
 **Returns:** AI response content (str)
 

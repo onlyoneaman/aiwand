@@ -36,6 +36,11 @@ aiwand.call_ai(
 | `user_prompt` | `str` | `None` | User message to append to messages list |
 | `additional_system_instructions` | `str` | `None` | Additional system instructions to append to the system prompt |
 | `images` | `List[Union[str, Path, bytes]]` | `None` | List of images to add to the messages list |
+| `document_links` | `List[str]` | `None` | List of URLs to fetch and include in the messages list |
+| `reasoning_effort` | `str` | `None` | Reasoning effort for Gemini models. Can be "low", "medium", or "high" |
+| `tool_choice` | `str` | `None` | Tool choice for OpenAI models. Can be "auto", "none", or "required" |
+| `tools` | `List[Dict[str, Any]]` | `None` | List of tools to use for the AI call. Can be a list of tool dictionaries with 'type', 'function', and 'description' |
+| `use_google_search` | `bool` | `False` | Whether to use the Google search tool for Gemini models. Only works with Gemini models |
 
 **Returns:** `str` or parsed Pydantic object (if `response_format` provided)
 
