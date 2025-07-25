@@ -138,7 +138,8 @@ def call_ai(
     reasoning_effort: Optional[str] = None,
     tool_choice: Optional[str] = None,
     tools: Optional[List[Dict[str, Any]]] = None,
-    debug: Optional[bool] = False
+    debug: Optional[bool] = False,
+    use_google_search: Optional[bool] = False
 ) -> str:
     """
     Unified wrapper for AI API calls that handles provider differences.
@@ -167,6 +168,8 @@ def call_ai(
                      Can be "auto", "none", "required".
         tools: Optional list of tools to use for the AI call.
                Can be a list of tool dictionaries with 'type', 'function', and 'description'.
+        use_google_search: Optional boolean to use google search tool.
+                Only works with Gemini models.
     Returns:
         str: The AI response content
         
@@ -253,6 +256,7 @@ def call_ai(
 
         content = None
         if current_provider == AIProvider.GEMINI:
+            params["use_google_search"] = use_google_search
             content = get_gemini_response(client, params, debug)
         elif current_provider == AIProvider.OPENAI:
             content = get_openai_response(client, params, debug)

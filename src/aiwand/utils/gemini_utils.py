@@ -23,8 +23,19 @@ def get_gemini_config(params: Dict[str, Any]) -> gemini_types.GenerateContentCon
         "top_k": params.get("top_k"),
         "max_output_tokens": params.get("max_completion_tokens"),
         "system_instruction": get_system_msg(params.get("messages", [])),
-        "response_modalities": ['TEXT']
+        "response_modalities": ['TEXT'],
+        "tools": params.get("tools"),
+        "tool_config": params.get("tool_config")
     }
+
+    if params.get("use_google_search"):
+        grounding_tool = gemini_types.Tool(
+            google_search=gemini_types.GoogleSearch()
+        )
+        config_dict["tools"] = [
+            *params.get("tools", []),
+            grounding_tool
+        ]
     
     # Handle structured output
     response_format: Optional[BaseModel] = params.get("response_format")
