@@ -32,10 +32,14 @@ def get_gemini_config(params: Dict[str, Any]) -> gemini_types.GenerateContentCon
         grounding_tool = gemini_types.Tool(
             google_search=gemini_types.GoogleSearch()
         )
-        config_dict["tools"] = [
-            *params.get("tools", []),
-            grounding_tool
-        ]
+        tools = params.get("tools", [])
+        if tools:
+            config_dict["tools"] = [
+                *tools,
+                grounding_tool
+            ]
+        else:
+            config_dict["tools"] = [grounding_tool]
     
     # Handle structured output
     response_format: Optional[BaseModel] = params.get("response_format")
