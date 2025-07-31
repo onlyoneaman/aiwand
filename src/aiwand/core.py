@@ -55,6 +55,7 @@ def summarize(
 
 def chat(
     message: str,
+    system_prompt: Optional[str] = None,
     conversation_history: Optional[List[Dict[str, str]]] = None,
     model: Optional[ModelType] = None,
     temperature: float = 0.7
@@ -84,7 +85,7 @@ def chat(
         messages=messages,
         temperature=temperature,
         model=model,
-        system_prompt=CHAT_SYSTEM_PROMPT,
+        system_prompt=system_prompt or CHAT_SYSTEM_PROMPT,
         user_prompt=message
     )
 
