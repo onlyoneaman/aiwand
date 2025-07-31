@@ -5,6 +5,7 @@ Extract functionality for AIWand - structured data extraction from any content
 from typing import Optional, List, Union, Any, Dict
 from pydantic import BaseModel
 from .config import call_ai, ModelType
+from .prompts import EXTRACT_SYSTEM_PROMPT
 from .utils import (
     convert_to_string, string_to_json, fetch_all_data, fetch_doc
 )
@@ -18,7 +19,7 @@ def extract(
     model: Optional[ModelType] = None,
     temperature: float = 0.7,
     response_format: Optional[BaseModel] = None,
-    system_instructions: Optional[str] = None,
+    system_prompt: Optional[str] = EXTRACT_SYSTEM_PROMPT,
     additional_system_instructions: Optional[str] = None,
     debug: Optional[bool] = False,
 ) -> Union[str, Dict[str, Any]]:
@@ -38,7 +39,7 @@ def extract(
         model: Specific AI model to use (auto-selected if not provided)
         temperature: Response creativity (0.0 to 1.0, default 0.7)
         response_format: Pydantic model class for structured output.
-        system_instructions: Any system instructions to help the extraction.
+        system_prompt: Custom system prompt to override the default extraction prompt.
         additional_system_instructions: Any other relavant instructions to help the extraction.
         
     Returns:
@@ -90,15 +91,6 @@ def extract(
             all_content.append(f"=== URL {url} ===\n{data}\n")
         
     combined_content = "\n\n".join(all_content)
-    
-    system_prompt = system_instructions or (
-        "You are an expert data extraction specialist. You excel at identifying, "
-        "analyzing, and extracting structured information from unstructured text. "
-        "You provide accurate, well-organized data while preserving context and "
-        "maintaining data integrity. You follow the specified format requirements precisely."
-        "Organize the extracted data in a clear, logical structure. "
-        "return the data as JSON format."
-    ) 
 
     if response_format:
         user_prompt = "Return the data as JSON format."    

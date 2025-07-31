@@ -5,7 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.25] - 2025-07-31
+## [0.4.27] - 2025-08-01
+- Refactor extract system prompt
+
+## [0.4.26] - 2025-07-31
 - Add *system_prompt* to chat
 
 ## [0.4.25] - 2025-07-25
