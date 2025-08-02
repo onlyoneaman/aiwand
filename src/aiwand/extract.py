@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from .config import call_ai, ModelType
 from .prompts import EXTRACT_SYSTEM_PROMPT
 from .utils import (
-    convert_to_string, string_to_json, fetch_all_data, fetch_doc
+    convert_to_string, string_to_json, fetch_all_data
 )
 
 

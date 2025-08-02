@@ -44,7 +44,8 @@ setup(
     install_requires=[
         "openai>=1.0.0",
         "python-dotenv>=0.19.0",
-        "beautifulsoup4>=4.0"
+        "beautifulsoup4>=4.0",
+        "google-genai>=1.20.0",
     ],
     extras_require={
         "dev": [
