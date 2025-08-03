@@ -11,6 +11,13 @@ from typing import Dict, List, Union, Optional, Type, Any
 from pydantic import BaseModel
 
 
+class OCRContentType(Enum):
+    """Content type for OCR processing."""
+    IMAGE = "image"
+    DOCUMENT = "document"
+
+
+
 class AIError(Exception):
     """Custom exception for AI-related errors."""
     pass
