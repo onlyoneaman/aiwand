@@ -281,7 +281,7 @@ def call_ai(
     max_output_tokens: Optional[int] = None,
     temperature: float = 0.7,
     top_p: float = 1.0,
-    model: Optional[ModelType] = GeminiModel.GEMINI_2_0_FLASH_LITE.value,
+    model: Optional[ModelType] = GeminiModel.GEMINI_2_5_FLASH_LITE.value,
     provider: Optional[Union[AIProvider, str]] = None,
     response_format: Optional[Dict[str, Any]] = None,
     system_prompt: Optional[str] = None,
