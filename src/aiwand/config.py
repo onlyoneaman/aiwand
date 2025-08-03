@@ -239,7 +239,7 @@ def call_ai(
     tools: Optional[List[Dict[str, Any]]] = None,
     debug: Optional[bool] = False,
     use_google_search: Optional[bool] = False,
-    use_ocr: Optional[bool] = False,
+    use_ocr: Optional[bool] = True,
     use_vision: Optional[bool] = False
 ) -> str:
     """
