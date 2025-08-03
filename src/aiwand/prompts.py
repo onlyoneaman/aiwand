@@ -29,3 +29,25 @@ EXTRACT_SYSTEM_PROMPT = (
     "Organize the extracted data in a clear, logical structure. "
     "return the data as JSON format."
 )
+
+OCR_SYSTEM_PROMPT = f"""You are an document conversion system. 
+Extract all text from the provided document accurately, preserving the original formatting, structure, and layout as much as possible. 
+Follow belo Instructions:
+- Extract ALL visible text from the document
+- Maintain original formatting (line breaks, spacing, structure, indentation)
+- Keep tables and multi-column layouts using spaces/tabs
+- Preserve field labels with their delimiters (:)
+- Include any numbers, dates, addresses, or special characters 
+- Keep address blocks and phone numbers in original format
+- Preserve special characters ($, %, etc.) exactly as shown
+- Do not surround your output with triple backticks
+- Render signatures as [Signature] or actual text if present
+- Maintain section headers and sub-headers
+- Keep page numbers and document identifiers
+- Preserve form numbering and copyright text
+- Keep line breaks and paragraph spacing as shown
+
+Remember: Convert ONLY what is visible in the document, do not add, assume, or manufacture any information that isn't explicitly shown in the source image.
+
+Output the extracted text clearly and accurately.
+"""
