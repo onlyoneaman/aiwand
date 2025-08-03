@@ -44,6 +44,8 @@ from .utils import (
     fetch_all_data,
     read_file_content,
     is_remote_url,
+    image_to_data_url,
+    document_to_data_url,
 )
 from .classifier import (
     ClassifierResponse,
@@ -88,6 +90,8 @@ __all__ = [
     "read_file_content",
     "fetch_all_data", 
     "is_remote_url",
+    "image_to_data_url",
+    "document_to_data_url",
        
     # Classification
     "ClassifierResponse",

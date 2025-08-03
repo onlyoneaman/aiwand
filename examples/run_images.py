@@ -37,6 +37,15 @@ def main():
     )        
     pprint.pp(data3)
 
+    links = [
+        "https://bella.amankumar.ai/examples/bank-statements/info-indian-overseas-bank.pdf"
+    ]
+    data = aiwand.extract(
+        document_links=links,
+        debug=True
+    )
+    print(data)
+
     return data
 
 if __name__ == "main":

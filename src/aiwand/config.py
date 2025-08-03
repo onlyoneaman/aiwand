@@ -27,6 +27,7 @@ from .models import (
 from .preferences import get_preferred_provider_and_model
 from .utils import (
     image_to_data_url,
+    document_to_data_url,
     retry_with_backoff,
     get_gemini_response,
     remove_empty_values,
@@ -225,20 +226,27 @@ def call_ai(
 
         if document_links:
             document_parts = []
-            for url in document_links:
-                fetched_data = fetch_doc(url)
-                mime_type, _ = mimetypes.guess_type(url)
-                if isinstance(fetched_data, str):
-                    base64_string = base64.b64encode(fetched_data.encode('utf-8')).decode('utf-8')
-                else:
-                    base64_string = base64.b64encode(fetched_data).decode('utf-8')
-                doc_part = {
-                    "type": "input_file",
-                    "filename": url.split("/")[-1],
-                    "file_data": f"data:{mime_type};base64,{base64_string}",
-                }
-                document_parts.append(doc_part)
-            final_messages.append({"role": "user", "content": document_parts})
+            for doc_src in document_links:
+                # Use the new document_to_data_url function that handles binary, URLs, and file paths
+                try:
+                    data_url = document_to_data_url(doc_src)
+                    # Extract filename for display purposes
+                    if isinstance(doc_src, str) and ("/" in doc_src or "\\" in doc_src):
+                        filename = doc_src.split("/")[-1] if "/" in doc_src else doc_src.split("\\")[-1]
+                    else:
+                        filename = "document"                    
+                    doc_part = {
+                        "type": "input_file",
+                        "filename": filename,
+                        "file_data": data_url,
+                    }
+                    document_parts.append(doc_part)
+                except Exception as e:
+                    print(f"Warning: Failed to process document {doc_src}: {e}")
+                    continue
+            
+            if document_parts:  # Only add if we have valid documents
+                final_messages.append({"role": "user", "content": document_parts})
 
         # Prepare common parameters
         params = {

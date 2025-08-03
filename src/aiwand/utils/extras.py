@@ -55,6 +55,39 @@ def image_to_data_url(src: str | pathlib.Path | bytes) -> str:
     return f"data:{mime};base64,{b64}"
 
 
+def document_to_data_url(src: str | pathlib.Path | bytes) -> str:
+    """Convert document to data URL, handling binary data, URLs, and file paths."""
+    if isinstance(src, bytes):
+        raw, mime = src, _detect_document_mime_type(src)
+    elif isinstance(src, str) and src.startswith("data:"):
+        # Handle data URLs - extract existing MIME type and data
+        try:
+            header, data = src.split(',', 1)
+            mime = header.split(';')[0].split(':', 1)[1]
+            raw = base64.b64decode(data)
+        except (ValueError, IndexError):
+            # Fallback if data URL parsing fails
+            raw, mime = src.encode(), "application/pdf"
+    elif isinstance(src, str) and src.startswith("http"):
+        import httpx
+        try:
+            response = httpx.get(src)
+            raw = response.content
+            # Try to get mime type from response headers or guess from URL
+            mime = response.headers.get('content-type', '').split(';')[0]
+            if not mime:
+                mime = mimetypes.guess_type(src)[0] or "application/pdf"
+        except Exception as e:
+            raise ValueError(f"Error fetching document from {src}: {str(e)}")
+    else:
+        path = pathlib.Path(src).expanduser()
+        raw = path.read_bytes()
+        mime = mimetypes.guess_type(path.name)[0] or "application/pdf"
+    
+    b64 = base64.b64encode(raw).decode()
+    return f"data:{mime};base64,{b64}"
+
+
 def _detect_image_mime_type(data: bytes) -> str:
     """Detect image MIME type from raw bytes using magic numbers."""
     if data.startswith(b'\xff\xd8\xff'):
@@ -72,6 +105,39 @@ def _detect_image_mime_type(data: bytes) -> str:
     else:
         # Fallback to PNG if format cannot be detected
         return "image/png"
+
+
+def _detect_document_mime_type(data: bytes) -> str:
+    """Detect document MIME type from raw bytes using magic numbers."""
+    if data.startswith(b'%PDF'):
+        return "application/pdf"
+    elif data.startswith(b'PK\x03\x04'):
+        # ZIP-based formats (DOCX, XLSX, PPTX)
+        if b'word/' in data[:1024]:
+            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        elif b'xl/' in data[:1024]:
+            return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        elif b'ppt/' in data[:1024]:
+            return "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        else:
+            return "application/zip"
+    elif data.startswith(b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1'):
+        # Microsoft Office legacy formats (DOC, XLS, PPT)
+        return "application/msword"
+    elif data.startswith(b'{\rtf'):
+        return "application/rtf"
+    elif data.startswith(b'<!DOCTYPE html') or data.startswith(b'<html'):
+        return "text/html"
+    elif data.startswith(b'<?xml'):
+        return "application/xml"
+    else:
+        # Check if it's likely text
+        try:
+            data.decode('utf-8')
+            return "text/plain"
+        except UnicodeDecodeError:
+            # Fallback to PDF if format cannot be detected
+            return "application/pdf"
 
 
 def remove_empty_values(params: Dict[str, Any]) -> Dict[str, Any]:
