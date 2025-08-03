@@ -151,8 +151,13 @@ def print_debug_messages(messages: List[Dict[str, Any]], params: Dict[str, Any])
         msg = copied_messages[-1]
         if msg.get("role") == "user" and msg.get("content"):
             for content in msg["content"]:
-                if content.get("type") == "image_url":
+                if not isinstance(content, dict):
+                    continue
+                content_type = content.get("type")
+                if content_type == "image_url":
                     content["image_url"]["url"] = "<IMAGE_URLs>"
+                elif content_type == "input_file":
+                    content["file_data"] = "<FILE_URLs>"
     print(json.dumps(copied_messages, indent=2))
     for k, v in params.items():
         if k != "messages":
