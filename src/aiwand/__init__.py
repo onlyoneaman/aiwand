@@ -10,7 +10,9 @@ from .extract import extract
 from .config import (
     call_ai,
     get_ai_client,
-    list_models
+    list_models,
+    ocr,
+    process_single_ocr
 )
 from .preferences import (
     get_current_provider,
@@ -31,6 +33,7 @@ from .models import (
     ModelType,
     ProviderType,
     ProviderRegistry,
+    OCRContentType
 )
 from .helper import (
     generate_random_number, 
@@ -62,7 +65,9 @@ __all__ = [
     "generate_text",
     "extract",
     "call_ai",
-    
+    "ocr",    
+    "process_single_ocr",
+
     # Configuration and setup
     "setup_user_preferences",
     "show_current_config",
@@ -78,7 +83,8 @@ __all__ = [
     "ModelType",
     "ProviderType",
     "ProviderRegistry",
-    
+    "OCRContentType",
+
     # Helper functions
     "generate_random_number",
     "generate_uuid",

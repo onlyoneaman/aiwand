@@ -9,18 +9,20 @@ import os
 import json
 from pathlib import Path  
 from typing import Dict, Any, Optional, Tuple, List, Union
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from google.genai import (
     Client as GeminiClient
 )
 from openai import OpenAI
 
-from .prompts import DEFAULT_SYSTEM_PROMPT
+from .prompts import DEFAULT_SYSTEM_PROMPT, OCR_SYSTEM_PROMPT
 from .models import (
     AIProvider,
     ModelType,
     GeminiModel,
     ProviderRegistry,
-    AIError
+    AIError,
+    OCRContentType
 )
 from .preferences import get_preferred_provider_and_model
 from .utils import (
@@ -120,102 +122,155 @@ def _resolve_provider_model_client(
         return pref_provider, str(preferred_model), _get_cached_client(pref_provider)
 
 
-def _extract_text_using_ocr(
+def process_single_ocr(
+    content,
+    content_type: OCRContentType,
+    index: int,
+    total_count: int,
+    ocr_system_prompt: str,
+    ocr_additional_system_instructions: Optional[str] = None,
+    model: Optional[ModelType] = None,
+    debug: Optional[bool] = False
+) -> Optional[Tuple[int, str]]:
+    """
+    Process a single item (image or document) for OCR extraction.
+    
+    Args:
+        content: Content to process (image or document)
+        content_type: Type of content (OCRContentType.IMAGE or OCRContentType.DOCUMENT)
+        index: Index of the item (0-based)
+        total_count: Total number of items being processed
+        ocr_system_prompt: System prompt for OCR
+        model: Model to use for OCR
+        
+    Returns:
+        Tuple of (index, extracted_text) or None if extraction failed
+    """
+    try:
+        # Prepare the call based on content type
+        call_kwargs = {
+            "system_prompt": ocr_system_prompt or OCR_SYSTEM_PROMPT,
+            "user_prompt": f"Please extract all text from this {content_type.value}:",
+            "model": model,
+            "additional_system_instructions": ocr_additional_system_instructions,
+            "use_ocr": False,
+            "use_vision": True,
+            "debug": debug
+        }
+        if content_type == OCRContentType.IMAGE:
+            call_kwargs["images"] = [content]
+            item_name = f"{index+1}"
+        else:  # OCRContentType.DOCUMENT
+            call_kwargs["document_links"] = [content]
+            if isinstance(content, str) and ("/" in content or "\\" in content):
+                item_name = content.split("/")[-1] if "/" in content else content.split("\\")[-1]
+            else:
+                item_name = f"document_{index+1}"
+
+        # Process the content
+        extracted_text = call_ai(**call_kwargs)
+        
+        if extracted_text.strip():
+            # Add identifier if multiple items
+            if total_count > 1:
+                type_label = content_type.value.title()
+                if content_type == OCRContentType.DOCUMENT and item_name != f"document_{index+1}":
+                    formatted_text = f"=== {type_label}: {item_name} ===\n{extracted_text.strip()}"
+                else:
+                    formatted_text = f"=== {type_label} {index+1} ===\n{extracted_text.strip()}"
+            else:
+                formatted_text = extracted_text.strip()
+            return (index, formatted_text)
+        return None
+                
+    except Exception as e:
+        content_name = content_type.value
+        print(f"Warning: OCR extraction failed for {content_name} {index+1}: {e}")
+        return None
+
+
+def ocr(
+    system_prompt: Optional[str] = None,
+    additional_system_instructions: Optional[str] = None,
     images: Optional[List[Union[str, Path, bytes]]] = None,
     document_links: Optional[List[str]] = None,
-    model: Optional[ModelType] = None
+    model: Optional[ModelType] = None,
+    max_workers: Optional[int] = None,
+    debug: Optional[bool] = False
 ) -> str:
     """
     Extract text from images and/or documents using OCR via AI vision model.
-    Processes each item individually for better accuracy.
+    Processes items in parallel for improved performance.
     
     Args:
         images: Optional list of images to extract text from
         document_links: Optional list of document paths/URLs to extract text from
         model: Optional model to use for OCR
+        max_workers: Optional maximum number of parallel workers (default: min(10, num_items))
         
     Returns:
         str: Extracted text from all items, formatted and concatenated
     """
     extracted_texts = []
-    print("Extracting text using OCR...")
-
-    ocr_system_prompt = f"""You are an document conversion system. 
-Extract all text from the provided document accurately, preserving the original formatting, structure, and layout as much as possible. 
-Follow belo Instructions:
-- Extract ALL visible text from the document
-- Maintain original formatting (line breaks, spacing, structure, indentation)
-- Keep tables and multi-column layouts using spaces/tabs
-- Preserve field labels with their delimiters (:)
-- Include any numbers, dates, addresses, or special characters 
-- Keep address blocks and phone numbers in original format
-- Preserve special characters ($, %, etc.) exactly as shown
-- Do not surround your output with triple backticks
-- Render signatures as [Signature] or actual text if present
-- Maintain section headers and sub-headers
-- Keep page numbers and document identifiers
-- Preserve form numbering and copyright text
-- Keep line breaks and paragraph spacing as shown
-
-Remember: Convert ONLY what is visible in the document, do not add, assume, or manufacture any information that isn't explicitly shown in the source image.
-
-Output the extracted text clearly and accurately.
-"""
+    total_items = (len(images) if images else 0) + (len(document_links) if document_links else 0)
     
-    # Process images if provided
-    if images:        
-        for i, image in enumerate(images):
-            try:
-                # Process each image individually for better accuracy
-                extracted_text = call_ai(
-                    system_prompt=ocr_system_prompt,
-                    user_prompt="Please extract all text from this image:",
-                    images=[image],  # Single image for better focus
-                    model=model,
-                    use_ocr=False,  # Important: prevent infinite recursion
-                    use_vision=True  # We need vision for OCR
-                )
-                
-                if extracted_text.strip():
-                    # Add image identifier if multiple images
-                    if len(images) > 1:
-                        extracted_texts.append(f"=== IMAGE {i+1} ===\n{extracted_text.strip()}")
-                    else:
-                        extracted_texts.append(extracted_text.strip())
-                        
-            except Exception as e:
-                print(f"Warning: OCR extraction failed for image {i+1}: {e}")
-                continue
+    if total_items == 0:
+        return ""
     
-    # Process documents if provided
+    if debug:
+        print(f"Extracting text using OCR from {total_items} items in parallel...")
+
+    ocr_system_prompt = system_prompt or OCR_SYSTEM_PROMPT 
+       
+    # Calculate optimal number of workers
+    if max_workers is None:
+        # Limit to 10 workers max to avoid overwhelming the API, but use fewer for small batches
+        max_workers = min(10, max(1, total_items))
+    
+    all_results = []
+    
+    # Process images in parallel if provided
+    if images:
+        if debug:
+            print(f"Processing {len(images)} images in parallel...")
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all image processing tasks
+            future_to_index_images = {
+                executor.submit(process_single_ocr, image, OCRContentType.IMAGE, i, len(images), ocr_system_prompt, additional_system_instructions, model, debug): i
+                for i, image in enumerate(images)
+            }
+            
+            # Collect results as they complete
+            for future in as_completed(future_to_index_images):
+                result = future.result()
+                if result is not None:
+                    all_results.append(result)
+    
+    # Process documents in parallel if provided
     if document_links:
-        for i, doc_link in enumerate(document_links):
-            try:
-                # Process each document individually for better accuracy
-                extracted_text = call_ai(
-                    system_prompt=ocr_system_prompt,
-                    user_prompt="Please extract all text from this document:",
-                    document_links=[doc_link],  # Single document for better focus
-                    model=model,
-                    use_ocr=False,  # Important: prevent infinite recursion
-                    use_vision=True  # We need vision for OCR
-                )
-
-                if extracted_text.strip():
-                    # Add document identifier if multiple documents
-                    if len(document_links) > 1:
-                        # Extract filename for better identification
-                        if isinstance(doc_link, str) and ("/" in doc_link or "\\" in doc_link):
-                            filename = doc_link.split("/")[-1] if "/" in doc_link else doc_link.split("\\")[-1]
-                        else:
-                            filename = f"document_{i+1}"
-                        extracted_texts.append(f"=== DOCUMENT: {filename} ===\n{extracted_text.strip()}")
-                    else:
-                        extracted_texts.append(extracted_text.strip())
-                        
-            except Exception as e:
-                print(f"Warning: OCR extraction failed for document {i+1}: {e}")
-                continue
+        if debug:
+            print(f"Processing {len(document_links)} documents in parallel...")
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all document processing tasks
+            future_to_index_documents = {
+                executor.submit(process_single_ocr, doc_link, OCRContentType.DOCUMENT, i, len(document_links), ocr_system_prompt, additional_system_instructions, model, debug): i
+                for i, doc_link in enumerate(document_links)
+            }
+            
+            # Collect results as they complete
+            for future in as_completed(future_to_index_documents):
+                result = future.result()
+                if result is not None:
+                    all_results.append(result)
+    
+    # Sort results by original index to maintain order
+    all_results.sort(key=lambda x: x[0])
+    
+    # Extract just the text content
+    extracted_texts = [result[1] for result in all_results]
+    
+    if debug:
+        print(f"OCR extraction completed. Processed {len(extracted_texts)}/{total_items} items successfully.")
     
     return "\n\n".join(extracted_texts)
 
@@ -240,7 +295,8 @@ def call_ai(
     debug: Optional[bool] = False,
     use_google_search: Optional[bool] = False,
     use_ocr: Optional[bool] = True,
-    use_vision: Optional[bool] = False
+    use_vision: Optional[bool] = False,
+    max_workers: Optional[int] = None
 ) -> str:
     """
     Unified wrapper for AI API calls that handles provider differences.
@@ -275,6 +331,8 @@ def call_ai(
                  When True, images and documents will be processed for text extraction and added as context.
         use_vision: Optional boolean to use direct vision capabilities (current default behavior).
                    When False with use_ocr=True, only extracted text will be sent, not the raw images.
+        max_workers: Optional maximum number of parallel workers for OCR processing.
+                    Only applies when use_ocr=True. Default: min(10, num_items).
     Returns:
         str: The AI response content
         
@@ -318,7 +376,14 @@ def call_ai(
         # Handle OCR extraction if requested
         ocr_context = ""
         if use_ocr and (images or document_links):
-            extracted_text = _extract_text_using_ocr(images=images, document_links=document_links, model=model)
+            extracted_text = ocr(
+                images=images, 
+                document_links=document_links, 
+                model=model, 
+                max_workers=max_workers,
+                additional_system_instructions=additional_system_instructions,
+                debug=debug
+            )
             if extracted_text.strip():
                 ocr_context = f"\n{extracted_text}\n"
 
@@ -356,7 +421,7 @@ def call_ai(
                     print(f"Warning: Failed to process document {doc_src}: {e}")
                     continue
             
-            if document_parts:  # Only add if we have valid documents
+            if len(document_parts) > 0:
                 final_messages.append({"role": "user", "content": document_parts})
 
         has_user_message = any(msg.get("role") in ["user", "assistant"] for msg in final_messages)
