@@ -8,7 +8,7 @@ from google.genai import (
 )
 from pydantic import BaseModel
 
-from .extras import remove_empty_values
+from .extras import remove_empty_values, print_debug_messages
 from .llm_utils import get_system_msg
 from .web_utils import fetch_doc
 
@@ -250,17 +250,19 @@ def get_gemini_response(client: gemini_client, params: Dict[str, Any], debug: bo
     """
     model = params.get("model")
     messages = params.get("messages", [])
-    
+
+    if debug:
+        print_debug_messages(messages=messages, params=params)
+
     config = get_gemini_config(params)
     contents = get_gemini_contents(messages)
 
     response_format = params.get("response_format")
 
     if debug:
-        print('params', params)
-        print('model', model)
-        print('contents', contents)
-        print('config', config)
+        for k, v in params.items():
+            if k != 'messages':
+                print(f'{k}: {v}')
     
     response = client.models.generate_content(
         model=model, 
