@@ -47,6 +47,11 @@ class BaseModel(Enum):
 class OpenAIModel(BaseModel):
     """Supported OpenAI models."""
 
+    GPT5 = "gpt-5"
+    GPT5_NANO = "gpt-5-nano"
+    GPT5_MINI = "gpt-5-mini"
+    GPT5_CHAT = "gpt-5-chat-latest"    
+
     O4_MINI = "o4-mini"
     O4_MINI_DEEP_RESEARCH = "o4-mini-deep-research"
 
