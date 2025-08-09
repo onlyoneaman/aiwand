@@ -120,6 +120,18 @@ class GeminiModel(BaseModel):
     GEMINI_1_5_FLASH_8b = "gemini-1.5-flash-8b"
 
 
+class VideoFileFormat(Enum):
+    """Supported video file formats."""
+    MP4 = "mp4"
+    WEBM = "webm"
+    MOV = "mov"
+    AVI = "avi"
+    X_FLV = "x-flv"
+    MPG = "mpg"
+    MPEG = "mpeg"
+    WMV = "wmv"
+
+
 # Type aliases for models
 ModelType = Union[OpenAIModel, GeminiModel, str]
 ProviderType = Union[AIProvider, str]
