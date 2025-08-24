@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from .extras import remove_empty_values, print_debug_messages
 from .llm_utils import get_system_msg
 from .web_utils import fetch_doc
+from ..models import AiSearchResult
 
 
 def get_gemini_config(params: Dict[str, Any]) -> gemini_types.GenerateContentConfig:
@@ -257,7 +258,11 @@ def get_gemini_response(client: gemini_client, params: Dict[str, Any], debug: bo
     config = get_gemini_config(params)
     contents = get_gemini_contents(messages)
 
+    use_google_search = params.get("use_google_search")
     response_format = params.get("response_format")
+    if use_google_search and response_format:
+        print(f"Warning: use_google_search is not supported with response_format, ignoring response_format.")
+        response_format = None
 
     if debug:
         for k, v in params.items():
@@ -272,5 +277,11 @@ def get_gemini_response(client: gemini_client, params: Dict[str, Any], debug: bo
 
     if response_format:
         return response_format(**response.parsed)
+    elif use_google_search:
+        grounding_metadata = response.candidates[0].grounding_metadata
+        return AiSearchResult(
+            text=response.text,
+            grounding_metadata=grounding_metadata
+        )
     return response.text
 
