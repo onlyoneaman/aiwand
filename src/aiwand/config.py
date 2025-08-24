@@ -22,7 +22,8 @@ from .models import (
     GeminiModel,
     ProviderRegistry,
     AIError,
-    OCRContentType
+    OCRContentType,
+    AiSearchResult
 )
 from .preferences import get_preferred_provider_and_model
 from .utils import (
@@ -297,7 +298,7 @@ def call_ai(
     use_ocr: Optional[bool] = True,
     use_vision: Optional[bool] = False,
     max_workers: Optional[int] = None
-) -> str:
+) -> Union[str, AiSearchResult]:
     """
     Unified wrapper for AI API calls that handles provider differences.
     
@@ -327,6 +328,7 @@ def call_ai(
                Can be a list of tool dictionaries with 'type', 'function', and 'description'.
         use_google_search: Optional boolean to use google search tool.
                 Only works with Gemini models.
+                Returns AiSearchResult always.
         use_ocr: Optional boolean to extract text from images/documents using OCR before processing.
                  When True, images and documents will be processed for text extraction and added as context.
         use_vision: Optional boolean to use direct vision capabilities (current default behavior).
@@ -334,7 +336,7 @@ def call_ai(
         max_workers: Optional maximum number of parallel workers for OCR processing.
                     Only applies when use_ocr=True. Default: min(10, num_items).
     Returns:
-        str: The AI response content
+        Union[str, AiSearchResult]: The AI response content or AiSearchResult if use_google_search is True.
         
     Raises:
         AIError: When the API call fails
