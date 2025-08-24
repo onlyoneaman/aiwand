@@ -3,7 +3,7 @@ import time
 from functools import wraps
 
 
-def _sleep_with_backoff(attempt: int, base: float = 0.5, cap: float = 8.0) -> None:
+def sleep_with_backoff(attempt: int, base: float = 0.5, cap: float = 16.0) -> None:
     """
     Exponential backoff with jitter.
     attempt: 0-based attempt index

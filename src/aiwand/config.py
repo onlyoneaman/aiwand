@@ -33,7 +33,7 @@ from .utils import (
     remove_empty_values,
     print_debug_messages,
     get_openai_response,
-    _sleep_with_backoff
+    sleep_with_backoff
 )
 
 # Client cache to avoid recreating clients
@@ -357,11 +357,11 @@ def call_ai(
         additional_system_instructions, debug, primary_model=model
     )
 
-    attempts = max(0, int(retries)) + 1
-    for attempt in range(1, attempts + 1):
+    failure_count = 0
+    for current_model, attempt_idx in plan:
         try:
             current_provider, model_name, client = _resolve_provider_model_client(
-                model, provider
+                current_model, provider
             )
             
             if messages is None:
@@ -421,15 +421,17 @@ def call_ai(
                 content = get_chat_completions_response(client, params, debug=debug)
             return content
         except AIError as e:
-            if attempt < attempts:
-                _sleep_with_backoff(attempt)
-                continue
-            raise AIError(str(e))
+            failure_count += 1
+            if (current_model, attempt_idx) != plan[-1]:
+                sleep_with_backoff(failure_count)
+            else:
+                raise AIError(str(e)) from e
         except Exception as e:
-            if attempt < attempts:
-                _sleep_with_backoff(attempt)
-                continue
-            raise AIError(f"AI request failed: {str(e)}")
+            failure_count += 1
+            if (current_model, attempt_idx) != plan[-1]:
+                sleep_with_backoff(failure_count)
+            else:
+                raise AIError(f"AI request failed: {str(e)}") from e
 
 
 def _precompute_context(
