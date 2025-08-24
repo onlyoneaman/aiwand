@@ -281,6 +281,7 @@ def call_ai(
     temperature: float = 0.7,
     top_p: float = 1.0,
     model: Optional[ModelType] = GeminiModel.GEMINI_2_5_FLASH_LITE,
+    fallback_models: Optional[List[ModelType]] = [GeminiModel.GEMINI_2_0_FLASH_LITE],
     provider: Optional[Union[AIProvider, str]] = None,
     response_format: Optional[Dict[str, Any]] = None,
     system_prompt: Optional[str] = None,
@@ -308,6 +309,8 @@ def call_ai(
         temperature: Response creativity (0.0 to 1.0)
         top_p: Nucleus sampling parameter
         model: Specific model to use (auto-selected if not provided)
+        fallback_models: Optional list of models to try if the first model fails.
+                         Default: [GeminiModel.GEMINI_2_0_FLASH_LITE].
         provider: Optional provider to use explicitly (AIProvider enum or string like 'openai', 'gemini').
                  Overrides model-based inference when specified.
         response_format: Response format specification
@@ -342,6 +345,18 @@ def call_ai(
     Raises:
         AIError: When the API call fails
     """
+
+    ordered = list(dict.fromkeys([model, *(fallback_models or [])]))
+    attempts_per_model = max(0, int(retries)) + 1
+    plan = [(m, i + 1) for m in ordered for i in range(attempts_per_model)]
+    if not plan:
+        raise AIError("No model provided and no fallbacks available.")    
+
+    ocr_context, image_urls, document_parts = _precompute_context(
+        images, document_links, use_ocr, use_vision, max_workers,
+        additional_system_instructions, debug, primary_model=model
+    )
+
     attempts = max(0, int(retries)) + 1
     for attempt in range(1, attempts + 1):
         try:
@@ -349,29 +364,16 @@ def call_ai(
                 model, provider
             )
             
-            # Handle case where messages is None or empty
             if messages is None:
                 messages = []
-            
-            # Prepare messages with system prompt
-            final_messages = messages.copy()
-            
-            # Check if messages already contain a system message
+            final_messages = messages.copy()            
             has_system_message = any(msg.get("role") == "system" for msg in final_messages)
-            
-            # Add system prompt only if:
-            # 1. No existing system message in messages
-            # 2. Either system_prompt was explicitly provided (including empty string) or we should use default
             if not has_system_message:
                 final_messages.insert(0, {"role": "system", "content": system_prompt or DEFAULT_SYSTEM_PROMPT})
-
-            # Append additional system instructions if provided
             if additional_system_instructions is not None:
-                # Find the system message and append additional instructions
                 for msg in final_messages:
                     if msg.get("role") == "system":
                         current_content = msg["content"]
-                        # Add proper spacing if current content exists and doesn't end with whitespace
                         if current_content:
                             msg["content"] = f"{current_content}\n\n{additional_system_instructions}"
                         break
@@ -379,62 +381,23 @@ def call_ai(
             if user_prompt is not None:
                 final_messages.append({"role": "user", "content": user_prompt})
 
-            # Handle OCR extraction if requested
-            ocr_context = ""
-            if use_ocr and (images or document_links):
-                extracted_text = ocr(
-                    images=images, 
-                    document_links=document_links, 
-                    model=model, 
-                    max_workers=max_workers,
-                    additional_system_instructions=additional_system_instructions,
-                    debug=debug
-                )
-                if extracted_text.strip():
-                    ocr_context = f"\n{extracted_text}\n"
-
-            # Add OCR context to the last user message if available
             if len(ocr_context) > 0:
                 final_messages.append({"role": "user", "content": f"<content>{ocr_context}</context>"})
 
-            # Handle images (only add raw images if use_vision=True or use_ocr=False)
-            if images and (use_vision or not use_ocr):
+            if len(image_urls) > 0:
                 image_parts = [
-                    {"type": "image_url", "image_url": {"url": image_to_data_url(img)}}
-                    for img in images
+                    {"type": "image_url", "image_url": {"url": image_url}}
+                    for image_url in image_urls
                 ]
                 final_messages.append({"role": "user", "content": image_parts})
 
-            # Handle documents (only add raw documents if use_vision=True or use_ocr=False)
-            if document_links and (use_vision or not use_ocr):
-                document_parts = []
-                for doc_src in document_links:
-                    # Use the new document_to_data_url function that handles binary, URLs, and file paths
-                    try:
-                        data_url = document_to_data_url(doc_src)
-                        # Extract filename for display purposes
-                        if isinstance(doc_src, str) and ("/" in doc_src or "\\" in doc_src):
-                            filename = doc_src.split("/")[-1] if "/" in doc_src else doc_src.split("\\")[-1]
-                        else:
-                            filename = "document"                    
-                        doc_part = {
-                            "type": "input_file",
-                            "filename": filename,
-                            "file_data": data_url,
-                        }
-                        document_parts.append(doc_part)
-                    except Exception as e:
-                        print(f"Warning: Failed to process document {doc_src}: {e}")
-                        continue
-                
-                if len(document_parts) > 0:
-                    final_messages.append({"role": "user", "content": document_parts})
+            if len(document_parts) > 0:
+                final_messages.append({"role": "user", "content": document_parts})
 
             has_user_message = any(msg.get("role") in ["user", "assistant"] for msg in final_messages)
             if not has_user_message:
                 final_messages.append({"role": "user", "content": "Please respond based on the instructions."})
 
-            # Prepare common parameters
             params = {
                 "model": model_name,
                 "messages": final_messages,
@@ -467,6 +430,63 @@ def call_ai(
                 _sleep_with_backoff(attempt)
                 continue
             raise AIError(f"AI request failed: {str(e)}")
+
+
+def _precompute_context(
+    images, document_links, use_ocr, use_vision, max_workers,
+    additional_system_instructions, debug, primary_model
+) -> Tuple[str, List[str], List[Dict[str, Any]]]:
+    """Compute OCR text, image data URLs, and document data URLs once."""
+    try:
+        # OCR once
+        ocr_context = ""
+        if use_ocr and (images or document_links):
+            try:
+                extracted_text = ocr(
+                    images=images,
+                    document_links=document_links,
+                    model=primary_model,
+                    max_workers=max_workers,
+                    additional_system_instructions=additional_system_instructions,
+                    debug=debug,
+                )
+                if extracted_text and extracted_text.strip():
+                    ocr_context = f"\n{extracted_text}\n"
+            except Exception:
+                pass
+
+        image_urls: List[str] = []
+        if images and (use_vision or not use_ocr):
+            for img in images:
+                try:
+                    image_urls.append(image_to_data_url(img))
+                except Exception:
+                    continue
+
+        document_parts: List[Dict[str, Any]] = []
+        if document_links and (use_vision or not use_ocr):
+            for doc_src in document_links:
+                try:
+                    data_url = document_to_data_url(doc_src)
+                    if isinstance(doc_src, str) and ("/" in doc_src or "\\" in doc_src):
+                        filename = doc_src.split("/")[-1] if "/" in doc_src else doc_src.split("\\")[-1]
+                    else:
+                        filename = "document"
+                    document_parts.append({
+                        "type": "input_file",
+                        "filename": filename,
+                        "file_data": data_url,
+                    })
+                except Exception:
+                    continue
+
+        return ocr_context, image_urls, document_parts
+    except Exception as e:
+        print(f"Warning: Failed to precompute context: {e}. Retrying with Gemini 2.5 Flash...")
+        return _precompute_context(
+            images, document_links, use_ocr, use_vision, max_workers,
+            additional_system_instructions, debug, GeminiModel.GEMINI_2_5_FLASH
+        )
 
 
 def get_chat_completions_response(client: OpenAI, params: Dict[str, Any], debug: bool = False) -> str:
