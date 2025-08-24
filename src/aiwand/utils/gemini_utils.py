@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from .extras import remove_empty_values, print_debug_messages
 from .llm_utils import get_system_msg
 from .web_utils import fetch_doc
-from ..models import AiSearchResult
+from ..models import AiSearchResult, FullAiResponse, UsageMetadata
 
 
 def get_gemini_config(params: Dict[str, Any]) -> gemini_types.GenerateContentConfig:
@@ -238,7 +238,19 @@ def get_gemini_contents(messages: List[Dict[str, Any]]) -> List[gemini_types.Con
     return contents
 
 
-def get_gemini_response(client: gemini_client, params: Dict[str, Any], debug: bool = False) -> str:
+def gemini_usage_details(response: gemini_types.GenerateContentResponse) -> UsageMetadata:
+    """
+    Get usage details from a Gemini API response.
+    """
+    return UsageMetadata(
+        input_tokens=response.usage_metadata.prompt_token_count,
+        output_tokens=response.usage_metadata.candidates_token_count,
+        total_tokens=response.usage_metadata.total_token_count,
+        raw_metadata=response.usage_metadata
+    )
+
+
+def get_gemini_response(client: gemini_client, params: Dict[str, Any], debug: bool = False, raw_response: bool = False) -> str:
     """
     Get a response from the Gemini API.
     
@@ -275,13 +287,20 @@ def get_gemini_response(client: gemini_client, params: Dict[str, Any], debug: bo
         config=config
     )
 
+    return_value = response.text
     if response_format:
-        return response_format(**response.parsed)
+        return_value = response_format(**response.parsed)
     elif use_google_search:
         grounding_metadata = response.candidates[0].grounding_metadata
-        return AiSearchResult(
+        return_value = AiSearchResult(
             text=response.text,
             grounding_metadata=grounding_metadata
         )
-    return response.text
+    if raw_response:
+        return_value = FullAiResponse(
+            output=response.text,
+            usage_metadata=gemini_usage_details(response),
+            raw_response=response
+        )
+    return return_value
 

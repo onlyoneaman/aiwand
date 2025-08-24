@@ -23,7 +23,8 @@ from .models import (
     ProviderRegistry,
     AIError,
     OCRContentType,
-    AiSearchResult
+    AiSearchResult,
+    FullAiResponse
 )
 from .preferences import get_preferred_provider_and_model
 from .utils import (
@@ -33,7 +34,8 @@ from .utils import (
     remove_empty_values,
     print_debug_messages,
     get_openai_response,
-    sleep_with_backoff
+    sleep_with_backoff,
+    chatcompletion_usage_details
 )
 
 # Client cache to avoid recreating clients
@@ -297,8 +299,9 @@ def call_ai(
     use_ocr: Optional[bool] = True,
     use_vision: Optional[bool] = False,
     max_workers: Optional[int] = None,
-    retries: Optional[int] = 2
-) -> Union[str, AiSearchResult]:
+    retries: Optional[int] = 2,
+    raw_response: Optional[bool] = False
+) -> Union[str, AiSearchResult, FullAiResponse]:
     """
     Unified wrapper for AI API calls that handles provider differences.
     
@@ -339,13 +342,14 @@ def call_ai(
                     Only applies when use_ocr=True. Default: min(10, num_items).
         retries: Optional number of retries to attempt if the API call fails.
                  Default: 2.
+        raw_response: Optional boolean to return the raw response and usage_metadata from the API.
+                          Default: False. Returns FullAiResponse if True.
     Returns:
         Union[str, AiSearchResult]: The AI response content or AiSearchResult if use_google_search is True.
         
     Raises:
         AIError: When the API call fails
     """
-
     ordered = list(dict.fromkeys([model, *(fallback_models or [])]))
     attempts_per_model = max(0, int(retries)) + 1
     plan = [(m, i + 1) for m in ordered for i in range(attempts_per_model)]
@@ -414,19 +418,23 @@ def call_ai(
             content = None
             if current_provider == AIProvider.GEMINI:
                 params["use_google_search"] = use_google_search
-                content = get_gemini_response(client, params, debug)
+                content = get_gemini_response(client, params, debug, raw_response)
             elif current_provider == AIProvider.OPENAI:
-                content = get_openai_response(client, params, debug)
+                content = get_openai_response(client, params, debug, raw_response)
             else:
-                content = get_chat_completions_response(client, params, debug=debug)
+                content = get_chat_completions_response(client, params, debug=debug, raw_response=raw_response)
             return content
         except AIError as e:
+            if debug:
+                print(f"AI request failed [{current_model}][{attempt_idx}]: {str(e)}")
             failure_count += 1
             if (current_model, attempt_idx) != plan[-1]:
                 sleep_with_backoff(failure_count)
             else:
                 raise AIError(str(e)) from e
         except Exception as e:
+            if debug:
+                print(f"AI request failed [{current_model}][{attempt_idx}]: {str(e)}")
             failure_count += 1
             if (current_model, attempt_idx) != plan[-1]:
                 sleep_with_backoff(failure_count)
@@ -491,7 +499,7 @@ def _precompute_context(
         )
 
 
-def get_chat_completions_response(client: OpenAI, params: Dict[str, Any], debug: bool = False) -> str:
+def get_chat_completions_response(client: OpenAI, params: Dict[str, Any], debug: bool = False, raw_response: bool = False) -> str:
     if debug:
         print_debug_messages(messages=params.get("messages"), params=params)
     response = client.chat.completions.create(**params)
@@ -502,7 +510,13 @@ def get_chat_completions_response(client: OpenAI, params: Dict[str, Any], debug:
             parsed = content
         else:
             parsed = json.loads(content)
-        return response_format(**parsed)
+        content = response_format(**parsed)
+    if raw_response:
+        content = FullAiResponse(
+            output=content,
+            usage_metadata=chatcompletion_usage_details(response),
+            raw_response=response
+        )
     return content
 
 

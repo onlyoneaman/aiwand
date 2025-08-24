@@ -34,7 +34,8 @@ from .models import (
     ProviderType,
     ProviderRegistry,
     OCRContentType,
-    AiSearchResult
+    AiSearchResult,
+    FullAiResponse
 )
 from .helper import (
     generate_random_number, 
@@ -86,6 +87,7 @@ __all__ = [
     "ProviderRegistry",
     "OCRContentType",
     "AiSearchResult",
+    "FullAiResponse",
 
     # Helper functions
     "generate_random_number",

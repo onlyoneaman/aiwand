@@ -133,6 +133,18 @@ class AiSearchResult(BaseModel):
     grounding_metadata: gemini_types.GroundingMetadata
 
 
+class UsageMetadata(BaseModel):
+    input_tokens: int
+    output_tokens: int
+    total_tokens: int
+    raw_metadata: Any
+
+class FullAiResponse(BaseModel):
+    output: str
+    raw_response: Any
+    usage_metadata: Any
+
+
 # Type aliases for models
 ModelType = Union[OpenAIModel, GeminiModel, str]
 ProviderType = Union[AIProvider, str]
