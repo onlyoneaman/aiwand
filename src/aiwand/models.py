@@ -9,13 +9,7 @@ import os
 from enum import Enum
 from typing import Dict, List, Union, Optional, Type, Any
 from pydantic import BaseModel
-
-
-class OCRContentType(Enum):
-    """Content type for OCR processing."""
-    IMAGE = "image"
-    DOCUMENT = "document"
-
+from google.genai import types as gemini_types
 
 
 class AIError(Exception):
@@ -28,23 +22,25 @@ class LinkContent(BaseModel):
     content: str
 
 
-class AIProvider(Enum):
-    """Supported AI providers."""
-    GEMINI = "gemini"
-    OPENAI = "openai"
-    
-    def __str__(self) -> str:
-        return self.value
-
-
-class BaseModel(Enum):
+class EnumBaseModel(Enum):
     """Base class for AI models."""
     
     def __str__(self) -> str:
         return self.value
 
 
-class OpenAIModel(BaseModel):
+class OCRContentType(EnumBaseModel):
+    """Content type for OCR processing."""
+    IMAGE = "image"
+    DOCUMENT = "document"
+
+
+class AIProvider(EnumBaseModel):
+    """Supported AI providers."""
+    GEMINI = "gemini"
+    OPENAI = "openai"
+
+class OpenAIModel(EnumBaseModel):
     """Supported OpenAI models."""
 
     GPT5 = "gpt-5"
@@ -95,7 +91,7 @@ class OpenAIModel(BaseModel):
 
 
 
-class GeminiModel(BaseModel):
+class GeminiModel(EnumBaseModel):
     """Supported Gemini models."""
     GEMINI_2_5_PRO = "gemini-2.5-pro"
     GEMINI_2_5_FLASH = "gemini-2.5-flash"
@@ -130,6 +126,11 @@ class VideoFileFormat(Enum):
     MPG = "mpg"
     MPEG = "mpeg"
     WMV = "wmv"
+
+
+class AiSearchResult(BaseModel):
+    text: str
+    grounding_metadata: gemini_types.GroundingMetadata
 
 
 # Type aliases for models
