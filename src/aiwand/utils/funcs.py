@@ -1,5 +1,18 @@
+import random
 import time
 from functools import wraps
+
+
+def _sleep_with_backoff(attempt: int, base: float = 0.5, cap: float = 8.0) -> None:
+    """
+    Exponential backoff with jitter.
+    attempt: 0-based attempt index
+    base: initial delay seconds
+    cap: max delay seconds
+    """
+    delay = min(cap, base * (2 ** attempt))
+    jitter = delay * (random.random() * 0.5 - 0.25)
+    time.sleep(max(0.05, delay + jitter))
 
 def retry(max_retries=3, delay=1, exceptions=(Exception,)):
     """

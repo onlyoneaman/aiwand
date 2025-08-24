@@ -29,12 +29,11 @@ from .preferences import get_preferred_provider_and_model
 from .utils import (
     image_to_data_url,
     document_to_data_url,
-    retry_with_backoff,
     get_gemini_response,
     remove_empty_values,
     print_debug_messages,
     get_openai_response,
-    fetch_doc
+    _sleep_with_backoff
 )
 
 # Client cache to avoid recreating clients
@@ -276,13 +275,12 @@ def ocr(
     return "\n\n".join(extracted_texts)
 
 
-@retry_with_backoff(max_retries=2)
 def call_ai(
     messages: Optional[List[Dict[str, str]]] = None,
     max_output_tokens: Optional[int] = None,
     temperature: float = 0.7,
     top_p: float = 1.0,
-    model: Optional[ModelType] = GeminiModel.GEMINI_2_5_FLASH_LITE.value,
+    model: Optional[ModelType] = GeminiModel.GEMINI_2_5_FLASH_LITE,
     provider: Optional[Union[AIProvider, str]] = None,
     response_format: Optional[Dict[str, Any]] = None,
     system_prompt: Optional[str] = None,
@@ -297,7 +295,8 @@ def call_ai(
     use_google_search: Optional[bool] = False,
     use_ocr: Optional[bool] = True,
     use_vision: Optional[bool] = False,
-    max_workers: Optional[int] = None
+    max_workers: Optional[int] = None,
+    retries: Optional[int] = 2
 ) -> Union[str, AiSearchResult]:
     """
     Unified wrapper for AI API calls that handles provider differences.
@@ -341,122 +340,131 @@ def call_ai(
     Raises:
         AIError: When the API call fails
     """
-    try:
-        # Resolve provider, model, and client
-        current_provider, model_name, client = _resolve_provider_model_client(model, provider)
-        
-        # Handle case where messages is None or empty
-        if messages is None:
-            messages = []
-        
-        # Prepare messages with system prompt
-        final_messages = messages.copy()
-        
-        # Check if messages already contain a system message
-        has_system_message = any(msg.get("role") == "system" for msg in final_messages)
-        
-        # Add system prompt only if:
-        # 1. No existing system message in messages
-        # 2. Either system_prompt was explicitly provided (including empty string) or we should use default
-        if not has_system_message:
-            final_messages.insert(0, {"role": "system", "content": system_prompt or DEFAULT_SYSTEM_PROMPT})
-
-        # Append additional system instructions if provided
-        if additional_system_instructions is not None:
-            # Find the system message and append additional instructions
-            for msg in final_messages:
-                if msg.get("role") == "system":
-                    current_content = msg["content"]
-                    # Add proper spacing if current content exists and doesn't end with whitespace
-                    if current_content:
-                        msg["content"] = f"{current_content}\n\n{additional_system_instructions}"
-                    break
-
-        if user_prompt is not None:
-            final_messages.append({"role": "user", "content": user_prompt})
-
-        # Handle OCR extraction if requested
-        ocr_context = ""
-        if use_ocr and (images or document_links):
-            extracted_text = ocr(
-                images=images, 
-                document_links=document_links, 
-                model=model, 
-                max_workers=max_workers,
-                additional_system_instructions=additional_system_instructions,
-                debug=debug
+    attempts = max(0, int(retries)) + 1
+    for attempt in range(1, attempts + 1):
+        try:
+            current_provider, model_name, client = _resolve_provider_model_client(
+                model, provider
             )
-            if extracted_text.strip():
-                ocr_context = f"\n{extracted_text}\n"
-
-        # Add OCR context to the last user message if available
-        if len(ocr_context) > 0:
-            final_messages.append({"role": "user", "content": f"<content>{ocr_context}</context>"})
-
-        # Handle images (only add raw images if use_vision=True or use_ocr=False)
-        if images and (use_vision or not use_ocr):
-            image_parts = [
-                {"type": "image_url", "image_url": {"url": image_to_data_url(img)}}
-                for img in images
-            ]
-            final_messages.append({"role": "user", "content": image_parts})
-
-        # Handle documents (only add raw documents if use_vision=True or use_ocr=False)
-        if document_links and (use_vision or not use_ocr):
-            document_parts = []
-            for doc_src in document_links:
-                # Use the new document_to_data_url function that handles binary, URLs, and file paths
-                try:
-                    data_url = document_to_data_url(doc_src)
-                    # Extract filename for display purposes
-                    if isinstance(doc_src, str) and ("/" in doc_src or "\\" in doc_src):
-                        filename = doc_src.split("/")[-1] if "/" in doc_src else doc_src.split("\\")[-1]
-                    else:
-                        filename = "document"                    
-                    doc_part = {
-                        "type": "input_file",
-                        "filename": filename,
-                        "file_data": data_url,
-                    }
-                    document_parts.append(doc_part)
-                except Exception as e:
-                    print(f"Warning: Failed to process document {doc_src}: {e}")
-                    continue
             
-            if len(document_parts) > 0:
-                final_messages.append({"role": "user", "content": document_parts})
+            # Handle case where messages is None or empty
+            if messages is None:
+                messages = []
+            
+            # Prepare messages with system prompt
+            final_messages = messages.copy()
+            
+            # Check if messages already contain a system message
+            has_system_message = any(msg.get("role") == "system" for msg in final_messages)
+            
+            # Add system prompt only if:
+            # 1. No existing system message in messages
+            # 2. Either system_prompt was explicitly provided (including empty string) or we should use default
+            if not has_system_message:
+                final_messages.insert(0, {"role": "system", "content": system_prompt or DEFAULT_SYSTEM_PROMPT})
 
-        has_user_message = any(msg.get("role") in ["user", "assistant"] for msg in final_messages)
-        if not has_user_message:
-            final_messages.append({"role": "user", "content": "Please respond based on the instructions."})
+            # Append additional system instructions if provided
+            if additional_system_instructions is not None:
+                # Find the system message and append additional instructions
+                for msg in final_messages:
+                    if msg.get("role") == "system":
+                        current_content = msg["content"]
+                        # Add proper spacing if current content exists and doesn't end with whitespace
+                        if current_content:
+                            msg["content"] = f"{current_content}\n\n{additional_system_instructions}"
+                        break
 
-        # Prepare common parameters
-        params = {
-            "model": model_name,
-            "messages": final_messages,
-            "temperature": temperature,
-            "top_p": top_p,
-            "tool_choice": tool_choice,
-            "tools": tools,
-            "max_completion_tokens": max_output_tokens,
-            # "reasoning_effort": reasoning_effort,
-            "response_format": response_format,
-        }
-        remove_empty_values(params=params)
+            if user_prompt is not None:
+                final_messages.append({"role": "user", "content": user_prompt})
 
-        content = None
-        if current_provider == AIProvider.GEMINI:
-            params["use_google_search"] = use_google_search
-            content = get_gemini_response(client, params, debug)
-        elif current_provider == AIProvider.OPENAI:
-            content = get_openai_response(client, params, debug)
-        else:
-            content = get_chat_completions_response(client, params, debug=debug)
-        return content
-    except AIError as e:
-        raise AIError(str(e))
-    except Exception as e:
-        raise AIError(f"AI request failed: {str(e)}")
+            # Handle OCR extraction if requested
+            ocr_context = ""
+            if use_ocr and (images or document_links):
+                extracted_text = ocr(
+                    images=images, 
+                    document_links=document_links, 
+                    model=model, 
+                    max_workers=max_workers,
+                    additional_system_instructions=additional_system_instructions,
+                    debug=debug
+                )
+                if extracted_text.strip():
+                    ocr_context = f"\n{extracted_text}\n"
+
+            # Add OCR context to the last user message if available
+            if len(ocr_context) > 0:
+                final_messages.append({"role": "user", "content": f"<content>{ocr_context}</context>"})
+
+            # Handle images (only add raw images if use_vision=True or use_ocr=False)
+            if images and (use_vision or not use_ocr):
+                image_parts = [
+                    {"type": "image_url", "image_url": {"url": image_to_data_url(img)}}
+                    for img in images
+                ]
+                final_messages.append({"role": "user", "content": image_parts})
+
+            # Handle documents (only add raw documents if use_vision=True or use_ocr=False)
+            if document_links and (use_vision or not use_ocr):
+                document_parts = []
+                for doc_src in document_links:
+                    # Use the new document_to_data_url function that handles binary, URLs, and file paths
+                    try:
+                        data_url = document_to_data_url(doc_src)
+                        # Extract filename for display purposes
+                        if isinstance(doc_src, str) and ("/" in doc_src or "\\" in doc_src):
+                            filename = doc_src.split("/")[-1] if "/" in doc_src else doc_src.split("\\")[-1]
+                        else:
+                            filename = "document"                    
+                        doc_part = {
+                            "type": "input_file",
+                            "filename": filename,
+                            "file_data": data_url,
+                        }
+                        document_parts.append(doc_part)
+                    except Exception as e:
+                        print(f"Warning: Failed to process document {doc_src}: {e}")
+                        continue
+                
+                if len(document_parts) > 0:
+                    final_messages.append({"role": "user", "content": document_parts})
+
+            has_user_message = any(msg.get("role") in ["user", "assistant"] for msg in final_messages)
+            if not has_user_message:
+                final_messages.append({"role": "user", "content": "Please respond based on the instructions."})
+
+            # Prepare common parameters
+            params = {
+                "model": model_name,
+                "messages": final_messages,
+                "temperature": temperature,
+                "top_p": top_p,
+                "tool_choice": tool_choice,
+                "tools": tools,
+                "max_completion_tokens": max_output_tokens,
+                # "reasoning_effort": reasoning_effort,
+                "response_format": response_format,
+            }
+            remove_empty_values(params=params)
+
+            content = None
+            if current_provider == AIProvider.GEMINI:
+                params["use_google_search"] = use_google_search
+                content = get_gemini_response(client, params, debug)
+            elif current_provider == AIProvider.OPENAI:
+                content = get_openai_response(client, params, debug)
+            else:
+                content = get_chat_completions_response(client, params, debug=debug)
+            return content
+        except AIError as e:
+            if attempt < attempts:
+                _sleep_with_backoff(attempt)
+                continue
+            raise AIError(str(e))
+        except Exception as e:
+            if attempt < attempts:
+                _sleep_with_backoff(attempt)
+                continue
+            raise AIError(f"AI request failed: {str(e)}")
 
 
 def get_chat_completions_response(client: OpenAI, params: Dict[str, Any], debug: bool = False) -> str:
