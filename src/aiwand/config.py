@@ -334,6 +334,8 @@ def call_ai(
                    When False with use_ocr=True, only extracted text will be sent, not the raw images.
         max_workers: Optional maximum number of parallel workers for OCR processing.
                     Only applies when use_ocr=True. Default: min(10, num_items).
+        retries: Optional number of retries to attempt if the API call fails.
+                 Default: 2.
     Returns:
         Union[str, AiSearchResult]: The AI response content or AiSearchResult if use_google_search is True.
         
