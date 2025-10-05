@@ -448,6 +448,9 @@ def _precompute_context(
 ) -> Tuple[str, List[str], List[Dict[str, Any]]]:
     """Compute OCR text, image data URLs, and document data URLs once."""
     try:
+        if usr_vision:
+            use_vision = True
+            use_ocr = False
         # OCR once
         ocr_context = ""
         if use_ocr and (images or document_links):

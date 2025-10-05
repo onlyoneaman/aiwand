@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.35] - 2025-10-06
+- If *use_vision* is True, set *use_ocr* to False
+
 ## [0.4.34] - 2025-08-25
 - Add *raw_response* to *call_ai*
 - Add *usage_metadata* in raw_response support
