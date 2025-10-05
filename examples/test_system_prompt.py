@@ -62,7 +62,7 @@ def test_custom_system_prompt():
     try:
         response = aiwand.call_ai(
             system_prompt=custom_prompt,
-            user_prompt="Hello, How are you?"
+            user_prompt="Hello, How are you?",
             temperature=0.7
         )
         print(f"Custom prompt: {custom_prompt}")

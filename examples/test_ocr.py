@@ -93,7 +93,7 @@ def test_new_ocr_wrapper():
             custom_success = validate_ocr_accuracy(custom_result, "Enhanced ocr()")
         else:
             print("❌ Enhanced OCR failed")
-            print(f"Failed items: {custom_result['failed']}")
+            print(f"Result: {custom_result}")
         
         # Test 3: Verify call_ai uses OCR wrapper internally
         print("\n3️⃣ Testing call_ai with use_ocr (should use wrapper internally)")
@@ -141,15 +141,15 @@ def test_new_ocr_wrapper():
                          integration_success)
         
         print(f"\n🚀 Overall wrapper functionality: {'✅ WORKING' if overall_success else '❌ ISSUES DETECTED'}")
-        
-        return overall_success
+
+        assert overall_success == True
         
     except Exception as e:
         print(f"❌ Wrapper test failed: {e}")
         import traceback
         traceback.print_exc()
-        return False
-
+        assert False
+        
 
 def run_legacy_tests():
     """Run focused legacy OCR tests"""
@@ -307,8 +307,8 @@ Output the extracted text clearly and accurately.
         print(f"\n📊 Legacy OCR Test Results:")
         print(f"   Standard OCR: {'✅ PASS' if legacy_success else '❌ FAIL'}")
         print(f"   Document OCR: {'✅ PASS' if doc_success else '❌ FAIL'}")
-        
-        return legacy_success and doc_success
+
+        assert legacy_success and doc_success
         
     except Exception as e:
         print(f"❌ Legacy test error: {e}")
@@ -316,7 +316,7 @@ Output the extracted text clearly and accurately.
         print("   • Make sure you have OPENAI_API_KEY or GEMINI_API_KEY in your .env file")
         print("   • Check your internet connection")
         print("   • Verify the image/document URLs are accessible")
-        return False
+        assert False
     
 def main():
     """Enhanced OCR test suite with new wrapper functionality"""
@@ -373,7 +373,7 @@ def main():
         if not legacy_success:
             print("   • Legacy OCR compatibility needs attention")
     
-    return overall_success
+    assert overall_success
 
 # if __name__ == "__main__":
     # main()
