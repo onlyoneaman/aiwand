@@ -296,8 +296,8 @@ def call_ai(
     tools: Optional[List[Dict[str, Any]]] = None,
     debug: Optional[bool] = False,
     use_google_search: Optional[bool] = False,
-    use_ocr: Optional[bool] = True,
-    use_vision: Optional[bool] = False,
+    use_ocr: Optional[bool] = False,
+    use_vision: Optional[bool] = True,
     max_workers: Optional[int] = None,
     retries: Optional[int] = 2,
     raw_response: Optional[bool] = False
